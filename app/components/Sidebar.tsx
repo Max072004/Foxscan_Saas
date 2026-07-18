@@ -37,14 +37,13 @@ const navItems: { tab: Tab; label: string; icon: React.ElementType; section?: st
   { tab: "Admin", label: "Admin", icon: Shield, section: "System" },
 ];
 
-/* FOXSCAN house-shape logo — matches the brand mark */
+/* FOXSCAN premium brand mark (yellow circle, dark charcoal house, integrated yellow typography) */
 function FoxscanLogo({ size = 30 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M10 95V35L70 10L90 35V95H10Z" fill="#F5B81F" />
-      <text x="18" y="85" fontFamily="Inter, Arial, sans-serif" fontWeight="800" fontSize="22" fill="#FFFFFF" letterSpacing="0.5">
-        FOXSCAN
-      </text>
+      <circle cx="50" cy="50" r="48" fill="#F5B81F" />
+      <path d="M25 48 L50 28 L75 48 V72 H25 Z" fill="#1F232B" />
+      <text x="27" y="65" fill="#F5B81F" fontFamily="Inter, sans-serif" fontWeight="900" fontSize="11" letterSpacing="0.3">FOXSCAN</text>
     </svg>
   );
 }
@@ -88,7 +87,7 @@ export default function Sidebar({
         {/* Logo */}
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">
-            <FoxscanLogo size={30} />
+            <FoxscanLogo size={28} />
           </div>
           <span className="sidebar-logo-text">
             FOX<b>SCAN</b>
@@ -110,7 +109,7 @@ export default function Sidebar({
             style={{ background: projectStatus === "ACTIVE" ? "var(--success)" : "var(--warning)" }}
           />
           <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{projectName}</span>
-          <ChevronDown size={12} style={{ opacity: 0.4, flexShrink: 0 }} />
+          <ChevronDown size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
         </div>
 
         {/* Navigation */}

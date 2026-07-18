@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Bell, Menu, ChevronDown, LogIn, KeyRound, User } from "lucide-react";
+import { Bell, Menu, ChevronDown, LogIn, KeyRound, User, Mail, ShieldAlert } from "lucide-react";
 import type { Role } from "@/lib/domain";
 import { FoxscanLogo } from "./Sidebar";
 
@@ -77,7 +77,7 @@ export default function Header({
     <header className="app-header">
       <div className="header-left">
         <button className="mobile-menu-btn" onClick={onMenuToggle} aria-label="Toggle menu">
-          <Menu />
+          <Menu size={20} />
         </button>
         <div>
           <div className="header-title">
@@ -95,12 +95,12 @@ export default function Header({
 
       <div className="header-right">
         {/* Notification Bell */}
-        <button className="header-icon-btn" aria-label="Notifications">
-          <Bell />
+        <button className="header-icon-btn" aria-label="Notifications" style={{ marginRight: 4 }}>
+          <Bell size={18} />
           {notificationCount > 0 && <span className="notification-dot" />}
         </button>
 
-        {/* User Menu */}
+        {/* User Menu Trigger */}
         <div className="user-menu-wrapper" ref={menuRef}>
           <button
             className="user-menu-trigger"
@@ -111,115 +111,143 @@ export default function Header({
               {userName.charAt(0).toUpperCase()}
             </div>
             <span className="user-menu-name">{userName}</span>
-            <ChevronDown size={14} style={{ color: "var(--muted)" }} />
+            <ChevronDown size={14} style={{ opacity: 0.7 }} />
           </button>
 
+          {/* User Menu Dropdown Card */}
           {menuOpen && (
             <div className="user-menu-dropdown">
-              {/* User Info */}
+              {/* Account Profile Summary */}
+              <div className="user-menu-section" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{
+                  width: 38, height: 38, borderRadius: "50%",
+                  background: "var(--brand-yellow-light)", display: "flex", alignItems: "center",
+                  justifyContent: "center", fontWeight: 700, fontSize: "14px",
+                  color: "var(--brand-yellow-hover)",
+                }}>
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: "13px", color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {userName}
+                  </div>
+                  <div className="muted" style={{ fontSize: "11px" }}>
+                    {token ? "Authenticated Session" : "Guest Mode"}
+                  </div>
+                </div>
+                <FoxscanLogo size={24} />
+              </div>
+
+              {/* Active Role Selector */}
               <div className="user-menu-section">
-                <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)", marginBottom: "var(--sp-2)" }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: "var(--radius-full)",
-                    background: "var(--brand-yellow)", display: "flex", alignItems: "center",
-                    justifyContent: "center", fontWeight: 700, fontSize: "var(--text-sm)",
-                    color: "var(--brand-charcoal)",
-                  }}>
-                    {userName.charAt(0).toUpperCase()}
+                <div className="user-menu-section-label" style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--muted)", marginBottom: "6px" }}>
+                  Active Workspace Role
+                </div>
+                <div style={{ position: "relative" }}>
+                  <select
+                    value={role}
+                    onChange={(e) => onRoleChange(e.target.value as Role)}
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      border: "1px solid var(--line)",
+                      borderRadius: "var(--radius-sm)",
+                      fontSize: "13px",
+                      fontWeight: 500,
+                      background: "var(--bg)",
+                      color: "var(--ink)",
+                      cursor: "pointer",
+                      appearance: "none",
+                    }}
+                  >
+                    {(["ADMIN", "CLIENT", "CONSULTANT", "MANUFACTURER", "CONTRACTOR"] as Role[]).map(
+                      (r) => (
+                        <option key={r} value={r}>{r}</option>
+                      )
+                    )}
+                  </select>
+                  <div style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", opacity: 0.6 }}>
+                    <ChevronDown size={14} />
                   </div>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: "var(--text-sm)" }}>{userName}</div>
-                    <div className="muted">{token ? "Authenticated" : "Not signed in"}</div>
-                  </div>
-                  <FoxscanLogo size={24} />
                 </div>
               </div>
 
-              {/* Role Selector */}
-              <div className="user-menu-section">
-                <div className="user-menu-section-label">Active Role</div>
-                <select
-                  value={role}
-                  onChange={(e) => onRoleChange(e.target.value as Role)}
-                  style={{
-                    width: "100%",
-                    padding: "var(--sp-2) var(--sp-3)",
-                    border: "1px solid var(--line)",
-                    borderRadius: "var(--radius)",
-                    fontSize: "var(--text-sm)",
-                    fontWeight: 500,
-                    background: "var(--bg)",
-                    cursor: "pointer",
-                  }}
-                >
-                  {(["ADMIN", "CLIENT", "CONSULTANT", "MANUFACTURER", "CONTRACTOR"] as Role[]).map(
-                    (r) => (
-                      <option key={r}>{r}</option>
-                    )
-                  )}
-                </select>
-              </div>
-
-              {/* Authentication */}
-              <div className="user-menu-section">
-                <div className="user-menu-section-label">Authentication</div>
-                <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)" }}>
-                    <User size={14} style={{ color: "var(--muted)", flexShrink: 0 }} />
+              {/* Authentication Management */}
+              <div className="user-menu-section" style={{ borderBottom: "none" }}>
+                <div className="user-menu-section-label" style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--muted)", marginBottom: "8px" }}>
+                  Workspace Authorization
+                </div>
+                <div style={{ display: "grid", gap: "8px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", position: "relative" }}>
+                    <div style={{ position: "absolute", left: "10px", opacity: 0.5 }}>
+                      <Mail size={13} />
+                    </div>
                     <input
                       aria-label="Login email"
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                       placeholder="Email or phone"
                       style={{
-                        flex: 1,
-                        padding: "var(--sp-2) var(--sp-3)",
+                        width: "100%",
+                        padding: "8px 12px 8px 30px",
                         border: "1px solid var(--line)",
-                        borderRadius: "var(--radius)",
-                        fontSize: "var(--text-sm)",
+                        borderRadius: "var(--radius-sm)",
+                        fontSize: "12px",
                         background: "var(--bg)",
+                        color: "var(--ink)",
                       }}
                     />
                   </div>
-                  <div style={{ display: "flex", gap: "var(--sp-2)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)", flex: 1 }}>
-                      <KeyRound size={14} style={{ color: "var(--muted)", flexShrink: 0 }} />
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", position: "relative", flex: 1 }}>
+                      <div style={{ position: "absolute", left: "10px", opacity: 0.5 }}>
+                        <KeyRound size={13} />
+                      </div>
                       <input
                         aria-label="OTP"
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
-                        placeholder="OTP code"
+                        placeholder="OTP Code"
                         style={{
-                          flex: 1,
-                          padding: "var(--sp-2) var(--sp-3)",
+                          width: "100%",
+                          padding: "8px 12px 8px 30px",
                           border: "1px solid var(--line)",
-                          borderRadius: "var(--radius)",
-                          fontSize: "var(--text-sm)",
+                          borderRadius: "var(--radius-sm)",
+                          fontSize: "12px",
                           background: "var(--bg)",
+                          color: "var(--ink)",
                         }}
                       />
                     </div>
                     <button
                       className="btn-secondary"
                       onClick={request}
-                      style={{ fontSize: "var(--text-xs)", whiteSpace: "nowrap" }}
+                      style={{ fontSize: "11px", height: "34px", padding: "0 10px", fontWeight: 500, whiteSpace: "nowrap" }}
                     >
-                      Get OTP
+                      Send OTP
                     </button>
                   </div>
-                  <button className="btn-primary" onClick={verify} style={{ width: "100%" }}>
-                    <LogIn size={14} />
-                    Sign In
+                  <button
+                    className="btn-primary"
+                    onClick={verify}
+                    style={{ width: "100%", height: "34px", fontSize: "12px", gap: "6px" }}
+                  >
+                    <LogIn size={13} />
+                    Verify and Connect
                   </button>
                   {message && (
-                    <small
-                      style={{
-                        color: message.includes("Signed in") ? "var(--success)" : "var(--muted)",
-                        fontSize: "var(--text-xs)",
-                      }}
-                    >
-                      {message}
-                    </small>
+                    <div style={{
+                      display: "flex", alignItems: "center", gap: "6px",
+                      marginTop: "4px", padding: "6px 8px", borderRadius: "4px",
+                      background: message.includes("Signed in") ? "var(--success-light)" : "var(--line-light)",
+                      color: message.includes("Signed in") ? "var(--success)" : "var(--muted)",
+                      fontSize: "11px",
+                    }}>
+                      <ShieldAlert size={12} />
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                        {message}
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
