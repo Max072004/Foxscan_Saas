@@ -5,3 +5,9 @@ allowBuilds:
   esbuild: set this to true or false
   sharp: set this to true or false
   unrs-resolver: set this to true or false
+
+minimumReleaseAgeExclude:
+  - expo-dev-client@57.0.7
+  - expo-dev-launcher@57.0.7
+  - expo-dev-menu@57.0.7
+  - expo-updates@57.0.8
