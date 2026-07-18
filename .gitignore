@@ -5,3 +5,24 @@ node_modules
 coverage
 data/*.json
 .pnpm-store
+
+# Expo
+.expo
+dist
+dist-android
+dist-android-final
+dist-ios-final
+
+# Node
+node_modules
+
+# Next
+.next
+
+# Env
+.env
+.env.local
+.env.production
+
+# Build
+*.tsbuildinfo
