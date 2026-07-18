@@ -14,6 +14,7 @@ import {
   Target,
   PieChart,
   Activity,
+  Award,
 } from "lucide-react";
 import { FoxscanLogo } from "./Sidebar";
 
@@ -34,12 +35,14 @@ export default function Reports({ token }: ReportsProps) {
   if (!token) {
     return (
       <div className="animate-fade">
-        <h2 className="page-title">Reports & Analytics</h2>
-        <div className="card" style={{ textAlign: "center", padding: "var(--sp-16) var(--sp-6)" }}>
-          <div style={{ opacity: 0.1, marginBottom: "var(--sp-4)" }}><FoxscanLogo size={64} /></div>
-          <div style={{ fontSize: "var(--text-lg)", fontWeight: 700, marginBottom: "var(--sp-2)" }}>Sign in to unlock analytics</div>
-          <p className="muted" style={{ maxWidth: 400, margin: "0 auto" }}>
-            Portfolio analytics, financial dashboards, and performance metrics require authentication.
+        <h2 className="page-title">Executive Reports & Intelligence</h2>
+        <div className="card" style={{ textAlign: "center", padding: "60px 24px", maxWidth: "600px", margin: "40px auto 0" }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+            <FoxscanLogo size={64} />
+          </div>
+          <h3 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "8px" }}>Reports Dashboard Locked</h3>
+          <p className="muted" style={{ maxWidth: "420px", margin: "0 auto 20px", fontSize: "13px", lineHeight: "1.5" }}>
+            Please authenticate using the workspace menu in the top right to unlock portfolio analytics, financial audits, and completion forecasts.
           </p>
         </div>
       </div>
@@ -49,8 +52,8 @@ export default function Reports({ token }: ReportsProps) {
   if (!report) {
     return (
       <div className="animate-fade">
-        <h2 className="page-title">Reports & Analytics</h2>
-        <p className="page-description">Loading analytics...</p>
+        <h2 className="page-title">Executive Reports & Intelligence</h2>
+        <p className="page-description">Loading workspace insights...</p>
         <div className="kpi-grid">
           {Array.from({ length: 8 }).map((_, i) => (
             <div className="skeleton skeleton-kpi" key={i} />
@@ -67,208 +70,197 @@ export default function Reports({ token }: ReportsProps) {
   const paidPct = contractVal > 0 ? Math.round((report.payments.paid / contractVal) * 100) : 0;
 
   return (
-    <div className="animate-fade">
-      {/* Page Header with Logo */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--sp-5)" }}>
+    <div className="animate-fade" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+      {/* Top Section */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--line)", paddingBottom: "14px" }}>
         <div>
-          <h2 className="page-title">Reports & Analytics</h2>
-          <p className="page-description" style={{ marginBottom: 0 }}>Portfolio-level insights, financial trends, and performance metrics</p>
+          <h2 className="page-title">Executive Intelligence</h2>
+          <p className="page-description" style={{ marginBottom: 0 }}>High-fidelity audit of portfolio progress, financial metrics, and operational SLA adherence.</p>
         </div>
-        <div style={{ opacity: 0.08 }}><FoxscanLogo size={48} /></div>
+        <div style={{ opacity: 0.12, marginRight: "10px" }}><FoxscanLogo size={40} /></div>
       </div>
 
-      {/* KPI Grid */}
-      <div className="kpi-grid" style={{ marginBottom: "var(--sp-5)" }}>
-        <KpiCard icon={Layers} cls="blue" label="Projects" value={String(report.portfolio.projects)} />
-        <KpiCard icon={IndianRupee} cls="green" label="Contract Value" value={`₹${fmt(contractVal)}`} />
-        <KpiCard icon={TrendingUp} cls="yellow" label="Portfolio Progress" value={`${progress}%`} trend="up" trendText={`${progress}% done`} />
-        <KpiCard icon={AlertTriangle} cls="red" label="Overdue TAT" value={String(report.tat.overdue)} trend={report.tat.overdue > 0 ? "down" : "up"} trendText={report.tat.overdue > 0 ? "Needs attention" : "All clear"} />
-        <KpiCard icon={IndianRupee} cls="green" label="Invoiced" value={`₹${fmt(report.payments.invoiced)}`} />
-        <KpiCard icon={IndianRupee} cls="yellow" label="Paid" value={`₹${fmt(report.payments.paid)}`} />
-        <KpiCard icon={IndianRupee} cls="orange" label="Retention" value={`₹${fmt(report.payments.retention)}`} />
-        <KpiCard icon={CalendarClock} cls="red" label="Delay Events" value={String(report.delays.length)} />
+      {/* KPI Cards Section */}
+      <div className="kpi-grid">
+        <KpiCard icon={Layers} cls="blue" label="Active Projects" value={String(report.portfolio.projects)} />
+        <KpiCard icon={IndianRupee} cls="green" label="Portfolio Capital" value={`₹${fmt(contractVal)}`} />
+        <KpiCard icon={TrendingUp} cls="yellow" label="Averaged Progress" value={`${progress}%`} trend="up" trendText={`${progress}% completed`} />
+        <KpiCard icon={AlertTriangle} cls="red" label="SLA Violations" value={String(report.tat.overdue)} trend={report.tat.overdue > 0 ? "down" : "up"} trendText={report.tat.overdue > 0 ? "Urgent attention" : "All clean"} />
+        <KpiCard icon={IndianRupee} cls="green" label="Total Invoiced" value={`₹${fmt(report.payments.invoiced)}`} />
+        <KpiCard icon={IndianRupee} cls="yellow" label="Paid Disbursements" value={`₹${fmt(report.payments.paid)}`} />
+        <KpiCard icon={IndianRupee} cls="orange" label="Retention Retained" value={`₹${fmt(report.payments.retention)}`} />
+        <KpiCard icon={CalendarClock} cls="red" label="Risk Indicators" value={String(report.delays.length)} />
       </div>
 
-      {/* Row 1: Budget vs Actual + Progress Trend */}
-      <div className="grid two-equal" style={{ marginBottom: "var(--sp-5)" }}>
-        {/* Budget vs Actual */}
-        <div className="card">
-          <h3>Budget vs Actual</h3>
-          <div style={{ display: "grid", gap: "var(--sp-4)" }}>
-            {/* Contract */}
-            <BudgetBar label="Contract Value" value={contractVal} max={contractVal} color="var(--brand-yellow)" icon={<Target size={14} />} />
-            {/* Invoiced */}
-            <BudgetBar label="Invoiced" value={report.payments.invoiced} max={contractVal} color="var(--info)" pct={invoicedPct} icon={<BarChart3 size={14} />} />
-            {/* Paid */}
-            <BudgetBar label="Paid" value={report.payments.paid} max={contractVal} color="var(--success)" pct={paidPct} icon={<IndianRupee size={14} />} />
-            {/* Retention */}
-            <BudgetBar label="Retention Held" value={report.payments.retention} max={contractVal} color="var(--warning)" icon={<Clock size={14} />} />
+      {/* Primary Row */}
+      <div className="grid two-equal">
+        {/* Budget vs Actual Horizontal Indicators */}
+        <div className="card" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700 }}>Capital Utilization</h3>
+          <div style={{ display: "grid", gap: "16px" }}>
+            <BudgetBar label="Total Capital Value" value={contractVal} max={contractVal} color="var(--brand-yellow)" icon={<Target size={13} />} />
+            <BudgetBar label="Billed Disbursements" value={report.payments.invoiced} max={contractVal} color="var(--info)" pct={invoicedPct} icon={<BarChart3 size={13} />} />
+            <BudgetBar label="Settled Accounts" value={report.payments.paid} max={contractVal} color="var(--success)" pct={paidPct} icon={<IndianRupee size={13} />} />
+            <BudgetBar label="Secured Retention" value={report.payments.retention} max={contractVal} color="var(--warning)" icon={<Clock size={13} />} />
           </div>
 
-          {/* Variance indicator */}
-          <div style={{ marginTop: "var(--sp-4)", padding: "var(--sp-3)", background: paidPct <= progress ? "var(--success-light)" : "var(--warning-light)", borderRadius: "var(--radius)", display: "flex", alignItems: "center", gap: "var(--sp-2)" }}>
+          <div style={{
+            marginTop: "6px",
+            padding: "10px 12px",
+            background: paidPct <= progress ? "rgba(34, 197, 94, 0.05)" : "rgba(245, 158, 11, 0.05)",
+            border: paidPct <= progress ? "1px solid rgba(34, 197, 94, 0.1)" : "1px solid rgba(245, 158, 11, 0.1)",
+            borderRadius: "6px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
+          }}>
             {paidPct <= progress ? <ArrowUpRight size={14} style={{ color: "var(--success)" }} /> : <ArrowDownRight size={14} style={{ color: "var(--warning)" }} />}
-            <span style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: paidPct <= progress ? "var(--success)" : "var(--warning)" }}>
-              {paidPct <= progress ? "Payments tracking below progress — healthy" : "Payments exceeding work progress"}
+            <span style={{ fontSize: "12px", fontWeight: 600, color: paidPct <= progress ? "var(--success)" : "var(--warning)" }}>
+              {paidPct <= progress ? "Financial outflows align with project deliverables." : "Billing advances currently run ahead of construction milestones."}
             </span>
           </div>
         </div>
 
-        {/* Progress Trend (simulated from data) */}
-        <div className="card">
-          <h3>Progress Trend</h3>
-          <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-6)", marginBottom: "var(--sp-4)" }}>
-            <DonutChart percentage={progress} size={120} label="Overall" color={progress >= 80 ? "var(--success)" : "var(--brand-yellow)"} />
-            <div style={{ display: "grid", gap: "var(--sp-4)", flex: 1 }}>
-              <ProgressMetric label="Work Progress" value={progress} color="var(--brand-yellow)" />
-              <ProgressMetric label="Budget Consumed" value={paidPct} color={paidPct > progress ? "var(--error)" : "var(--success)"} />
-              <ProgressMetric label="TAT Compliance" value={tatOnTime} color={tatOnTime >= 80 ? "var(--success)" : tatOnTime >= 50 ? "var(--warning)" : "var(--error)"} />
+        {/* Progress Metrics & Completion Forecast */}
+        <div className="card" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700 }}>Compliance & Timeline Outlook</h3>
+          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+            <DonutChart percentage={progress} size={110} label="Portfolio Progress" color={progress >= 80 ? "var(--success)" : "var(--brand-yellow)"} />
+            <div style={{ display: "grid", gap: "10px", flex: 1 }}>
+              <ProgressMetric label="Construction Delivery" value={progress} color="var(--brand-yellow)" />
+              <ProgressMetric label="Disbursement Consumption" value={paidPct} color={paidPct > progress ? "var(--error)" : "var(--success)"} />
+              <ProgressMetric label="SLA Turnaround (TAT)" value={tatOnTime} color={tatOnTime >= 80 ? "var(--success)" : tatOnTime >= 50 ? "var(--warning)" : "var(--error)"} />
             </div>
           </div>
 
-          {/* Completion forecast */}
-          <div style={{ padding: "var(--sp-3)", background: "var(--bg)", borderRadius: "var(--radius)", border: "1px solid var(--line-light)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)", marginBottom: "var(--sp-2)" }}>
-              <Activity size={14} style={{ color: "var(--brand-yellow)" }} />
-              <span style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Completion Forecast</span>
+          <div style={{ padding: "12px", background: "var(--bg)", borderRadius: "8px", border: "1px solid var(--line-light)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
+              <Award size={13} style={{ color: "var(--brand-yellow)" }} />
+              <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px" }}>Timeline Outlook</span>
             </div>
-            <div style={{ fontSize: "var(--text-sm)", color: "var(--ink-secondary)" }}>
+            <div style={{ fontSize: "12px", color: "var(--ink-secondary)", lineHeight: "1.4" }}>
               {progress >= 100
-                ? "Project is complete! All activities finished."
+                ? "Closeout reached. Handover documentation pending final registry."
                 : progress >= 50
-                ? `At current pace, project is on track for completion. ${100 - progress}% remaining work.`
-                : `Project is in early stages. ${100 - progress}% of work remains to be completed.`
+                ? `Construction milestones remain on-track. Approximately ${100 - progress}% workspace actions remaining.`
+                : `Early mobilization stage. High density of structural operations scheduled next.`
               }
             </div>
           </div>
         </div>
       </div>
 
-      {/* Row 2: Payment Analytics + TAT Performance */}
-      <div className="grid two-equal" style={{ marginBottom: "var(--sp-5)" }}>
+      {/* Secondary Analytics Row */}
+      <div className="grid two-equal">
         {/* Payment Analytics Bar Chart */}
-        <div className="card">
-          <h3>Payment Analytics</h3>
-          <div className="bar-chart" style={{ height: 220 }}>
+        <div className="card" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700 }}>Disbursement Metrics Breakdown</h3>
+          <div className="bar-chart" style={{ height: "180px", paddingTop: "0" }}>
             {[
               { label: "Contract", value: contractVal, color: "var(--brand-yellow)" },
-              { label: "Invoiced", value: report.payments.invoiced, color: "var(--info)" },
-              { label: "Paid", value: report.payments.paid, color: "var(--success)" },
+              { label: "Billed", value: report.payments.invoiced, color: "var(--info)" },
+              { label: "Settled", value: report.payments.paid, color: "var(--success)" },
               { label: "Retention", value: report.payments.retention, color: "var(--warning)" },
-              { label: "Outstanding", value: Math.max(0, contractVal - report.payments.paid - report.payments.retention), color: "var(--muted)" },
+              { label: "Remaining", value: Math.max(0, contractVal - report.payments.paid - report.payments.retention), color: "var(--muted)" },
             ].map((item) => {
               const max = contractVal || 1;
-              const pct = Math.max(3, (item.value / max) * 100);
+              const pct = Math.max(4, (item.value / max) * 100);
               return (
                 <div className="bar-chart-col" key={item.label}>
-                  <div className="bar-chart-value" style={{ fontSize: "var(--text-xs)" }}>₹{fmt(item.value)}</div>
+                  <div className="bar-chart-value" style={{ fontSize: "10px", fontWeight: 600 }}>₹{fmt(item.value)}</div>
                   <div
                     className="bar-chart-bar"
-                    style={{ height: `${pct}%`, background: item.color, borderRadius: "var(--radius-sm) var(--radius-sm) 0 0" }}
+                    style={{ height: `${pct}%`, background: item.color, borderRadius: "4px 4px 0 0" }}
                   />
-                  <div className="bar-chart-label">{item.label}</div>
+                  <div className="bar-chart-label" style={{ fontSize: "9px", marginTop: "4px" }}>{item.label}</div>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* TAT Performance */}
-        <div className="card">
-          <h3>TAT Performance</h3>
-          <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-6)", marginBottom: "var(--sp-4)" }}>
-            <DonutChart percentage={tatOnTime} size={120} label="On Time" color={tatOnTime >= 80 ? "var(--success)" : tatOnTime >= 50 ? "var(--warning)" : "var(--error)"} />
-            <div style={{ display: "grid", gap: "var(--sp-4)", flex: 1 }}>
+        {/* SLA and TAT Performance */}
+        <div className="card" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700 }}>Operational Turnaround Compliance</h3>
+          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+            <DonutChart percentage={tatOnTime} size={110} label="SLA Adherence" color={tatOnTime >= 80 ? "var(--success)" : tatOnTime >= 50 ? "var(--warning)" : "var(--error)"} />
+            <div style={{ display: "grid", gap: "10px", flex: 1 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <div className="muted" style={{ fontSize: "var(--text-xs)" }}>Total Stages</div>
-                  <div style={{ fontWeight: 800, fontSize: "var(--text-xl)", letterSpacing: "-0.02em" }}>{report.tat.total}</div>
+                  <div className="muted" style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Logged Steps</div>
+                  <div style={{ fontWeight: 800, fontSize: "16px" }}>{report.tat.total}</div>
                 </div>
                 <div>
-                  <div className="muted" style={{ fontSize: "var(--text-xs)" }}>On Time</div>
-                  <div style={{ fontWeight: 800, fontSize: "var(--text-xl)", color: "var(--success)", letterSpacing: "-0.02em" }}>{report.tat.onTime}</div>
+                  <div className="muted" style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Cleared SLA</div>
+                  <div style={{ fontWeight: 800, fontSize: "16px", color: "var(--success)" }}>{report.tat.onTime}</div>
                 </div>
                 <div>
-                  <div className="muted" style={{ fontSize: "var(--text-xs)" }}>Overdue</div>
-                  <div style={{ fontWeight: 800, fontSize: "var(--text-xl)", color: "var(--error)", letterSpacing: "-0.02em" }}>{report.tat.overdue}</div>
+                  <div className="muted" style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Violated SLA</div>
+                  <div style={{ fontWeight: 800, fontSize: "16px", color: "var(--error)" }}>{report.tat.overdue}</div>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* TAT breakdown bars */}
-          <div style={{ display: "grid", gap: "var(--sp-3)" }}>
-            <ProgressMetric label="On-time rate" value={tatOnTime} color="var(--success)" />
-            <ProgressMetric label="Overdue rate" value={100 - tatOnTime} color="var(--error)" />
+          <div style={{ display: "grid", gap: "8px" }}>
+            <ProgressMetric label="Cleared SLA Percentage" value={tatOnTime} color="var(--success)" />
+            <ProgressMetric label="Missed SLA Percentage" value={100 - tatOnTime} color="var(--error)" />
           </div>
         </div>
       </div>
 
-      {/* Row 3: Activity Distribution + Delays */}
+      {/* Row 3: Activity Distribution + Risks */}
       <div className="grid two-equal">
         {/* Activity Distribution */}
-        <div className="card">
-          <h3>Activity Distribution</h3>
-          <div style={{ display: "grid", gap: "var(--sp-3)" }}>
+        <div className="card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700 }}>Operational Status Matrix</h3>
+          <div style={{ display: "grid", gap: "10px" }}>
             {[
-              { label: "Not Started", key: "NOT_STARTED", color: "var(--muted)" },
-              { label: "In Progress", key: "IN_PROGRESS", color: "var(--brand-yellow)" },
-              { label: "Submitted", key: "SUBMITTED", color: "var(--warning)" },
-              { label: "Approved", key: "APPROVED", color: "var(--info)" },
-              { label: "Paid", key: "PAID", color: "var(--success)" },
+              { label: "Not Mobilized", key: "NOT_STARTED", color: "var(--muted)" },
+              { label: "Under Construction", key: "IN_PROGRESS", color: "var(--brand-yellow)" },
+              { label: "Submitted for Audit", key: "SUBMITTED", color: "var(--warning)" },
+              { label: "Verified & Approved", key: "APPROVED", color: "var(--info)" },
+              { label: "Settled Account", key: "PAID", color: "var(--success)" },
             ].map(({ label, key, color }) => {
-              // We don't have per-status counts from the report API but we can show the visual pattern
               return (
-                <div key={key} style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)" }}>
-                  <div style={{ width: 10, height: 10, borderRadius: 2, background: color, flexShrink: 0 }} />
-                  <span style={{ fontSize: "var(--text-sm)", fontWeight: 500, flex: 1 }}>{label}</span>
-                  <span className={`badge ${key}`}>{key.replace("_", " ")}</span>
+                <div key={key} style={{ display: "flex", alignItems: "center", gap: "12px", borderBottom: "1px solid var(--line-light)", paddingBottom: "6px" }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+                  <span style={{ fontSize: "12px", fontWeight: 500, flex: 1, color: "var(--ink-secondary)" }}>{label}</span>
+                  <span className={`badge ${key}`} style={{ fontSize: "9px", padding: "1px 6px" }}>{key.replace("_", " ")}</span>
                 </div>
               );
             })}
           </div>
-
-          <div style={{ marginTop: "var(--sp-5)", padding: "var(--sp-3)", background: "var(--bg)", borderRadius: "var(--radius)", border: "1px solid var(--line-light)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)", marginBottom: "var(--sp-2)" }}>
-              <PieChart size={14} style={{ color: "var(--brand-yellow)" }} />
-              <span style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Summary</span>
-            </div>
-            <div style={{ fontSize: "var(--text-sm)", color: "var(--ink-secondary)" }}>
-              Portfolio has {report.portfolio.projects} project(s) with a combined contract value of ₹{fmt(contractVal)}.
-              Overall progress stands at {progress}% with {report.tat.overdue} overdue approval(s).
-            </div>
-          </div>
         </div>
 
-        {/* Delay Events */}
-        <div className="card">
-          <h3>Delay Events & Risks</h3>
+        {/* Delay Events and Risks */}
+        <div className="card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700 }}>Project Contingency Risks</h3>
           {report.delays.length > 0 ? (
-            <div className="list">
+            <div className="list" style={{ gap: "10px" }}>
               {report.delays.map((d: any) => (
-                <div className="alert alert-error" key={d.id}>
-                  <div className="row" style={{ marginBottom: "var(--sp-1)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)" }}>
-                      <AlertTriangle size={14} />
-                      <b style={{ fontSize: "var(--text-sm)" }}>{d.reason}</b>
+                <div className="alert alert-error" key={d.id} style={{ padding: "12px" }}>
+                  <div className="row" style={{ marginBottom: "4px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <AlertTriangle size={13} />
+                      <span style={{ fontSize: "13px", fontWeight: 700 }}>{d.reason}</span>
                     </div>
-                    <span className="badge OVERDUE">{d.impactDays} days</span>
+                    <span className="badge OVERDUE">{d.impactDays} Days Delay</span>
                   </div>
-                  <div className="muted">{d.mitigationPlan}</div>
-                  <div style={{ marginTop: "var(--sp-2)", fontSize: "var(--text-xs)", color: "var(--muted)" }}>
-                    Target close: {new Date(d.targetClose).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}
+                  <p className="muted" style={{ fontSize: "12px", color: "var(--ink-secondary)" }}>{d.mitigationPlan}</p>
+                  <div style={{ marginTop: "6px", fontSize: "10px", color: "var(--muted)" }}>
+                    Target SLA Resolution: {new Date(d.targetClose).toLocaleDateString("en-IN")}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ textAlign: "center", padding: "var(--sp-8) var(--sp-4)" }}>
-              <div style={{ width: 56, height: 56, borderRadius: "var(--radius-full)", background: "var(--success-light)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto var(--sp-3)" }}>
-                <ArrowUpRight size={24} style={{ color: "var(--success)" }} />
+            <div style={{ textAlign: "center", padding: "30px 0" }}>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", background: "var(--success-light)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                <ArrowUpRight size={20} style={{ color: "var(--success)" }} />
               </div>
-              <div style={{ fontWeight: 700, fontSize: "var(--text-md)", marginBottom: "var(--sp-1)" }}>No Delay Events</div>
-              <p className="muted" style={{ maxWidth: 280, margin: "0 auto" }}>
-                All activities are progressing within expected timelines. No delays reported.
+              <h4 style={{ fontSize: "13px", fontWeight: 700, marginBottom: "2px" }}>Zero Critical Incidents</h4>
+              <p className="muted" style={{ maxWidth: "240px", margin: "0 auto", fontSize: "12px" }}>
+                No active delays, access blocks, or material shortages reported.
               </p>
             </div>
           )}
@@ -281,8 +273,8 @@ export default function Reports({ token }: ReportsProps) {
 /* --- Helpers --- */
 
 function fmt(value: number) {
-  if (value >= 10000000) return `${(value / 10000000).toFixed(1)}Cr`;
-  if (value >= 100000) return `${(value / 100000).toFixed(1)}L`;
+  if (value >= 10000000) return `${(value / 10000000).toFixed(2)}Cr`;
+  if (value >= 100000) return `${(value / 100000).toFixed(2)}L`;
   if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
   return String(value);
 }
@@ -297,21 +289,21 @@ function KpiCard({ icon: Icon, cls, label, value, trend, trendText }: {
 }) {
   return (
     <div className="kpi-card">
-      <div className={`kpi-card-icon ${cls}`}><Icon size={18} /></div>
+      <div className={`kpi-card-icon ${cls}`}><Icon size={16} /></div>
       <div className="kpi-card-label">{label}</div>
       <div className="kpi-card-value">{value}</div>
       {trend && trendText && (
-        <div className={`kpi-card-trend ${trend}`}>
+        <div className={`kpi-card-trend ${trend}`} style={{ marginTop: "4px" }}>
           {trend === "up" ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-          {trendText}
+          <span>{trendText}</span>
         </div>
       )}
     </div>
   );
 }
 
-function DonutChart({ percentage, size = 120, label, color }: { percentage: number; size?: number; label?: string; color?: string }) {
-  const stroke = 8;
+function DonutChart({ percentage, size = 110, label, color }: { percentage: number; size?: number; label?: string; color?: string }) {
+  const stroke = 6;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percentage / 100) * circumference;
@@ -324,12 +316,12 @@ function DonutChart({ percentage, size = 120, label, color }: { percentage: numb
           cx={size / 2} cy={size / 2} r={radius} fill="none"
           stroke={color || "var(--brand-yellow)"}
           strokeWidth={stroke} strokeDasharray={circumference} strokeDashoffset={offset}
-          strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s ease" }}
+          strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.8s ease" }}
         />
       </svg>
       <div className="donut-label">
-        <div className="donut-label-value">{percentage}%</div>
-        {label && <div className="donut-label-text">{label}</div>}
+        <div className="donut-label-value" style={{ fontSize: "16px" }}>{percentage}%</div>
+        {label && <div className="donut-label-text" style={{ fontSize: "9px" }}>{label}</div>}
       </div>
     </div>
   );
@@ -339,17 +331,17 @@ function BudgetBar({ label, value, max, color, pct, icon }: { label: string; val
   const width = max > 0 ? Math.max(2, (value / max) * 100) : 0;
   return (
     <div>
-      <div className="row" style={{ marginBottom: "var(--sp-1)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)", fontSize: "var(--text-sm)", fontWeight: 500 }}>
+      <div className="row" style={{ marginBottom: "4px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 500, color: "var(--ink-secondary)" }}>
           <span style={{ color }}>{icon}</span>
           {label}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)" }}>
-          <span style={{ fontSize: "var(--text-sm)", fontWeight: 700 }}>₹{fmt(value)}</span>
-          {pct !== undefined && <span style={{ fontSize: "var(--text-xs)", color: "var(--muted)" }}>({pct}%)</span>}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--ink)" }}>₹{fmt(value)}</span>
+          {pct !== undefined && <span className="badge" style={{ fontSize: "9px", padding: "1px 4px" }}>{pct}%</span>}
         </div>
       </div>
-      <div className="progress" style={{ height: 6 }}>
+      <div className="progress" style={{ height: 4 }}>
         <span style={{ width: `${width}%`, background: color, transition: "width 0.8s ease" }} />
       </div>
     </div>
@@ -360,10 +352,10 @@ function ProgressMetric({ label, value, color }: { label: string; value: number;
   return (
     <div>
       <div className="row" style={{ marginBottom: 3 }}>
-        <span style={{ fontSize: "var(--text-xs)", fontWeight: 500, color: "var(--muted)" }}>{label}</span>
-        <span style={{ fontSize: "var(--text-sm)", fontWeight: 700 }}>{value}%</span>
+        <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--muted)" }}>{label}</span>
+        <span style={{ fontSize: "12px", fontWeight: 700 }}>{value}%</span>
       </div>
-      <div className="progress" style={{ height: 4 }}>
+      <div className="progress" style={{ height: 3 }}>
         <span style={{ width: `${value}%`, background: color, transition: "width 0.8s ease" }} />
       </div>
     </div>
