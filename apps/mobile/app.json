@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "FOXSCAN", "slug": "foxscan", "scheme": "foxscan", "platforms": ["ios", "android"],
+    "version": "0.1.0", "orientation": "portrait", "userInterfaceStyle": "light",
+    "newArchEnabled": true, "plugins": ["expo-router", ["expo-camera", {"cameraPermission": "Allow FOXSCAN to capture site evidence."}], ["expo-location", {"locationWhenInUsePermission": "Allow FOXSCAN to geotag site updates."}], ["expo-notifications", {"color": "#e6692d"}], ["expo-local-authentication", {"faceIDPermission": "Allow FOXSCAN biometric sign-in."}]],
+    "ios": {"supportsTablet": true, "bundleIdentifier": "com.foxscan.mobile", "infoPlist": {"UIBackgroundModes": ["fetch", "remote-notification"]}},
+    "android": {"package": "com.foxscan.mobile", "permissions": ["CAMERA", "ACCESS_FINE_LOCATION", "RECORD_AUDIO", "POST_NOTIFICATIONS"]},
+    "experiments": {"typedRoutes": true},
+    "extra": {"apiUrl": "http://localhost:3000"}
+  }
+}

@@ -1,0 +1,5 @@
+import { describe, expect, it } from "vitest";
+import { createStage, decide } from "./workflow";
+import type { Activity } from "./domain";
+const activity: Activity = { id:"activity",projectId:"project",name:"Primer",sequence:1,plannedStart:"2026-01-01",plannedEnd:"2026-01-02",progress:0,status:"IN_PROGRESS",dependencyIds:[],paymentMode:"FIXED",paymentValue:1000,retentionPct:10,gstPct:18 };
+describe("approval workflow",()=>{it("moves a submitted stage through the prescribed chain",()=>{const stage=createStage(activity,"contractor",["photo"],{quality:true});expect(stage.state).toBe("MANUFACTURER");decide(stage,"mfg","MANUFACTURER","APPROVE");expect(stage.state).toBe("CONSULTANT");decide(stage,"pmc","CONSULTANT","APPROVE");expect(stage.state).toBe("CLIENT");decide(stage,"client","CLIENT","APPROVE");expect(stage.state).toBe("PAID");expect(stage.amountDue).toBe(1080);});it("prevents an out-of-order approval",()=>{const stage=createStage(activity,"contractor",[],{});expect(()=>decide(stage,"client","CLIENT","APPROVE")).toThrow("Only the MANUFACTURER");});});

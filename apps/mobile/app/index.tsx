@@ -1,0 +1,1 @@
+import {Redirect} from "expo-router"; import {useAuthStore} from "@/stores/auth"; export default function Index(){return <Redirect href={useAuthStore.getState().token?"/(tabs)/dashboard":"/(auth)/login"}/>}

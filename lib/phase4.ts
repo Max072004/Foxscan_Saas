@@ -1,0 +1,4 @@
+import type { DlpCase,Dispute,Warranty } from "./domain";
+export function dlpStatus(item:Pick<DlpCase,"endsOn"|"status">,now=new Date()){if(item.status==="CLOSED")return "CLOSED" as const;const remaining=new Date(item.endsOn).getTime()-now.getTime();return remaining<0?"OVERDUE" as const:remaining<=30*86400000?"INSPECTION_DUE" as const:"ACTIVE" as const;}
+export function warrantyStatus(item:Pick<Warranty,"endsOn">,now=new Date()){const remaining=new Date(item.endsOn).getTime()-now.getTime();return remaining<0?"EXPIRED" as const:remaining<=30*86400000?"EXPIRING" as const:"ACTIVE" as const;}
+export function canTransitionDispute(dispute:Dispute,next:Dispute["status"]){const allowed:Record<Dispute["status"],Dispute["status"][]>={OPEN:["UNDER_REVIEW","CLOSED"],UNDER_REVIEW:["RESOLVED","CLOSED"],RESOLVED:["CLOSED"],CLOSED:[]};return allowed[dispute.status].includes(next);}

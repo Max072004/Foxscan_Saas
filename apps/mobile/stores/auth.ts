@@ -1,0 +1,3 @@
+import * as SecureStore from "expo-secure-store"; import { create } from "zustand"; import type {Role} from "@/lib/types";
+type AuthState={token:string|null;role:Role|null;name:string|null;hydrate:()=>Promise<void>;signIn:(token:string,user:{role:Role;name:string})=>Promise<void>;signOut:()=>Promise<void>};
+export const useAuthStore=create<AuthState>((set)=>({token:null,role:null,name:null,hydrate:async()=>{const raw=await SecureStore.getItemAsync("foxscan.session");if(raw)set(JSON.parse(raw));},signIn:async(token,user)=>{const next={token,role:user.role,name:user.name};await SecureStore.setItemAsync("foxscan.session",JSON.stringify(next));set(next);},signOut:async()=>{await SecureStore.deleteItemAsync("foxscan.session");set({token:null,role:null,name:null});}}));

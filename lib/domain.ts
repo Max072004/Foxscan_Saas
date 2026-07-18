@@ -1,0 +1,30 @@
+export const roles = ["ADMIN", "CLIENT", "CONSULTANT", "MANUFACTURER", "CONTRACTOR"] as const;
+export type Role = (typeof roles)[number];
+export const activityStatuses = ["NOT_STARTED", "IN_PROGRESS", "SUBMITTED", "APPROVED", "PAID", "ON_HOLD"] as const;
+export type ActivityStatus = (typeof activityStatuses)[number];
+export type ProjectStatus = "DRAFT" | "ACTIVE" | "ON_HOLD" | "COMPLETED" | "CANCELLED";
+export type WorkflowState = "CONTRACTOR" | "MANUFACTURER" | "CONSULTANT" | "CLIENT" | "PAID" | "REWORK";
+
+export interface Tenant { id: string; name: string; type: "SOCIETY" | "CONSULTANT" | "MANUFACTURER" | "CONTRACTOR"; gstin?: string }
+export interface User { id: string; tenantId: string; name: string; email: string; phone?: string; role: Role; active: boolean }
+export interface Session { token: string; userId: string; expiresAt: string }
+export interface Invitation { id: string; tenantId: string; email?: string; phone?: string; role: Role; projectId?: string; token: string; expiresAt: string; acceptedAt?: string; createdBy: string; createdAt: string }
+export interface Building { id: string; projectId: string; name: string; wings: number; floors: number; areaSqft: number }
+export interface BoqItem { id: string; projectId: string; activityId?: string; code: string; description: string; quantity: number; unit: string; rate: number; manufacturer?: string; version: number }
+export interface Project { id: string; tenantId: string; name: string; address: string; scope: string; buildings: number; areaSqft: number; contractValue: number; startDate: string; endDate: string; status: ProjectStatus; contractorId?: string; manufacturerId?: string; consultantId?: string; clientId?: string }
+export interface Activity { id: string; projectId: string; name: string; description?: string; sequence: number; plannedStart: string; plannedEnd: string; actualStart?: string; actualEnd?: string; progress: number; status: ActivityStatus; dependencyIds: string[]; paymentMode: "PERCENTAGE" | "FIXED" | "MILESTONE" | "RA_BILL"; paymentValue: number; retentionPct: number; gstPct: number }
+export interface Stage { id: string; activityId: string; state: WorkflowState; raisedAt: string; dueAt: string; submittedBy: string; evidence: string[]; checklist: Record<string, boolean>; comments: StageComment[]; decisions: StageDecision[]; amountDue: number; invoiceId?: string }
+export interface StageComment { id: string; actorId: string; text: string; createdAt: string; kind: "COMMENT" | "SUGGESTION" | "RETURN_REASON" }
+export interface StageDecision { id: string; actorId: string; role: Role; decision: "RAISED" | "APPROVED" | "RETURNED" | "PAYMENT_RELEASED"; createdAt: string; note?: string }
+export interface Invoice { id: string; projectId: string; activityId: string; stageId: string; invoiceNumber: string; subtotal: number; cgst: number; sgst: number; igst: number; retention: number; total: number; status: "UPLOADED" | "MATCHED" | "APPROVED" | "PAID"; documentId?: string; paymentReference?: string }
+export interface SiteUpdate { id: string; projectId: string; activityId?: string; date: string; weather: string; manpower: number; equipment: string; workDone: string; issues?: string; latitude?: number; longitude?: number; voiceNote?: string; important: boolean; attachments: string[]; authorId: string }
+export interface Delay { id: string; activityId: string; reason: "WEATHER" | "MATERIAL_SHORTAGE" | "MANPOWER" | "SOCIETY_ACCESS" | "SCOPE_CHANGE" | "OTHER"; impactDays: number; ownerId: string; mitigationPlan: string; targetClose: string; resolvedAt?: string }
+export interface DocumentRecord { id: string; projectId: string; name: string; type: "CONTRACT" | "BOQ" | "INVOICE" | "PHOTO" | "VIDEO" | "DRAWING" | "REPORT" | "OTHER"; version: number; tags: string[]; visibility: Role[]; url: string; uploadedBy: string; createdAt: string }
+export interface NotificationRecord { id: string; tenantId: string; recipientId: string; event: string; title: string; body: string; channels: ("IN_APP" | "WHATSAPP" | "EMAIL" | "PUSH")[]; readAt?: string; createdAt: string }
+export interface PaymentRecord { id: string; invoiceId: string; provider: "RAZORPAY" | "INTERNAL"; providerPaymentId?: string; amount: number; currency: "INR"; status: "PENDING" | "CAPTURED" | "FAILED"; createdAt: string }
+export interface DeviceRegistration { id: string; userId: string; tenantId: string; expoPushToken: string; platform: "ios" | "android"; deviceName?: string; createdAt: string; updatedAt: string }
+export interface DlpCase { id: string; projectId: string; contractorId: string; startsOn: string; endsOn: string; inspectionDueOn: string; status: "ACTIVE" | "INSPECTION_DUE" | "CLOSED" | "OVERDUE"; retentionAmount: number; closedAt?: string; createdAt: string }
+export interface Warranty { id: string; projectId: string; provider: string; type: "MANUFACTURER" | "WORKMANSHIP"; reference: string; startsOn: string; endsOn: string; coverage: string; documentId?: string; status: "ACTIVE" | "EXPIRING" | "EXPIRED"; createdAt: string }
+export interface Dispute { id: string; projectId: string; raisedBy: string; category: "QUALITY" | "PAYMENT" | "SCOPE" | "DELAY" | "SAFETY" | "OTHER"; title: string; description: string; evidenceIds: string[]; status: "OPEN" | "UNDER_REVIEW" | "RESOLVED" | "CLOSED"; ownerId?: string; resolution?: string; resolvedAt?: string; createdAt: string; updatedAt: string }
+export interface AuditEvent { id: string; tenantId: string; actorId: string; action: string; entity: string; entityId: string; before?: unknown; after?: unknown; ip?: string; device?: string; createdAt: string; hash: string }
+export interface AppData { tenants: Tenant[]; users: User[]; sessions: Session[]; invitations: Invitation[]; buildings: Building[]; boqItems: BoqItem[]; projects: Project[]; activities: Activity[]; stages: Stage[]; invoices: Invoice[]; payments: PaymentRecord[]; deviceRegistrations: DeviceRegistration[]; dlpCases: DlpCase[]; warranties: Warranty[]; disputes: Dispute[]; notifications: NotificationRecord[]; siteUpdates: SiteUpdate[]; delays: Delay[]; documents: DocumentRecord[]; audits: AuditEvent[] }

@@ -1,0 +1,3 @@
+import {describe,expect,it} from "vitest";import {criticalPath} from "./scheduling";import type {Activity} from "./domain";
+const a=(id:string,start:string,end:string,dependencies:string[]=[]):Activity=>({id,projectId:"p",name:id,sequence:1,plannedStart:start,plannedEnd:end,progress:0,status:"NOT_STARTED",dependencyIds:dependencies,paymentMode:"FIXED",paymentValue:0,retentionPct:0,gstPct:0});
+describe("critical path",()=>it("selects the longest dependency chain",()=>{const r=criticalPath([a("a","2026-01-01","2026-01-03"),a("b","2026-01-04","2026-01-08",["a"]),a("c","2026-01-01","2026-01-04")]);expect(r.path).toEqual(["a","b"]);expect(r.duration).toBe(8);}));
