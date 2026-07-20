@@ -39,8 +39,13 @@ export async function POST(req: NextRequest) {
   if (!activity)
     return NextResponse.json({ error: "Activity not found" }, { status: 404 });
 
+  const project = data.projects.find(p => p.id === activity.projectId);
+  if (!project)
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+
   const stage = createStage(
     activity,
+    project,
     body.actorId,
     body.evidence || [],
     body.checklist || {},
@@ -50,8 +55,7 @@ export async function POST(req: NextRequest) {
   data.stages.push(stage);
 
   await audit(data, {
-    tenantId:
-      data.projects.find(p => p.id === activity.projectId)?.tenantId || "",
+    tenantId: project.tenantId,
     actorId: body.actorId,
     action: "RAISE_STAGE",
     entity: "stage",
@@ -60,12 +64,13 @@ export async function POST(req: NextRequest) {
   });
   await saveData(data);
 
-  // Notify: Contractor raised → notify Manufacturer
-  const manufacturer = findRecipientByRole(data, activity.id, "MANUFACTURER");
-  if (manufacturer) {
+  // Notify next reviewer dynamically
+  const nextReviewerRole = stage.state; // e.g. MANUFACTURER, CONSULTANT, or CLIENT
+  const reviewer = findRecipientByRole(data, activity.id, nextReviewerRole as any);
+  if (reviewer) {
     notify(
       data,
-      manufacturer,
+      reviewer,
       "STAGE_RAISED",
       `Stage raised for ${activity.name}`,
       `A new stage has been raised for "${activity.name}" and is awaiting your review.`
@@ -83,8 +88,10 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Stage not found" }, { status: 404 });
 
   const previousState = stage.state;
-  const updated = decide(stage, body.actorId, body.role, body.action, body.note);
   const activity = data.activities.find(a => a.id === stage.activityId)!;
+  const project = data.projects.find(p => p.id === activity.projectId)!;
+
+  const updated = decide(stage, project, body.actorId, body.role, body.action, body.note);
 
   activity.status =
     updated.state === "PAID"
@@ -96,8 +103,7 @@ export async function PATCH(req: NextRequest) {
           : "SUBMITTED";
 
   await audit(data, {
-    tenantId:
-      data.projects.find(p => p.id === activity.projectId)?.tenantId || "",
+    tenantId: project.tenantId,
     actorId: body.actorId,
     action: body.action,
     entity: "stage",
@@ -108,7 +114,6 @@ export async function PATCH(req: NextRequest) {
 
   // --- Send notifications based on the new state ---
   if (updated.state === "REWORK") {
-    // Returned for rework → notify the Contractor who originally submitted
     const contractor = findUser(data, stage.submittedBy);
     if (contractor) {
       const reason = body.note || "No reason provided";
@@ -121,7 +126,6 @@ export async function PATCH(req: NextRequest) {
       ).catch(() => undefined);
     }
   } else if (updated.state === "CONSULTANT") {
-    // Manufacturer approved → notify Consultant
     const consultant = findRecipientByRole(data, activity.id, "CONSULTANT");
     if (consultant) {
       notify(
@@ -133,19 +137,18 @@ export async function PATCH(req: NextRequest) {
       ).catch(() => undefined);
     }
   } else if (updated.state === "CLIENT") {
-    // Consultant approved → notify Client
     const client = findRecipientByRole(data, activity.id, "CLIENT");
     if (client) {
+      const approvedBy = previousState === "CONSULTANT" ? "Consultant" : "Manufacturer";
       notify(
         data,
         client,
         "STAGE_APPROVED",
-        `Stage for ${activity.name} approved by Consultant`,
-        `The stage for "${activity.name}" has been approved by the Consultant and is awaiting your payment release.`
+        `Stage for ${activity.name} approved by ${approvedBy}`,
+        `The stage for "${activity.name}" has been approved by the ${approvedBy} and is awaiting your payment release.`
       ).catch(() => undefined);
     }
   } else if (updated.state === "PAID") {
-    // Client released payment → notify Contractor
     const contractor = findRecipientByRole(data, activity.id, "CONTRACTOR");
     if (contractor) {
       notify(
