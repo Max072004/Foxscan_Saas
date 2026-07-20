@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Text, View, ScrollView, Pressable, TextInput } from "react-native";
@@ -6,9 +6,12 @@ import { Screen, Title, Card, Button } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Project } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuthStore } from "@/stores/auth";
 
 export default function ProjectDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+  const { role } = useAuthStore();
   const [activeSubTab, setActiveSubTab] = useState<"timeline" | "docs">("timeline");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -69,9 +72,21 @@ export default function ProjectDetails() {
       <Screen>
         {/* Project Header Info Card */}
         <View className="mb-4">
-          <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
-            Project Overview
-          </Text>
+          <View className="flex-row items-center justify-between mb-1.5 px-0.5">
+            <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+              Project Overview
+            </Text>
+            {role && role !== "MANUFACTURER" && (
+              <Pressable
+                onPress={() => router.push({ pathname: "/project/setup", params: { id } })}
+                className="flex-row items-center active:opacity-75"
+                style={({ pressed }) => pressed ? { transform: [{ scale: 0.96 }] } : {}}
+              >
+                <Ionicons name="settings-outline" size={14} color="#EAAC1F" />
+                <Text className="text-brandAmber text-xs font-bold ml-1">Setup</Text>
+              </Pressable>
+            )}
+          </View>
           <Card>
             <View className="border-l-4 border-brandAmber pl-3">
               <Text className="text-xl font-extrabold text-brandCharcoal leading-tight mb-1">
