@@ -45,6 +45,16 @@ export default function SiteUpdates() {
   const projectActivities = data?.activities?.filter((a: any) => a.projectId === project?.id)
     ?.sort((a: any, b: any) => a.sequence - b.sequence) || [];
 
+  const withTimeout = <T,>(promise: Promise<T>, ms: number, message: string): Promise<T> => {
+    let timeoutId: NodeJS.Timeout;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(`Timeout: ${message}`));
+      }, ms);
+    });
+    return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+  };
+
   const submit = async () => {
     Keyboard.dismiss();
     setIsUploading(true);
@@ -53,8 +63,19 @@ export default function SiteUpdates() {
       let voiceUrl: string | undefined = undefined;
 
       if (capture && capture.uri) {
-        const fileResponse = await fetch(capture.uri);
-        const blob = await fileResponse.blob();
+        console.log("[MediaUpload] [Photo] Fetching local photo URI:", capture.uri);
+        const fileResponse = await withTimeout(
+          fetch(capture.uri),
+          15000,
+          "Fetching local photo file timed out"
+        );
+        console.log("[MediaUpload] [Photo] Converting photo to Blob...");
+        const blob = await withTimeout(
+          fileResponse.blob(),
+          15000,
+          "Converting photo file to blob timed out"
+        );
+        console.log("[MediaUpload] [Photo] Blob retrieved. Size:", blob.size);
 
         const formData = new FormData();
         formData.append("file", blob, "photo.jpg");
@@ -62,20 +83,38 @@ export default function SiteUpdates() {
         formData.append("activityId", selectedActivityId || "general");
         formData.append("filename", "photo.jpg");
 
-        const response = await fetch(`${baseUrl}/api/upload`, {
-          method: "POST",
-          body: formData,
-        });
+        console.log("[MediaUpload] [Photo] Sending upload request to backend...");
+        const response = await withTimeout(
+          fetch(`${baseUrl}/api/upload`, {
+            method: "POST",
+            body: formData,
+          }),
+          30000,
+          "Uploading photo to server timed out"
+        );
+        console.log("[MediaUpload] [Photo] Backend response status:", response.status);
         if (!response.ok) throw new Error("Photo upload failed");
         const resJson = await response.json();
+        console.log("[MediaUpload] [Photo] Upload succeeded. URL:", resJson.url);
         if (resJson.url) {
           attachmentUrls.push(resJson.url);
         }
       }
 
       if (voice) {
-        const fileResponse = await fetch(voice);
-        const blob = await fileResponse.blob();
+        console.log("[MediaUpload] [Voice] Fetching local voice note URI:", voice);
+        const fileResponse = await withTimeout(
+          fetch(voice),
+          15000,
+          "Fetching local voice note file timed out"
+        );
+        console.log("[MediaUpload] [Voice] Converting voice to Blob...");
+        const blob = await withTimeout(
+          fileResponse.blob(),
+          15000,
+          "Converting voice file to blob timed out"
+        );
+        console.log("[MediaUpload] [Voice] Blob retrieved. Size:", blob.size);
 
         const formData = new FormData();
         formData.append("file", blob, "voice.m4a");
@@ -83,12 +122,19 @@ export default function SiteUpdates() {
         formData.append("activityId", selectedActivityId || "general");
         formData.append("filename", "voice.m4a");
 
-        const response = await fetch(`${baseUrl}/api/upload`, {
-          method: "POST",
-          body: formData,
-        });
+        console.log("[MediaUpload] [Voice] Sending upload request to backend...");
+        const response = await withTimeout(
+          fetch(`${baseUrl}/api/upload`, {
+            method: "POST",
+            body: formData,
+          }),
+          30000,
+          "Uploading voice note to server timed out"
+        );
+        console.log("[MediaUpload] [Voice] Backend response status:", response.status);
         if (!response.ok) throw new Error("Voice note upload failed");
         const resJson = await response.json();
+        console.log("[MediaUpload] [Voice] Upload succeeded. URL:", resJson.url);
         if (resJson.url) {
           voiceUrl = resJson.url;
         }
@@ -121,6 +167,7 @@ export default function SiteUpdates() {
       setVoice(undefined);
       setShowSuccess(true);
     } catch (err: any) {
+      console.error("[MediaUpload] UPLOAD FLOW EXCEPTION:", err);
       alert("Error uploading media: " + err.message);
     } finally {
       setIsUploading(false);
