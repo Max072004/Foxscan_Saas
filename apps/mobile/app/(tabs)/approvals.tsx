@@ -257,7 +257,7 @@ export default function Approvals() {
         {/* MOBILE QA COMPLIANCE CHECKLIST MODAL */}
         {selectedActivity && (
           <View className="absolute inset-0 bg-brandCharcoal/70 z-50 justify-end" style={{ elevation: 15 }}>
-            <View className="bg-white rounded-t-3xl p-6 border-t border-slate-100 shadow-lg">
+            <View className="bg-white rounded-t-3xl p-6 pb-10 border-t border-slate-100 shadow-lg">
               <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-brandCharcoal font-extrabold text-base">
                   QA Compliance Checklist
@@ -404,7 +404,7 @@ export default function Approvals() {
         {/* MOBILE CLIENT PAYMENT PROOF UPLOAD MODAL */}
         {selectedPaymentStage && (
           <View className="absolute inset-0 bg-brandCharcoal/70 z-50 justify-end" style={{ elevation: 15 }}>
-            <View className="bg-white rounded-t-3xl p-6 border-t border-slate-100 shadow-lg">
+            <View className="bg-white rounded-t-3xl p-6 pb-10 border-t border-slate-100 shadow-lg">
               <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-brandCharcoal font-extrabold text-base">
                   Upload Payment Proof

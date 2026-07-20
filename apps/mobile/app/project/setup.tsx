@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import type { Project, Activity } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@/stores/auth";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MobileProjectSetup() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -156,8 +157,9 @@ export default function MobileProjectSetup() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      <Screen>
+    <SafeAreaView className="flex-1 bg-offWhite" edges={["top"]}>
+      <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
+        <Screen>
         {/* Back Link Header */}
         <Pressable
           onPress={() => router.back()}
@@ -337,7 +339,8 @@ export default function MobileProjectSetup() {
             </Card>
           )}
         </View>
-      </Screen>
-    </ScrollView>
+        </Screen>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

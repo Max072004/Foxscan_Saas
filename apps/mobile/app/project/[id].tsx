@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import type { Project } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@/stores/auth";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProjectDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -68,8 +69,9 @@ export default function ProjectDetails() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      <Screen>
+    <SafeAreaView className="flex-1 bg-offWhite" edges={["top"]}>
+      <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
+        <Screen>
         {/* Project Header Info Card */}
         <View className="mb-4">
           <View className="flex-row items-center justify-between mb-1.5 px-0.5">
@@ -277,7 +279,8 @@ export default function ProjectDetails() {
             </View>
           </View>
         )}
-      </Screen>
-    </ScrollView>
+        </Screen>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
