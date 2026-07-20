@@ -12,6 +12,7 @@ import {
   Shield,
   ChevronDown,
   PanelLeftClose,
+  AlertTriangle,
 } from "lucide-react";
 
 export type Tab =
@@ -20,6 +21,7 @@ export type Tab =
   | "Timeline"
   | "Payments"
   | "Site updates"
+  | "Delays"
   | "Setup"
   | "Documents"
   | "Reports"
@@ -32,6 +34,7 @@ const navItems: { tab: Tab; label: string; icon: React.ElementType; section?: st
   { tab: "Timeline", label: "Timeline", icon: CalendarRange },
   { tab: "Payments", label: "Payments", icon: CreditCard },
   { tab: "Site updates", label: "Site Updates", icon: HardHat },
+  { tab: "Delays", label: "Delays", icon: AlertTriangle },
   { tab: "Documents", label: "Documents", icon: FileText, section: "Intelligence" },
   { tab: "Reports", label: "Reports", icon: BarChart3 },
   { tab: "Admin", label: "Admin", icon: Shield, section: "System" },

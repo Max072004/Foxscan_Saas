@@ -16,6 +16,7 @@ import Setup from "./components/Setup";
 import Documents from "./components/Documents";
 import Reports from "./components/Reports";
 import Admin from "./components/Admin";
+import Delays from "./components/Delays";
 import { FoxscanLogo } from "./components/Sidebar";
 
 export default function Home() {
@@ -133,6 +134,9 @@ export default function Home() {
             <Documents data={data} token={token} projectId={project.id} />
           )}
           {tab === "Reports" && <Reports token={token} />}
+          {tab === "Delays" && (
+            <Delays data={data} token={token} projectId={project.id} reload={reload} />
+          )}
           {tab === "Admin" && <Admin data={data} token={token} />}
         </div>
       </div>
