@@ -47,21 +47,26 @@ export default function Approvals() {
 
   const getStateBadge = (state: string) => {
     switch (state) {
+      case "NOT_STARTED":
+        return { bg: "bg-slate-100 border border-slate-200", text: "text-slate-500", label: "Not Started" };
       case "CONTRACTOR":
       case "IN_PROGRESS":
         return { bg: "bg-sky-50 border border-sky-100", text: "text-sky-700", label: "Contractor Stage" };
+      case "SUBMITTED":
       case "MANUFACTURER":
-        return { bg: "bg-amber-50 border border-amber-100", text: "text-amber-700", label: "Awaiting Manufacturer" };
       case "CONSULTANT":
-        return { bg: "bg-purple-50 border border-purple-100", text: "text-purple-700", label: "Awaiting Consultant" };
+        return { bg: "bg-amber-50 border border-amber-200", text: "text-amber-700", label: `Awaiting ${state}` };
+      case "APPROVED":
       case "CLIENT":
-        return { bg: "bg-indigo-50 border border-indigo-100", text: "text-indigo-700", label: "Awaiting Client Payment" };
+        return { bg: "bg-teal-50 border border-teal-200", text: "text-teal-700", label: "Approved (Awaiting Release)" };
       case "PAID":
-        return { bg: "bg-green-50 border border-green-100", text: "text-successGreen", label: "Paid & Closed" };
+        return { bg: "bg-emerald-50 border border-emerald-200", text: "text-successGreen", label: "Paid & Closed" };
       case "REWORK":
-        return { bg: "bg-red-50 border border-red-100", text: "text-alertRed", label: "Rework Required" };
+        return { bg: "bg-rose-50 border border-rose-200", text: "text-alertRed", label: "Rework Required" };
+      case "OVERDUE":
+        return { bg: "bg-red-50 border border-red-200", text: "text-alertRed", label: "Overdue" };
       default:
-        return { bg: "bg-slate-50 border border-slate-150", text: "text-slate-600", label: state };
+        return { bg: "bg-slate-50 border border-slate-200", text: "text-slate-600", label: state };
     }
   };
 
