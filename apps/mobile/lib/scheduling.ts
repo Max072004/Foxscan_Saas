@@ -1,3 +1,7 @@
+// WARNING: This file contains schedule-slippage calculation logic.
+// There is a duplicate copy of `calculateProjectSlippage` in `lib/scheduling.ts` (root)
+// due to Metro bundler boundaries. If you modify this logic, update BOTH files.
+
 export function calculateProjectSlippage(
   project: any,
   activities: any[],

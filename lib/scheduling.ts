@@ -1,3 +1,7 @@
+// WARNING: This file contains schedule-slippage calculation logic.
+// There is a duplicate copy of `calculateProjectSlippage` in `apps/mobile/lib/scheduling.ts`
+// due to Metro bundler boundaries. If you modify this logic, update BOTH files.
+
 import type { Activity } from "./domain";
 const day=(value:string)=>Math.floor(new Date(`${value}T00:00:00Z`).getTime()/86400000);
 export function criticalPath(activities:Activity[]){const byId=new Map(activities.map(a=>[a.id,a]));const memo=new Map<string,{duration:number;path:string[]}>();const visit=(id:string):{duration:number;path:string[]}=>{const existing=memo.get(id);if(existing)return existing;const activity=byId.get(id);if(!activity)return{duration:0,path:[]};const predecessor=activity.dependencyIds.map(visit).sort((a,b)=>b.duration-a.duration)[0]||{duration:0,path:[]};const result={duration:predecessor.duration+Math.max(1,day(activity.plannedEnd)-day(activity.plannedStart)+1),path:[...predecessor.path,id]};memo.set(id,result);return result;};return activities.map(a=>visit(a.id)).sort((a,b)=>b.duration-a.duration)[0]||{duration:0,path:[]};}
