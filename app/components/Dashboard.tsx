@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import type { Role } from "@/lib/domain";
 import { FoxscanLogo } from "./Sidebar";
+import { calculateProjectSlippage } from "@/lib/scheduling";
 
 interface DashboardProps {
   data: AppData;
@@ -28,6 +29,7 @@ interface DashboardProps {
 
 export default function Dashboard({ data, activities, stages, role }: DashboardProps) {
   const project = data.projects[0];
+  const slippageInfo = calculateProjectSlippage(project, activities, stages);
   const paid = activities.filter((a) => a.status === "PAID").length;
   const completed = activities.filter((a) => a.progress === 100).length;
   const inProgress = activities.filter((a) => a.progress > 0 && a.progress < 100).length;
@@ -118,7 +120,14 @@ export default function Dashboard({ data, activities, stages, role }: DashboardP
           <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
             <MiniStat label="Progress" value={`${progress}%`} />
             <MiniStat label="Budget Utilization" value={`${budgetPct}%`} />
-            <MiniStat label="Remaining Days" value={String(daysRemaining)} />
+            <MiniStat label="Schedule Status" value={
+              slippageInfo.status === "BEHIND" 
+                ? `${slippageInfo.slippageDays}d behind` 
+                : slippageInfo.status === "AHEAD" 
+                ? `${Math.abs(slippageInfo.slippageDays)}d ahead` 
+                : "On track"
+            } />
+            <MiniStat label="Projected End" value={slippageInfo.projectedEndDate || project.endDate} />
             <MiniStat label="Completed Steps" value={`${completed}/${activities.length}`} />
           </div>
         </div>
@@ -126,6 +135,42 @@ export default function Dashboard({ data, activities, stages, role }: DashboardP
           <FoxscanLogo size={90} />
         </div>
       </div>
+
+      {/* Escalated Delays Alert Box */}
+      {(() => {
+        const today = new Date();
+        const escalated = stages.filter((s) => {
+          return s.state !== "PAID" && s.state !== "REWORK" && new Date(s.dueAt) < today;
+        });
+        if (escalated.length === 0) return null;
+        return (
+          <div className="card" style={{ border: "1px solid var(--error)", background: "rgba(217, 56, 58, 0.04)", padding: "16px 20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--error)", fontWeight: 700, fontSize: "14px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              <AlertTriangle size={18} />
+              <span>Escalated Delays (Overdue Approvals)</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px", marginTop: "12px" }}>
+              {escalated.map((s) => {
+                const act = activities.find((a) => a.id === s.activityId);
+                const overdueHours = Math.max(0, Math.floor((today.getTime() - new Date(s.dueAt).getTime()) / 3600000));
+                const overdueDays = Math.floor(overdueHours / 24);
+                const displayOverdue = overdueDays > 0 
+                  ? `${overdueDays}d ${overdueHours % 24}h` 
+                  : `${overdueHours}h`;
+                return (
+                  <div key={s.id} style={{ background: "white", padding: "12px 14px", borderRadius: "6px", border: "1px solid rgba(217, 56, 58, 0.15)" }}>
+                    <div style={{ fontWeight: 700, fontSize: "13px", color: "var(--ink)" }}>{act?.name || "Stage Ticket"}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px", fontSize: "11px" }}>
+                      <span className="muted">Stuck with: <strong style={{ color: "var(--ink)" }}>{s.state}</strong></span>
+                      <span style={{ color: "var(--error)", background: "rgba(217, 56, 58, 0.08)", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>Overdue by {displayOverdue}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* KPI Cards Section */}
       {showKpis && (
@@ -168,8 +213,12 @@ export default function Dashboard({ data, activities, stages, role }: DashboardP
               <span style={{ width: `${timeProgress}%`, background: timeProgress > progress ? "var(--error)" : "var(--success)" }} />
             </div>
             <div className="row" style={{ marginTop: "6px" }}>
-              <span style={{ fontSize: "10px", color: "var(--muted)" }}>{startDate.toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}</span>
-              <span style={{ fontSize: "10px", color: "var(--muted)" }}>{endDate.toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}</span>
+              <span style={{ fontSize: "10px", color: "var(--muted)" }}>Planned: {startDate.toLocaleDateString("en-IN", { month: "short", day: "numeric" })} — {endDate.toLocaleDateString("en-IN", { month: "short", day: "numeric" })}</span>
+            </div>
+            <div className="row" style={{ marginTop: "4px" }}>
+              <span style={{ fontSize: "10px", fontWeight: 600, color: slippageInfo.status === "BEHIND" ? "var(--error)" : slippageInfo.status === "AHEAD" ? "var(--success)" : "var(--muted)" }}>
+                Projected: {slippageInfo.projectedEndDate} ({slippageInfo.status === "BEHIND" ? `${slippageInfo.slippageDays}d behind` : slippageInfo.status === "AHEAD" ? `${Math.abs(slippageInfo.slippageDays)}d ahead` : "on track"})
+              </span>
             </div>
           </div>
         </div>

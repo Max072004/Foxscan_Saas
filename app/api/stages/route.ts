@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     body.actorId,
     body.evidence || [],
     body.checklist || {},
-    body.tatHours || 24
+    body.tatHours || 48
   );
   activity.status = "SUBMITTED";
   activity.progress = 50;
@@ -92,7 +92,7 @@ export async function PATCH(req: NextRequest) {
   const activity = data.activities.find(a => a.id === stage.activityId)!;
   const project = data.projects.find(p => p.id === activity.projectId)!;
 
-  const updated = decide(stage, project, body.actorId, body.role, body.action, body.note);
+  const updated = decide(stage, project, body.actorId, body.role, body.action, body.note, body.tatHours || 48);
   if (body.evidence) {
     stage.evidence = body.evidence;
   }

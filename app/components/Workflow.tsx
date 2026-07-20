@@ -108,12 +108,26 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
                   (["MANUFACTURER", "CONSULTANT", "CLIENT"] as Role[]).includes(role) &&
                   s.state === role;
 
+                const isOverdue = s.state !== "PAID" && s.state !== "REWORK" && new Date(s.dueAt) < new Date();
                 return (
                   <div className="item" key={s.id}>
                     <div className="row" style={{ marginBottom: "var(--sp-2)" }}>
                       <b style={{ fontSize: "var(--text-sm)" }}>{a?.name}</b>
-                      <span className={`badge ${s.state}`}>{s.state}</span>
+                      <div style={{ display: "flex", gap: "var(--sp-2)", alignItems: "center" }}>
+                        {isOverdue && (
+                          <span className="badge REWORK" style={{ background: "rgba(217, 56, 58, 0.08)", color: "var(--error)", border: "1px solid rgba(217, 56, 58, 0.2)", fontSize: "10px", fontWeight: 700 }}>
+                            OVERDUE
+                          </span>
+                        )}
+                        <span className={`badge ${s.state}`}>{s.state}</span>
+                      </div>
                     </div>
+                    {isOverdue && (
+                      <div className="row" style={{ marginBottom: "var(--sp-2)", gap: "4px", color: "var(--error)", fontSize: "var(--text-xs)", fontWeight: 700 }}>
+                        <Clock size={12} />
+                        <span>ESCALATED: Stuck with {s.state} (Overdue by {Math.max(0, Math.floor((new Date().getTime() - new Date(s.dueAt).getTime()) / 3600000))}h)</span>
+                      </div>
+                    )}
                     <div className="muted" style={{ marginBottom: "var(--sp-2)" }}>
                       ₹{s.amountDue.toLocaleString("en-IN")} due · {s.decisions.length} decisions
                     </div>

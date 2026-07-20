@@ -8,6 +8,7 @@ import type { Project } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@/stores/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { calculateProjectSlippage } from "../../../lib/scheduling";
 
 export default function ProjectDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -27,6 +28,8 @@ export default function ProjectDetails() {
     queryFn: () => api<any>("/api/data"),
   });
   const activities = globalData?.activities?.filter((a: any) => a.projectId === id) || [];
+  const projectStages = globalData?.stages?.filter((s: any) => activities.some((a: any) => a.id === s.activityId)) || [];
+  const slippageInfo = calculateProjectSlippage(project, activities, projectStages);
 
   const { data: documents = [], refetch: refetchDocs } = useQuery({
     queryKey: ["project-documents", id, searchQuery],
@@ -119,6 +122,129 @@ export default function ProjectDetails() {
             </View>
           </Card>
         </View>
+
+        {/* Schedule & Slippage Card */}
+        {project && (
+          <View className="mb-4">
+            <Card>
+              <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center">
+                  <Ionicons 
+                    name={
+                      slippageInfo.status === "BEHIND" 
+                        ? "alert-circle" 
+                        : slippageInfo.status === "AHEAD" 
+                        ? "sparkles" 
+                        : "checkmark-circle"
+                    } 
+                    size={20} 
+                    color={
+                      slippageInfo.status === "BEHIND" 
+                        ? "#D9383A" 
+                        : slippageInfo.status === "AHEAD" 
+                        ? "#1B8755" 
+                        : "#64748B"
+                    } 
+                  />
+                  <Text className="text-sm font-extrabold text-brandCharcoal ml-2">
+                    Schedule Status
+                  </Text>
+                </View>
+                <View className={`px-2.5 py-0.5 rounded-full ${
+                  slippageInfo.status === "BEHIND" 
+                    ? "bg-red-50" 
+                    : slippageInfo.status === "AHEAD" 
+                    ? "bg-green-50" 
+                    : "bg-slate-100"
+                }`}>
+                  <Text className={`text-[10px] font-bold uppercase ${
+                    slippageInfo.status === "BEHIND" 
+                      ? "text-alertRed" 
+                      : slippageInfo.status === "AHEAD" 
+                      ? "text-successGreen" 
+                      : "text-slate-500"
+                  }`}>
+                    {slippageInfo.status.replace("_", " ")}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="flex-row justify-between items-center mt-1">
+                <View>
+                  <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+                    Slippage Metric
+                  </Text>
+                  <Text className={`text-sm font-extrabold ${
+                    slippageInfo.status === "BEHIND" 
+                      ? "text-alertRed" 
+                      : slippageInfo.status === "AHEAD" 
+                      ? "text-successGreen" 
+                      : "text-slate-600"
+                  }`}>
+                    {slippageInfo.status === "BEHIND" 
+                      ? `${slippageInfo.slippageDays} days behind` 
+                      : slippageInfo.status === "AHEAD" 
+                      ? `${Math.abs(slippageInfo.slippageDays)} days ahead` 
+                      : "On track"}
+                  </Text>
+                </View>
+                <View>
+                  <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+                    Projected Completion
+                  </Text>
+                  <Text className="text-xs font-extrabold text-brandCharcoal">
+                    {slippageInfo.projectedEndDate || project.endDate}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Escalated delays (stuck TAT stages) */}
+              {(() => {
+                const today = new Date();
+                const escalated = projectStages.filter((s: any) => {
+                  return s.state !== "PAID" && s.state !== "REWORK" && new Date(s.dueAt) < today;
+                });
+                
+                if (escalated.length === 0) return null;
+                
+                return (
+                  <View className="mt-4 pt-3 border-t border-slate-100">
+                    <View className="flex-row items-center mb-2">
+                      <Ionicons name="warning-outline" size={14} color="#D9383A" />
+                      <Text className="text-alertRed text-xs font-bold uppercase tracking-wider ml-1">
+                        Escalated Delays (Overdue)
+                      </Text>
+                    </View>
+                    {escalated.map((s: any) => {
+                      const act = activities.find((a: any) => a.id === s.activityId);
+                      const overdueHours = Math.max(0, Math.floor((today.getTime() - new Date(s.dueAt).getTime()) / 3600000));
+                      const overdueDays = Math.floor(overdueHours / 24);
+                      const displayOverdue = overdueDays > 0 
+                        ? `${overdueDays}d ${overdueHours % 24}h` 
+                        : `${overdueHours}h`;
+                      
+                      return (
+                        <View key={s.id} className="bg-red-50/50 rounded-xl p-2.5 mb-1.5 border border-red-100/50">
+                          <Text className="text-xs font-bold text-slate-800">
+                            {act?.name || "Unknown Activity"}
+                          </Text>
+                          <View className="flex-row justify-between items-center mt-1">
+                            <Text className="text-[10px] font-semibold text-slate-500">
+                              Stuck with: <Text className="font-extrabold text-brandCharcoal">{s.state}</Text>
+                            </Text>
+                            <Text className="text-[10px] font-bold text-alertRed bg-red-100 px-1.5 py-0.5 rounded">
+                              Overdue by {displayOverdue}
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                );
+              })()}
+            </Card>
+          </View>
+        )}
 
         {/* Project Sub-Tab Switcher */}
         <View className="flex-row bg-slate-200/50 p-1.5 rounded-2xl mb-4 gap-2">

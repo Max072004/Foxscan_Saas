@@ -5,6 +5,8 @@ import { api } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
+import { calculateProjectSlippage } from "../../../lib/scheduling";
+
 export default function Dashboard() {
   const router = useRouter();
   const { data, error } = useQuery({
@@ -12,8 +14,19 @@ export default function Dashboard() {
     queryFn: () => api<any>("/api/reports"),
   });
 
+  const { data: globalData } = useQuery({
+    queryKey: ["data"],
+    queryFn: () => api<any>("/api/data"),
+  });
+
   const progress = data ? Math.round(data.portfolio.progress) : 0;
   const overdueCount = data?.tat?.overdue || 0;
+
+  // Calculate slippage for showcase project (first project in workspace)
+  const firstProject = globalData?.projects?.[0];
+  const activeProjActs = firstProject ? (globalData?.activities?.filter((a: any) => a.projectId === firstProject.id) || []) : [];
+  const activeProjStages = firstProject ? (globalData?.stages?.filter((s: any) => activeProjActs.some((a: any) => a.id === s.activityId)) || []) : [];
+  const activeSlippage = firstProject ? calculateProjectSlippage(firstProject, activeProjActs, activeProjStages) : null;
 
   return (
     <ScrollView className="flex-grow bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
@@ -61,11 +74,27 @@ export default function Dashboard() {
                     Overall Project Health
                   </Text>
                   <Text className="text-xl font-extrabold text-brandCharcoal leading-tight">
-                    Greenview External Repainting
+                    {firstProject?.name || "Greenview External Repainting"}
                   </Text>
-                  <Text className="text-slate-500 text-xs font-semibold mt-1">
-                    Scaffolding and coatings active
-                  </Text>
+                  {activeSlippage ? (
+                    <Text className={`text-xs font-bold mt-1.5 ${
+                      activeSlippage.status === "BEHIND" 
+                        ? "text-alertRed" 
+                        : activeSlippage.status === "AHEAD" 
+                        ? "text-successGreen" 
+                        : "text-slate-500"
+                    }`}>
+                      {activeSlippage.status === "BEHIND"
+                        ? `${activeSlippage.slippageDays}d behind schedule`
+                        : activeSlippage.status === "AHEAD"
+                        ? `${Math.abs(activeSlippage.slippageDays)}d ahead of schedule`
+                        : "On track (no slippage)"}
+                    </Text>
+                  ) : (
+                    <Text className="text-slate-500 text-xs font-semibold mt-1">
+                      Scaffolding and coatings active
+                    </Text>
+                  )}
                 </View>
 
                 {/* Progress Ring using pure CSS overlay borders */}
