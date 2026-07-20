@@ -1,1 +1,19 @@
-module.exports={content:["./app/**/*.{ts,tsx}","./components/**/*.{ts,tsx}"],presets:[require("nativewind/preset")],theme:{extend:{colors:{fox:"#e6692d",ink:"#162126"}}},plugins:[]};
+module.exports={
+  content:["./app/**/*.{ts,tsx}","./components/**/*.{ts,tsx}"],
+  presets:[require("nativewind/preset")],
+  theme:{
+    extend:{
+      colors:{
+        fox:"#EAAC1F",
+        brandAmber:"#EAAC1F",
+        brandCharcoal:"#1A1D24",
+        offWhite:"#F9F9F6",
+        successGreen:"#1B8755",
+        alertRed:"#D9383A",
+        mutedGray:"#64748B",
+        ink:"#1A1D24"
+      }
+    }
+  },
+  plugins:[]
+};
