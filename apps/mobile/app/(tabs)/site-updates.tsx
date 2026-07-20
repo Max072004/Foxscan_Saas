@@ -54,12 +54,11 @@ export default function SiteUpdates() {
 
       if (capture && capture.uri) {
         const formData = new FormData();
-        // @ts-ignore
         formData.append("file", {
           uri: capture.uri,
           type: "image/jpeg",
-          name: "photo.jpg"
-        });
+          name: "photo.jpg",
+        } as any);
         formData.append("projectId", project?.id || "");
         formData.append("activityId", selectedActivityId || "general");
         formData.append("filename", "photo.jpg");
@@ -77,12 +76,11 @@ export default function SiteUpdates() {
 
       if (voice) {
         const formData = new FormData();
-        // @ts-ignore
         formData.append("file", {
           uri: voice,
           type: "audio/m4a",
-          name: "voice.m4a"
-        });
+          name: "voice.m4a",
+        } as any);
         formData.append("projectId", project?.id || "");
         formData.append("activityId", selectedActivityId || "general");
         formData.append("filename", "voice.m4a");
