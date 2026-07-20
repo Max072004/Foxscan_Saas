@@ -22,6 +22,8 @@ const COLUMNS: { state: string; label: string; color: string }[] = [
 
 export default function Workflow({ data, activities, stages, role, actorId, reload }: WorkflowProps) {
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [returningStageId, setReturningStageId] = useState<string | null>(null);
+  const [returnNote, setReturnNote] = useState("");
   const [checklist, setChecklist] = useState({
     prep: false,
     coating: false,
@@ -43,7 +45,7 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
     reload();
   };
 
-  const act = async (s: any, action: string) => {
+  const act = async (s: any, action: string, customNote?: string) => {
     let evidencePayload: string[] | undefined = undefined;
     if (role === "CLIENT" && action === "APPROVE") {
       const ref = prompt("Enter Cheque Number or Transaction Reference (Proof of Payment):");
@@ -60,7 +62,7 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
         role,
         action,
         evidence: evidencePayload,
-        note: action === "RETURN" ? "Please rectify surface finish." : `Approved with proof reference: ${evidencePayload?.[0]}`,
+        note: customNote || (action === "RETURN" ? "Returned for rework" : `Approved with proof reference: ${evidencePayload?.[0]}`),
       }),
     });
     reload();
@@ -165,8 +167,8 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
                                     </div>
                                   )}
                                   {su.voiceNote && (
-                                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "6px", color: "var(--brand-yellow-hover)", fontWeight: 600, fontSize: "10px" }}>
-                                      <span>🎤 Voice note attached</span>
+                                    <div style={{ marginTop: "6px" }}>
+                                      <audio src={su.voiceNote} controls style={{ width: "100%", height: "28px" }} />
                                     </div>
                                   )}
                                 </div>
@@ -190,8 +192,8 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
                                     </div>
                                   )}
                                   {su.voiceNote && (
-                                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "6px", color: "var(--error)", fontWeight: 600, fontSize: "10px" }}>
-                                      <span>🎤 Rework Voice note attached</span>
+                                    <div style={{ marginTop: "6px" }}>
+                                      <audio src={su.voiceNote} controls style={{ width: "100%", height: "28px" }} />
                                     </div>
                                   )}
                                 </div>
@@ -218,15 +220,63 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
                     </div>
 
                     {canAct && (
-                      <div className="row" style={{ gap: "var(--sp-2)", justifyContent: "flex-start" }}>
-                        <button className="btn-primary" onClick={() => act(s, "APPROVE")} style={{ fontSize: "var(--text-xs)" }}>
-                          <CheckCircle2 size={14} />
-                          {role === "CLIENT" ? "Release Payment" : "Approve"}
-                        </button>
-                        <button className="btn-danger" onClick={() => act(s, "RETURN")} style={{ fontSize: "var(--text-xs)" }}>
-                          <RotateCcw size={14} />
-                          Return
-                        </button>
+                      <div style={{ marginTop: "var(--sp-3)" }}>
+                        {returningStageId === s.id ? (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-2)", width: "100%" }}>
+                            <textarea
+                              placeholder="Provide a reason for return (Required)..."
+                              value={returnNote}
+                              onChange={(e) => setReturnNote(e.target.value)}
+                              style={{
+                                width: "100%",
+                                minHeight: "60px",
+                                padding: "var(--sp-2)",
+                                borderRadius: "var(--radius)",
+                                border: "1px solid var(--error)",
+                                fontSize: "var(--text-xs)",
+                                background: "var(--bg)",
+                                color: "var(--ink)",
+                                fontFamily: "var(--font)",
+                                resize: "none"
+                              }}
+                            />
+                            <div style={{ display: "flex", gap: "var(--sp-2)" }}>
+                              <button
+                                className="btn-danger"
+                                disabled={!returnNote.trim()}
+                                onClick={() => {
+                                  act(s, "RETURN", returnNote);
+                                  setReturningStageId(null);
+                                  setReturnNote("");
+                                }}
+                                style={{ fontSize: "var(--text-xs)", padding: "4px 10px" }}
+                              >
+                                Submit Return
+                              </button>
+                              <button
+                                className="btn-ghost"
+                                onClick={() => {
+                                  setReturningStageId(null);
+                                  setReturnNote("");
+                                }}
+                                style={{ fontSize: "var(--text-xs)", padding: "4px 10px", color: "var(--muted)" }}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="row" style={{ gap: "var(--sp-2)", justifyContent: "flex-start" }}>
+                            <button className="btn-primary" onClick={() => act(s, "APPROVE")} style={{ fontSize: "var(--text-xs)" }}>
+                              <CheckCircle2 size={14} />
+                              {role === "CLIENT" ? "Release Payment" : "Approve"}
+                            </button>
+                            <button className="btn-danger" onClick={() => setReturningStageId(s.id)} style={{ fontSize: "var(--text-xs)" }}>
+                              <RotateCcw size={14} />
+                              Return
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

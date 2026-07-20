@@ -14,27 +14,82 @@ interface SiteUpdatesProps {
 export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUpdatesProps) {
   const [workDone, setWorkDone] = useState("");
   const [selectedActivityId, setSelectedActivityId] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [voiceFile, setVoiceFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!workDone) return;
-    await fetch("/api/site-updates", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        projectId,
-        authorId: actorId,
-        workDone,
-        activityId: selectedActivityId || undefined,
-        weather: "Clear",
-        manpower: 0,
-        equipment: "",
-        important: false,
-      }),
-    });
-    setWorkDone("");
-    setSelectedActivityId("");
-    reload();
+    setIsUploading(true);
+
+    try {
+      let attachmentUrls: string[] = [];
+      let voiceUrl: string | undefined = undefined;
+
+      if (photoFile) {
+        const formData = new FormData();
+        formData.append("file", photoFile);
+        formData.append("projectId", projectId);
+        formData.append("activityId", selectedActivityId || "general");
+        formData.append("filename", photoFile.name);
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (!response.ok) throw new Error("Photo upload failed");
+        const resJson = await response.json();
+        if (resJson.url) {
+          attachmentUrls.push(resJson.url);
+        }
+      }
+
+      if (voiceFile) {
+        const formData = new FormData();
+        formData.append("file", voiceFile);
+        formData.append("projectId", projectId);
+        formData.append("activityId", selectedActivityId || "general");
+        formData.append("filename", voiceFile.name);
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (!response.ok) throw new Error("Audio upload failed");
+        const resJson = await response.json();
+        if (resJson.url) {
+          voiceUrl = resJson.url;
+        }
+      }
+
+      await fetch("/api/site-updates", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          projectId,
+          authorId: actorId,
+          workDone,
+          activityId: selectedActivityId || undefined,
+          weather: "Clear",
+          manpower: 0,
+          equipment: "",
+          important: false,
+          attachments: attachmentUrls,
+          voiceNote: voiceUrl,
+        }),
+      });
+
+      setWorkDone("");
+      setSelectedActivityId("");
+      setPhotoFile(null);
+      setVoiceFile(null);
+      reload();
+    } catch (err: any) {
+      alert("Upload failed: " + err.message);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const updates = data.siteUpdates.filter((s) => s.projectId === projectId);
@@ -95,11 +150,44 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
             onFocus={(e) => { e.currentTarget.style.borderColor = "var(--brand-yellow)"; e.currentTarget.style.boxShadow = "0 0 0 3px var(--brand-yellow-light)"; }}
             onBlur={(e) => { e.currentTarget.style.borderColor = "var(--line)"; e.currentTarget.style.boxShadow = "none"; }}
           />
-          <div className="row" style={{ justifyContent: "space-between" }}>
-            <div style={{ display: "flex", gap: "var(--sp-2)" }}>
-              <button type="button" className="btn-ghost" style={{ color: "var(--muted)" }} title="Attach photo">
-                <Paperclip size={16} />
+          
+          {/* File input selectors */}
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "var(--muted)", cursor: "pointer", padding: "6px 12px", border: "1px dashed var(--line)", borderRadius: "6px", background: "var(--bg)" }}>
+              <Paperclip size={14} />
+              <span>{photoFile ? `Photo: ${photoFile.name}` : "Attach Photo"}</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+                style={{ display: "none" }}
+              />
+            </label>
+            {photoFile && (
+              <button type="button" onClick={() => setPhotoFile(null)} style={{ fontSize: "11px", color: "var(--error)", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
+                Remove
               </button>
+            )}
+
+            <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "var(--muted)", cursor: "pointer", padding: "6px 12px", border: "1px dashed var(--line)", borderRadius: "6px", background: "var(--bg)" }}>
+              <Cloud size={14} />
+              <span>{voiceFile ? `Audio: ${voiceFile.name}` : "Attach Audio / Voice"}</span>
+              <input
+                type="file"
+                accept="audio/*"
+                onChange={(e) => setVoiceFile(e.target.files?.[0] || null)}
+                style={{ display: "none" }}
+              />
+            </label>
+            {voiceFile && (
+              <button type="button" onClick={() => setVoiceFile(null)} style={{ fontSize: "11px", color: "var(--error)", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
+                Remove
+              </button>
+            )}
+          </div>
+
+          <div className="row" style={{ justifyContent: "space-between", marginTop: "15px" }}>
+            <div style={{ display: "flex", gap: "var(--sp-2)" }}>
               <button type="button" className="btn-ghost" style={{ color: "var(--muted)" }} title="Weather">
                 <Cloud size={16} />
               </button>
@@ -107,13 +195,13 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
                 <Star size={16} />
               </button>
             </div>
-            <button className="btn-primary" type="submit">
+            <button className="btn-primary" type="submit" disabled={isUploading || !workDone.trim()}>
               <Send size={14} />
-              Post Update
+              {isUploading ? "Uploading & Posting..." : "Post Update"}
             </button>
           </div>
           <small className="muted">
-            Camera, geolocation and voice-note fields are supported by the API model and mobile clients.
+            Camera, geolocation and voice-note fields are fully supported and uploaded to Supabase Storage.
           </small>
         </form>
 

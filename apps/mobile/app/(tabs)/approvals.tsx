@@ -1,16 +1,47 @@
 import { useQuery } from "@tanstack/react-query";
-import { Text, View, ScrollView, Pressable, TextInput, Image } from "react-native";
+import { Text, View, ScrollView, Pressable, TextInput, Image, Modal } from "react-native";
 import { Screen, Title, Card, Button } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useAudioPlayer } from "expo-audio";
+import { useRouter } from "expo-router";
+export function VoiceNotePlayer({ url, color = "#EAAC1F" }: { url: string; color?: string }) {
+  const player = useAudioPlayer(url);
+  const isPlaying = player.playing;
+
+  const togglePlay = () => {
+    if (isPlaying) {
+      player.pause();
+    } else {
+      player.play();
+    }
+  };
+
+  return (
+    <Pressable
+      onPress={togglePlay}
+      className="flex-row items-center bg-slate-100 px-3 py-1.5 rounded-lg mt-2 self-start border border-slate-200/50"
+      style={{ gap: 6 }}
+    >
+      <Ionicons name={isPlaying ? "pause" : "play"} size={12} color={color} />
+      <Text className="text-[11px] font-bold text-slate-700">
+        {isPlaying ? "Pause Voice" : "Play Voice"}
+      </Text>
+    </Pressable>
+  );
+}
 
 export default function Approvals() {
   const { role, userId } = useAuthStore();
+  const router = useRouter();
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
   const [selectedPaymentStage, setSelectedPaymentStage] = useState<any>(null);
   const [paymentRefText, setPaymentRefText] = useState("");
+  const [returningStageId, setReturningStageId] = useState<string | null>(null);
+  const [returnComment, setReturnComment] = useState("");
+  const [activeImageUrl, setActiveImageUrl] = useState<string | null>(null);
   const [checklist, setChecklist] = useState({
     prep: false,
     coating: false,
@@ -23,10 +54,7 @@ export default function Approvals() {
     queryFn: () => api<any>("/api/data"),
   });
 
-  const act = async (
-    stageId: string,
-    action: "APPROVE" | "RETURN"
-  ) => {
+  const act = async (stageId: string, action: "APPROVE" | "RETURN", comment?: string) => {
     await api("/api/stages", {
       method: "PATCH",
       body: JSON.stringify({
@@ -34,6 +62,7 @@ export default function Approvals() {
         action,
         role,
         actorId: userId || "mobile",
+        note: comment,
       }),
     });
     refetch();
@@ -114,23 +143,19 @@ export default function Approvals() {
                 {su.attachments && su.attachments.length > 0 && (
                   <View className="flex-row gap-2 mt-2 flex-wrap">
                     {su.attachments.map((url: string, idx: number) => (
-                      <Image
-                        key={idx}
-                        source={{ uri: url }}
-                        className="w-12 h-12 rounded bg-slate-100"
-                        resizeMode="cover"
-                      />
+                      <Pressable key={idx} onPress={() => setActiveImageUrl(url)} className="active:opacity-80">
+                        <Image
+                          source={{ uri: url }}
+                          className="w-12 h-12 rounded bg-slate-100"
+                          resizeMode="cover"
+                        />
+                      </Pressable>
                     ))}
                   </View>
                 )}
 
                 {su.voiceNote && (
-                  <View className="flex-row items-center mt-1.5">
-                    <Ionicons name="volume-high" size={12} color="#EAAC1F" />
-                    <Text className="text-[9px] font-bold text-brandAmber ml-1">
-                      Voice note attached
-                    </Text>
-                  </View>
+                  <VoiceNotePlayer url={su.voiceNote} color="#EAAC1F" />
                 )}
               </View>
             ))}
@@ -151,28 +176,66 @@ export default function Approvals() {
                 {su.attachments && su.attachments.length > 0 && (
                   <View className="flex-row gap-2 mt-2 flex-wrap">
                     {su.attachments.map((url: string, idx: number) => (
-                      <Image
-                        key={idx}
-                        source={{ uri: url }}
-                        className="w-12 h-12 rounded bg-slate-100"
-                        resizeMode="cover"
-                      />
+                      <Pressable key={idx} onPress={() => setActiveImageUrl(url)} className="active:opacity-80">
+                        <Image
+                          source={{ uri: url }}
+                          className="w-12 h-12 rounded bg-slate-100"
+                          resizeMode="cover"
+                        />
+                      </Pressable>
                     ))}
                   </View>
                 )}
 
                 {su.voiceNote && (
-                  <View className="flex-row items-center mt-1.5">
-                    <Ionicons name="volume-high" size={12} color="#D9383A" />
-                    <Text className="text-[9px] font-bold text-alertRed ml-1">
-                      Rework Voice note attached
-                    </Text>
-                  </View>
+                  <VoiceNotePlayer url={su.voiceNote} color="#D9383A" />
                 )}
               </View>
             ))}
           </View>
         )}
+      </View>
+    );
+  };
+  const renderDecisionTimeline = (stage: any) => {
+    const decisions = stage.decisions || [];
+    if (decisions.length === 0) return null;
+
+    return (
+      <View className="mb-4 bg-slate-50/60 border border-slate-200/40 rounded-xl p-3">
+        <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+          Approval Timeline
+        </Text>
+        {decisions.map((d: any) => {
+          const isReturned = d.decision === "RETURNED";
+          return (
+            <View key={d.id} className="flex-row items-start mb-2" style={{ gap: 8 }}>
+              <View
+                className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${
+                  isReturned ? "bg-alertRed" : "bg-successGreen"
+                }`}
+              />
+              <View className="flex-1">
+                <View className="flex-row items-center flex-wrap" style={{ gap: 4 }}>
+                  <Text className="text-xs font-bold text-slate-700">{d.role}</Text>
+                  <Text className="text-[9px] font-semibold text-slate-400 uppercase">
+                    {d.decision.replace("_", " ")}
+                  </Text>
+                  <Text className="text-[9px] text-slate-400">
+                    · {new Date(d.createdAt).toLocaleDateString()} {new Date(d.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </View>
+                {d.note ? (
+                  <View className="mt-1 bg-white border border-slate-100 p-2 rounded-lg">
+                    <Text className="text-xs text-slate-600 font-medium italic">
+                      "{d.note}"
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          );
+        })}
       </View>
     );
   };
@@ -263,7 +326,20 @@ export default function Approvals() {
                           Due: {new Date(stage.dueAt).toLocaleDateString()}
                         </Text>
                       </View>
+                      {renderDecisionTimeline(stage)}
                       {renderEvidenceBlock(stage)}
+                      <View className="mb-2">
+                        <Button
+                          label="Log new evidence before resubmitting"
+                          variant="secondary"
+                          onPress={() => {
+                            router.push({
+                              pathname: "/(tabs)/site-updates",
+                              params: { activityId: stage.activityId }
+                            });
+                          }}
+                        />
+                      </View>
                       <Button
                         label="Re-submit Stage"
                         onPress={() => {
@@ -292,6 +368,7 @@ export default function Approvals() {
                         Proof Reference: <Text className="text-brandCharcoal font-extrabold">{stage.evidence?.[0] || "Confirmed by Client"}</Text>
                       </Text>
                     </View>
+                    {renderDecisionTimeline(stage)}
                     <Button
                       label="Confirm Receipt & Close Stage"
                       onPress={() => act(stage.id, "APPROVE")}
@@ -325,6 +402,7 @@ export default function Approvals() {
                           </Text>
                         </View>
                       </View>
+                      {renderDecisionTimeline(stage)}
                       {renderEvidenceBlock(stage)}
                     </Card>
                   );
@@ -481,6 +559,7 @@ export default function Approvals() {
                       </Text>
                     </View>
                   </View>
+                  {renderDecisionTimeline(stage)}
                   {renderEvidenceBlock(stage)}
                   <Button
                     label="Release Payment"
@@ -596,6 +675,7 @@ export default function Approvals() {
                     </Text>
                   </View>
                 </View>
+                {renderDecisionTimeline(stage)}
                 {renderEvidenceBlock(stage)}
                 <View className="flex-row space-x-3 gap-3">
                   <View className="flex-1">
@@ -609,7 +689,7 @@ export default function Approvals() {
                     <Button
                       label="Return"
                       variant="danger"
-                      onPress={() => act(stage.id, "RETURN")}
+                      onPress={() => setReturningStageId(stage.id)}
                     />
                   </View>
                 </View>
@@ -618,6 +698,90 @@ export default function Approvals() {
           })
         )}
       </Screen>
+
+      {/* Return for Rework Comment Modal */}
+      <Modal
+        visible={returningStageId !== null}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {
+          setReturningStageId(null);
+          setReturnComment("");
+        }}
+      >
+        <View className="flex-1 justify-end bg-brandCharcoal/50">
+          <View className="bg-white rounded-t-3xl p-6 min-h-[300px]">
+            <Text className="text-brandCharcoal font-extrabold text-lg mb-2">
+              Reason for Return
+            </Text>
+            <Text className="text-slate-500 text-xs font-semibold mb-4 leading-relaxed">
+              Please specify the rework required. This comment will be visible to the Contractor.
+            </Text>
+
+            <TextInput
+              value={returnComment}
+              onChangeText={setReturnComment}
+              placeholder="Describe what needs to be fixed..."
+              placeholderTextColor="#94A3B8"
+              multiline
+              className="border border-slate-200 rounded-xl p-4 mb-6 min-h-[100px] text-brandCharcoal text-sm font-medium focus:border-brandAmber"
+              style={{ textAlignVertical: "top" }}
+            />
+
+            <View className="flex-row space-x-3 gap-3">
+              <View className="flex-1">
+                <Button
+                  label="Submit Return"
+                  variant="danger"
+                  disabled={!returnComment.trim()}
+                  onPress={async () => {
+                    if (returningStageId) {
+                      await act(returningStageId, "RETURN", returnComment);
+                    }
+                    setReturningStageId(null);
+                    setReturnComment("");
+                  }}
+                />
+              </View>
+              <View className="flex-1">
+                <Button
+                  label="Cancel"
+                  variant="secondary"
+                  onPress={() => {
+                    setReturningStageId(null);
+                    setReturnComment("");
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Full-Screen Image Viewer Modal */}
+      <Modal
+        visible={activeImageUrl !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setActiveImageUrl(null)}
+      >
+        <View className="flex-1 bg-black justify-center items-center relative">
+          {activeImageUrl && (
+            <Image
+              source={{ uri: activeImageUrl }}
+              className="w-full h-full"
+              resizeMode="contain"
+            />
+          )}
+          <Pressable
+            onPress={() => setActiveImageUrl(null)}
+            className="absolute top-12 right-6 w-10 h-10 bg-brandCharcoal/80 rounded-full items-center justify-center border border-slate-700/50"
+            style={{ zIndex: 100 }}
+          >
+            <Ionicons name="close" size={24} color="#FFFFFF" />
+          </Pressable>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }

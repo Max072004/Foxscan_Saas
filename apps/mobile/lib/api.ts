@@ -8,7 +8,7 @@ import { useAuthStore } from "@/stores/auth";
 //    `expo prebuild` time. Stale in the bare workflow; only useful as a
 //    last-resort fallback when no env var is present.
 // 3. Hard-coded Android emulator address (10.0.2.2 routes to host loopback).
-const baseUrl =
+export const baseUrl =
   process.env.EXPO_PUBLIC_API_URL ||
   (Constants.expoConfig?.extra?.apiUrl as string | undefined) ||
   "http://10.0.2.2:3000";

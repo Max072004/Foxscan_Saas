@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -15,9 +15,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Screen, Title, Card, Button } from "@/components/ui";
 import { CameraCapture } from "@/components/camera-capture";
 import { VoiceNote } from "@/components/voice-note";
-import { api } from "@/lib/api";
+import { api, baseUrl } from "@/lib/api";
 import { enqueue, syncQueue } from "@/lib/offline";
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
 
 export default function SiteUpdates() {
   const { data } = useQuery({
@@ -30,6 +31,15 @@ export default function SiteUpdates() {
   const [capture, setCapture] = useState<any>();
   const [voice, setVoice] = useState<string>();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const { activityId } = useLocalSearchParams<{ activityId?: string }>();
+
+  useEffect(() => {
+    if (activityId) {
+      setSelectedActivityId(activityId);
+    }
+  }, [activityId]);
 
   const project = data?.projects?.[0];
   const projectActivities = data?.activities?.filter((a: any) => a.projectId === project?.id)
@@ -37,31 +47,88 @@ export default function SiteUpdates() {
 
   const submit = async () => {
     Keyboard.dismiss();
-    const body = {
-      projectId: project?.id,
-      authorId: "mobile",
-      workDone,
-      activityId: selectedActivityId || undefined,
-      weather: "Clear",
-      manpower: 0,
-      equipment: "",
-      important: false,
-      attachments: capture ? [capture.uri] : [],
-      voiceNote: voice,
-      latitude: capture?.latitude,
-      longitude: capture?.longitude,
-    };
+    setIsUploading(true);
     try {
-      await api("/api/site-updates", { method: "POST", body: JSON.stringify(body) });
-    } catch {
-      await enqueue({ method: "POST", path: "/api/site-updates", body });
+      let attachmentUrls: string[] = [];
+      let voiceUrl: string | undefined = undefined;
+
+      if (capture && capture.uri) {
+        const formData = new FormData();
+        // @ts-ignore
+        formData.append("file", {
+          uri: capture.uri,
+          type: "image/jpeg",
+          name: "photo.jpg"
+        });
+        formData.append("projectId", project?.id || "");
+        formData.append("activityId", selectedActivityId || "general");
+        formData.append("filename", "photo.jpg");
+
+        const response = await fetch(`${baseUrl}/api/upload`, {
+          method: "POST",
+          body: formData,
+        });
+        if (!response.ok) throw new Error("Photo upload failed");
+        const resJson = await response.json();
+        if (resJson.url) {
+          attachmentUrls.push(resJson.url);
+        }
+      }
+
+      if (voice) {
+        const formData = new FormData();
+        // @ts-ignore
+        formData.append("file", {
+          uri: voice,
+          type: "audio/m4a",
+          name: "voice.m4a"
+        });
+        formData.append("projectId", project?.id || "");
+        formData.append("activityId", selectedActivityId || "general");
+        formData.append("filename", "voice.m4a");
+
+        const response = await fetch(`${baseUrl}/api/upload`, {
+          method: "POST",
+          body: formData,
+        });
+        if (!response.ok) throw new Error("Voice note upload failed");
+        const resJson = await response.json();
+        if (resJson.url) {
+          voiceUrl = resJson.url;
+        }
+      }
+
+      const body = {
+        projectId: project?.id,
+        authorId: "mobile",
+        workDone,
+        activityId: selectedActivityId || undefined,
+        weather: "Clear",
+        manpower: 0,
+        equipment: "",
+        important: false,
+        attachments: attachmentUrls,
+        voiceNote: voiceUrl,
+        latitude: capture?.latitude,
+        longitude: capture?.longitude,
+      };
+
+      try {
+        await api("/api/site-updates", { method: "POST", body: JSON.stringify(body) });
+      } catch {
+        await enqueue({ method: "POST", path: "/api/site-updates", body });
+      }
+      await syncQueue();
+      setWorkDone("");
+      setSelectedActivityId("");
+      setCapture(null);
+      setVoice(undefined);
+      setShowSuccess(true);
+    } catch (err: any) {
+      alert("Error uploading media: " + err.message);
+    } finally {
+      setIsUploading(false);
     }
-    await syncQueue();
-    setWorkDone("");
-    setSelectedActivityId("");
-    setCapture(null);
-    setVoice(undefined);
-    setShowSuccess(true);
   };
 
   return (
@@ -203,9 +270,9 @@ export default function SiteUpdates() {
                 </View>
 
                 <Button
-                  label="Submit Site Update"
+                  label={isUploading ? "Uploading & Saving..." : "Submit Site Update"}
                   onPress={submit}
-                  disabled={!workDone.trim()}
+                  disabled={!workDone.trim() || isUploading}
                 />
               </Card>
             </Screen>

@@ -17,7 +17,7 @@ export function createStage(activity: Activity, project: Project, actorId: strin
 export function decide(stage: Stage, project: Project, actorId: string, role: Role, action: "APPROVE" | "RETURN", note?: string, tatHours = 48): Stage {
   if (expectedRole[stage.state] !== role) throw new Error(`Only the ${expectedRole[stage.state]} role can act at this step.`);
   const now = new Date().toISOString();
-  if (action === "RETURN") { stage.state = "REWORK"; stage.comments.push({ id: id(), actorId, text: note || "Returned for rework", createdAt: now, kind: "RETURN_REASON" }); stage.decisions.push({ id: id(), actorId, role, decision: "RETURNED", createdAt: now, note }); return stage; }
+  if (action === "RETURN") { stage.state = "REWORK"; stage.comments.push({ id: id(), actorId, text: note || "Returned for rework", createdAt: now, kind: "RETURN_REASON" }); stage.decisions.push({ id: id(), actorId, role, decision: "RETURNED", createdAt: now, note, comment: note }); return stage; }
   
   let nextState: WorkflowState = "PAID";
   if (stage.state === "MANUFACTURER") {
@@ -30,7 +30,7 @@ export function decide(stage: Stage, project: Project, actorId: string, role: Ro
     nextState = "PAID";
   }
   
-  stage.decisions.push({ id: id(), actorId, role, decision: stage.state === "CLIENT" ? "PAYMENT_RELEASED" : "APPROVED", createdAt: now, note });
+  stage.decisions.push({ id: id(), actorId, role, decision: stage.state === "CLIENT" ? "PAYMENT_RELEASED" : "APPROVED", createdAt: now, note, comment: note });
   stage.state = nextState;
   if (nextState !== "PAID") {
     stage.dueAt = addHours(new Date(), tatHours).toISOString();

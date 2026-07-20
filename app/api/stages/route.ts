@@ -122,6 +122,22 @@ export async function PATCH(req: NextRequest) {
   const activity = data.activities.find(a => a.id === stage.activityId)!;
   const project = data.projects.find(p => p.id === activity.projectId)!;
 
+  const expectedRoles: Record<string, string> = {
+    MANUFACTURER: "MANUFACTURER",
+    CONSULTANT: "CONSULTANT",
+    CLIENT: "CLIENT",
+    AWAITING_RECEIPT: "CONTRACTOR",
+    REWORK: "CONTRACTOR"
+  };
+
+  const requiredRole = expectedRoles[stage.state];
+  if (requiredRole && body.role !== requiredRole) {
+    return NextResponse.json(
+      { error: `Forbidden: Only the ${requiredRole} role can act at this stage.` },
+      { status: 403 }
+    );
+  }
+
   const updated = decide(stage, project, body.actorId, body.role, body.action, body.note, body.tatHours || 48);
   if (body.evidence) {
     stage.evidence = body.evidence;
