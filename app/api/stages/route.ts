@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
     body.tatHours || 24
   );
   activity.status = "SUBMITTED";
+  activity.progress = 100;
   data.stages.push(stage);
 
   await audit(data, {
@@ -104,6 +105,8 @@ export async function PATCH(req: NextRequest) {
         : updated.state === "REWORK"
           ? "IN_PROGRESS"
           : "SUBMITTED";
+
+  activity.progress = (activity.status === "APPROVED" || activity.status === "PAID" || activity.status === "SUBMITTED") ? 100 : 0;
 
   await audit(data, {
     tenantId: project.tenantId,
