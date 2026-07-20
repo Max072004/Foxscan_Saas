@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-import { calculateProjectSlippage } from "../../../lib/scheduling";
+import { calculateProjectSlippage } from "@/lib/scheduling";
 
 export default function Dashboard() {
   const router = useRouter();

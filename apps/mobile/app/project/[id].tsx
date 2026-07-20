@@ -8,7 +8,7 @@ import type { Project } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@/stores/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { calculateProjectSlippage } from "../../../lib/scheduling";
+import { calculateProjectSlippage } from "@/lib/scheduling";
 
 export default function ProjectDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
