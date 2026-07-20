@@ -11,9 +11,32 @@ interface SetupProps {
 
 export default function Setup({ project, token, reload }: SetupProps) {
   const [name, setName] = useState("");
+  const [paymentValue, setPaymentValue] = useState("");
+  const [gstPct, setGstPct] = useState("18");
+  const [retentionPct, setRetentionPct] = useState("5");
+  const [validationError, setValidationError] = useState("");
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError("");
+
+    const pv = Number(paymentValue);
+    const gst = Number(gstPct);
+    const ret = Number(retentionPct);
+
+    if (!pv || pv <= 0) {
+      setValidationError("Payment value must be greater than 0.");
+      return;
+    }
+    if (isNaN(gst) || gst < 0 || gst > 100) {
+      setValidationError("GST % must be between 0 and 100.");
+      return;
+    }
+    if (isNaN(ret) || ret < 0 || ret > 100) {
+      setValidationError("Retention % must be between 0 and 100.");
+      return;
+    }
+
     const r = await fetch("/api/activities", {
       method: "POST",
       headers: {
@@ -27,11 +50,16 @@ export default function Setup({ project, token, reload }: SetupProps) {
         plannedStart: project.startDate,
         plannedEnd: project.endDate,
         paymentMode: "FIXED",
-        paymentValue: 0,
+        paymentValue: pv,
+        gstPct: gst,
+        retentionPct: ret,
       }),
     });
     if (r.ok) {
       setName("");
+      setPaymentValue("");
+      setGstPct("18");
+      setRetentionPct("5");
       reload();
     }
   };
@@ -118,6 +146,55 @@ export default function Setup({ project, token, reload }: SetupProps) {
               required
             />
           </div>
+          <div>
+            <label className="muted" style={{ display: "block", marginBottom: "var(--sp-1)" }}>
+              Payment Value (₹)
+            </label>
+            <input
+              type="number"
+              value={paymentValue}
+              onChange={(e) => setPaymentValue(e.target.value)}
+              placeholder="e.g. 150000"
+              min="1"
+              step="0.01"
+              required
+            />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--sp-3)" }}>
+            <div>
+              <label className="muted" style={{ display: "block", marginBottom: "var(--sp-1)" }}>
+                GST %
+              </label>
+              <input
+                type="number"
+                value={gstPct}
+                onChange={(e) => setGstPct(e.target.value)}
+                placeholder="18"
+                min="0"
+                max="100"
+                step="0.01"
+              />
+            </div>
+            <div>
+              <label className="muted" style={{ display: "block", marginBottom: "var(--sp-1)" }}>
+                Retention %
+              </label>
+              <input
+                type="number"
+                value={retentionPct}
+                onChange={(e) => setRetentionPct(e.target.value)}
+                placeholder="5"
+                min="0"
+                max="100"
+                step="0.01"
+              />
+            </div>
+          </div>
+          {validationError && (
+            <div style={{ color: "var(--danger)", fontSize: "var(--text-sm)", marginTop: "var(--sp-1)" }}>
+              {validationError}
+            </div>
+          )}
           <button className="btn-primary" disabled={!token} type="submit">
             <Plus size={14} />
             Add Activity
@@ -128,3 +205,4 @@ export default function Setup({ project, token, reload }: SetupProps) {
     </div>
   );
 }
+
