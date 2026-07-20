@@ -53,20 +53,14 @@ export default function SiteUpdates() {
       let voiceUrl: string | undefined = undefined;
 
       if (capture && capture.uri) {
-        const filePart = {
-          uri: capture.uri,
-          type: "image/jpeg",
-          name: "photo.jpg",
-        };
-        console.log("Photo file part being appended:", filePart);
+        const fileResponse = await fetch(capture.uri);
+        const blob = await fileResponse.blob();
 
         const formData = new FormData();
-        formData.append("file", filePart as any);
+        formData.append("file", blob, "photo.jpg");
         formData.append("projectId", project?.id || "");
         formData.append("activityId", selectedActivityId || "general");
         formData.append("filename", "photo.jpg");
-
-        console.log("FormData photo constructed. Sending request to:", `${baseUrl}/api/upload`);
 
         const response = await fetch(`${baseUrl}/api/upload`, {
           method: "POST",
@@ -80,20 +74,14 @@ export default function SiteUpdates() {
       }
 
       if (voice) {
-        const filePart = {
-          uri: voice,
-          type: "audio/m4a",
-          name: "voice.m4a",
-        };
-        console.log("Voice file part being appended:", filePart);
+        const fileResponse = await fetch(voice);
+        const blob = await fileResponse.blob();
 
         const formData = new FormData();
-        formData.append("file", filePart as any);
+        formData.append("file", blob, "voice.m4a");
         formData.append("projectId", project?.id || "");
         formData.append("activityId", selectedActivityId || "general");
         formData.append("filename", "voice.m4a");
-
-        console.log("FormData voice constructed. Sending request to:", `${baseUrl}/api/upload`);
 
         const response = await fetch(`${baseUrl}/api/upload`, {
           method: "POST",
@@ -133,8 +121,6 @@ export default function SiteUpdates() {
       setVoice(undefined);
       setShowSuccess(true);
     } catch (err: any) {
-      console.log("FULL UPLOAD ERROR OBJECT:", err);
-      console.error("UPLOAD ERROR DETAILS:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
       alert("Error uploading media: " + err.message);
     } finally {
       setIsUploading(false);
