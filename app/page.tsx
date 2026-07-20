@@ -102,7 +102,7 @@ export default function Home() {
 
         <div className="app-content">
           {tab === "Overview" && (
-            <Dashboard data={data} activities={activities} stages={stages} />
+            <Dashboard data={data} activities={activities} stages={stages} role={role} />
           )}
           {tab === "Workflow" && (
             <Workflow
