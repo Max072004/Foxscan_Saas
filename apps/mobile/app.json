@@ -3,6 +3,7 @@
     "name": "FOXSCAN",
     "slug": "foxscan",
     "scheme": "foxscan",
+    "icon": "./assets/icon.png",
     "platforms": [
       "ios",
       "android"
@@ -40,6 +41,7 @@
       "expo-asset"
     ],
     "ios": {
+      "icon": "./assets/icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.foxscan.mobile",
       "infoPlist": {
@@ -56,6 +58,10 @@
     },
     "android": {
       "package": "com.foxscan.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#EAAC1F"
+      },
       "permissions": [
         "CAMERA",
         "ACCESS_FINE_LOCATION",
