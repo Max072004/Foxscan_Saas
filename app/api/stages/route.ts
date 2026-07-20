@@ -92,6 +92,9 @@ export async function PATCH(req: NextRequest) {
   const project = data.projects.find(p => p.id === activity.projectId)!;
 
   const updated = decide(stage, project, body.actorId, body.role, body.action, body.note);
+  if (body.evidence) {
+    stage.evidence = body.evidence;
+  }
 
   activity.status =
     updated.state === "PAID"
@@ -148,6 +151,17 @@ export async function PATCH(req: NextRequest) {
         `The stage for "${activity.name}" has been approved by the ${approvedBy} and is awaiting your payment release.`
       ).catch(() => undefined);
     }
+  } else if (updated.state === "AWAITING_RECEIPT") {
+    const contractor = findRecipientByRole(data, activity.id, "CONTRACTOR");
+    if (contractor) {
+      notify(
+        data,
+        contractor,
+        "PAYMENT_PROOF_UPLOADED",
+        `Payment proof uploaded for ${activity.name}`,
+        `The Client has uploaded proof of payment for "${activity.name}". Please review and confirm receipt of payment to close the stage.`
+      ).catch(() => undefined);
+    }
   } else if (updated.state === "PAID") {
     const contractor = findRecipientByRole(data, activity.id, "CONTRACTOR");
     if (contractor) {
@@ -155,8 +169,8 @@ export async function PATCH(req: NextRequest) {
         data,
         contractor,
         "PAYMENT_RELEASED",
-        `Payment released for ${activity.name}`,
-        `Payment has been released for "${activity.name}". Amount due: ₹${stage.amountDue.toLocaleString("en-IN")}.`
+        `Payment cleared for ${activity.name}`,
+        `Receipt of payment has been confirmed for "${activity.name}". The stage is now paid and closed.`
       ).catch(() => undefined);
     }
   }

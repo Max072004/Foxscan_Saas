@@ -3,7 +3,7 @@ export type Role = (typeof roles)[number];
 export const activityStatuses = ["NOT_STARTED", "IN_PROGRESS", "SUBMITTED", "APPROVED", "PAID", "ON_HOLD"] as const;
 export type ActivityStatus = (typeof activityStatuses)[number];
 export type ProjectStatus = "DRAFT" | "ACTIVE" | "ON_HOLD" | "COMPLETED" | "CANCELLED";
-export type WorkflowState = "CONTRACTOR" | "MANUFACTURER" | "CONSULTANT" | "CLIENT" | "PAID" | "REWORK";
+export type WorkflowState = "CONTRACTOR" | "MANUFACTURER" | "CONSULTANT" | "CLIENT" | "AWAITING_RECEIPT" | "PAID" | "REWORK";
 
 export interface Tenant { id: string; name: string; type: "SOCIETY" | "CONSULTANT" | "MANUFACTURER" | "CONTRACTOR"; gstin?: string }
 export interface User { id: string; tenantId: string; name: string; email: string; phone?: string; role: Role; active: boolean }

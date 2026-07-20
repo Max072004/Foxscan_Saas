@@ -44,6 +44,13 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
   };
 
   const act = async (s: any, action: string) => {
+    let evidencePayload: string[] | undefined = undefined;
+    if (role === "CLIENT" && action === "APPROVE") {
+      const ref = prompt("Enter Cheque Number or Transaction Reference (Proof of Payment):");
+      if (!ref) return;
+      evidencePayload = [ref];
+    }
+
     await fetch("/api/stages", {
       method: "PATCH",
       headers: { "content-type": "application/json" },
@@ -52,13 +59,15 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
         actorId,
         role,
         action,
-        note: action === "RETURN" ? "Please rectify surface finish." : "Approved in Foxscan",
+        evidence: evidencePayload,
+        note: action === "RETURN" ? "Please rectify surface finish." : `Approved with proof reference: ${evidencePayload?.[0]}`,
       }),
     });
     reload();
   };
 
   const reworkStages = stages.filter((s) => s.state === "REWORK");
+  const receiptStages = stages.filter((s) => s.state === "AWAITING_RECEIPT");
 
   return (
     <div className="animate-fade">
@@ -200,6 +209,38 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
                         style={{ fontSize: "var(--text-xs)" }}
                       >
                         Re-submit stage
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* Confirm Payment Receipt (Contractor only) */}
+          {receiptStages.length > 0 && (
+            <>
+              <h3 style={{ marginTop: "var(--sp-5)" }}>Confirm Payment Receipt</h3>
+              <div className="list">
+                {receiptStages.map((s) => {
+                  const a = activities.find((x: any) => x.id === s.activityId);
+                  return (
+                    <div className="item" key={s.id}>
+                      <div className="row" style={{ marginBottom: "var(--sp-2)" }}>
+                        <b style={{ fontSize: "var(--text-sm)" }}>{a?.name}</b>
+                        <span className="badge CLIENT" style={{ backgroundColor: "rgba(27,135,85,0.1)", color: "var(--success)" }}>
+                          Payment Proof Uploaded
+                        </span>
+                      </div>
+                      <div style={{ fontSize: "var(--text-xs)", color: "var(--muted)", marginBottom: "var(--sp-3)" }}>
+                        Reference: <strong>{s.evidence?.[0] || "Payment Confirmed by Client"}</strong>
+                      </div>
+                      <button
+                        className="btn-primary"
+                        onClick={() => act(s, "APPROVE")}
+                        style={{ fontSize: "var(--text-xs)" }}
+                      >
+                        Confirm Receipt & Close Stage
                       </button>
                     </div>
                   );

@@ -9,6 +9,8 @@ import { useState } from "react";
 export default function Approvals() {
   const { role, userId } = useAuthStore();
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [selectedPaymentStage, setSelectedPaymentStage] = useState<any>(null);
+  const [paymentRefText, setPaymentRefText] = useState("");
   const [checklist, setChecklist] = useState({
     prep: false,
     coating: false,
@@ -86,6 +88,7 @@ export default function Approvals() {
   // Contractor: see activities they can raise + stages returned for rework
   if (role === "CONTRACTOR") {
     const reworkStages = stages.filter((s: any) => s.state === "REWORK");
+    const receiptStages = stages.filter((s: any) => s.state === "AWAITING_RECEIPT");
     const submittedStages = stages.filter(
       (s: any) =>
         s.state !== "PAID" &&
@@ -179,6 +182,30 @@ export default function Approvals() {
                     </Card>
                   );
                 })}
+              </View>
+            )}
+
+            {receiptStages.length > 0 && (
+              <View className="mb-6">
+                <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
+                  Confirm Payment Receipt
+                </Text>
+                {receiptStages.map((stage: any) => (
+                  <Card key={stage.id}>
+                    <View className="mb-3">
+                      <Text className="font-extrabold text-brandCharcoal text-base">
+                        {getActivityName(stage.activityId)}
+                      </Text>
+                      <Text className="text-slate-500 text-[10px] font-bold mt-1.5 leading-relaxed">
+                        Proof Reference: <Text className="text-brandCharcoal font-extrabold">{stage.evidence?.[0] || "Confirmed by Client"}</Text>
+                      </Text>
+                    </View>
+                    <Button
+                      label="Confirm Receipt & Close Stage"
+                      onPress={() => act(stage.id, "APPROVE")}
+                    />
+                  </Card>
+                ))}
               </View>
             )}
 
@@ -324,51 +351,112 @@ export default function Approvals() {
     );
 
     return (
-      <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-        <Screen>
-          <Title>Approvals</Title>
-          <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
-            Awaiting Payment Release
-          </Text>
-          {awaitingPayment.length === 0 ? (
-            <Card>
-              <View className="items-center py-6">
-                <Ionicons name="checkmark-circle-outline" size={40} color="#1B8755" />
-                <Text className="text-slate-500 font-bold text-center mt-3">
-                  No stages awaiting payment
-                </Text>
-              </View>
-            </Card>
-          ) : (
-            awaitingPayment.map((stage: any) => (
-              <Card key={stage.id}>
-                <View className="flex-row items-center justify-between mb-4">
-                  <View className="flex-1 pr-2">
-                    <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
-                      {getActivityName(stage.activityId)}
-                    </Text>
-                    <Text className="font-extrabold text-brandCharcoal text-xs">
-                      Due: {new Date(stage.dueAt).toLocaleDateString()}
-                    </Text>
-                  </View>
-                  <View>
-                    <Text className="text-xs text-slate-400 font-bold text-right mb-0.5">
-                      AMOUNT DUE
-                    </Text>
-                    <Text className="font-extrabold text-2xl text-successGreen text-right">
-                      ₹{stage.amountDue?.toLocaleString("en-IN") ?? "0"}
-                    </Text>
-                  </View>
+      <View className="flex-1 relative bg-offWhite">
+        <ScrollView className="flex-grow" contentContainerStyle={{ flexGrow: 1 }}>
+          <Screen>
+            <Title>Approvals</Title>
+            <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
+              Awaiting Payment Release
+            </Text>
+            {awaitingPayment.length === 0 ? (
+              <Card>
+                <View className="items-center py-6">
+                  <Ionicons name="checkmark-circle-outline" size={40} color="#1B8755" />
+                  <Text className="text-slate-500 font-bold text-center mt-3">
+                    No stages awaiting payment
+                  </Text>
                 </View>
-                <Button
-                  label="Release Payment"
-                  onPress={() => act(stage.id, "APPROVE")}
-                />
               </Card>
-            ))
-          )}
-        </Screen>
-      </ScrollView>
+            ) : (
+              awaitingPayment.map((stage: any) => (
+                <Card key={stage.id}>
+                  <View className="flex-row items-center justify-between mb-4">
+                    <View className="flex-1 pr-2">
+                      <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                        {getActivityName(stage.activityId)}
+                      </Text>
+                      <Text className="font-extrabold text-brandCharcoal text-xs">
+                        Due: {new Date(stage.dueAt).toLocaleDateString()}
+                      </Text>
+                    </View>
+                    <View className="ml-2">
+                      <Text className="text-xs text-slate-400 font-bold text-right mb-0.5">
+                        AMOUNT DUE
+                      </Text>
+                      <Text className="font-extrabold text-xl text-successGreen text-right">
+                        ₹{stage.amountDue?.toLocaleString("en-IN") ?? "0"}
+                      </Text>
+                    </View>
+                  </View>
+                  <Button
+                    label="Release Payment"
+                    onPress={() => {
+                      setSelectedPaymentStage(stage);
+                      setPaymentRefText("");
+                    }}
+                  />
+                </Card>
+              ))
+            )}
+          </Screen>
+        </ScrollView>
+
+        {/* MOBILE CLIENT PAYMENT PROOF UPLOAD MODAL */}
+        {selectedPaymentStage && (
+          <View className="absolute inset-0 bg-brandCharcoal/70 z-50 justify-end" style={{ elevation: 15 }}>
+            <View className="bg-white rounded-t-3xl p-6 border-t border-slate-100 shadow-lg">
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="text-brandCharcoal font-extrabold text-base">
+                  Upload Payment Proof
+                </Text>
+                <Pressable
+                  onPress={() => setSelectedPaymentStage(null)}
+                  className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center"
+                >
+                  <Ionicons name="close" size={16} color="#64748B" />
+                </Pressable>
+              </View>
+              
+              <Text className="text-slate-400 text-xs font-semibold mb-4 leading-relaxed">
+                Confirm you have paid ₹{selectedPaymentStage.amountDue?.toLocaleString("en-IN")} externally and enter details (e.g. cheque number, transaction ID).
+              </Text>
+
+              <View className="mb-6">
+                <Text className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5">
+                  Cheque Number / Transfer Reference
+                </Text>
+                <TextInput
+                  value={paymentRefText}
+                  onChangeText={setPaymentRefText}
+                  placeholder="e.g. Cheque #482931 or IMPS reference ID"
+                  placeholderTextColor="#94A3B8"
+                  className="h-12 border border-slate-200 bg-white rounded-xl px-4 text-brandCharcoal text-xs font-semibold"
+                />
+              </View>
+
+              <Button
+                label="Submit Payment Proof"
+                onPress={async () => {
+                  await api("/api/stages", {
+                    method: "PATCH",
+                    body: JSON.stringify({
+                      stageId: selectedPaymentStage.id,
+                      action: "APPROVE",
+                      role: "CLIENT",
+                      actorId: userId || "mobile",
+                      evidence: [paymentRefText],
+                      note: `Approved with proof reference: ${paymentRefText}`,
+                    }),
+                  });
+                  refetch();
+                  setSelectedPaymentStage(null);
+                }}
+                disabled={!paymentRefText.trim()}
+              />
+            </View>
+          </View>
+        )}
+      </View>
     );
   }
 

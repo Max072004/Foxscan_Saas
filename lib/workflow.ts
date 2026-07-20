@@ -1,7 +1,7 @@
 import { addHours } from "date-fns";
 import type { Activity, Role, Stage, WorkflowState, Project } from "./domain";
 import { id } from "./store";
-const expectedRole: Record<WorkflowState, Role | null> = { CONTRACTOR: "CONTRACTOR", MANUFACTURER: "MANUFACTURER", CONSULTANT: "CONSULTANT", CLIENT: "CLIENT", PAID: null, REWORK: "CONTRACTOR" };
+const expectedRole: Record<WorkflowState, Role | null> = { CONTRACTOR: "CONTRACTOR", MANUFACTURER: "MANUFACTURER", CONSULTANT: "CONSULTANT", CLIENT: "CLIENT", AWAITING_RECEIPT: "CONTRACTOR", PAID: null, REWORK: "CONTRACTOR" };
 export function createStage(activity: Activity, project: Project, actorId: string, evidence: string[], checklist: Record<string, boolean>, tatHours = 24): Stage {
   let initialState: WorkflowState = "MANUFACTURER";
   if (!project.manufacturerId) {
@@ -25,6 +25,8 @@ export function decide(stage: Stage, project: Project, actorId: string, role: Ro
   } else if (stage.state === "CONSULTANT") {
     nextState = "CLIENT";
   } else if (stage.state === "CLIENT") {
+    nextState = "AWAITING_RECEIPT";
+  } else if (stage.state === "AWAITING_RECEIPT") {
     nextState = "PAID";
   }
   
