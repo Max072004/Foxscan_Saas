@@ -132,6 +132,76 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
                       ₹{s.amountDue.toLocaleString("en-IN")} due · {s.decisions.length} decisions
                     </div>
 
+                    {/* Site Update Evidence Section */}
+                    {(() => {
+                      const stageUpdates = data.siteUpdates.filter(su => su.stageId === s.id);
+                      if (stageUpdates.length === 0) return null;
+
+                      const returnedDecision = s.decisions.find((d: any) => d.decision === "RETURNED");
+                      const returnTime = returnedDecision ? new Date(returnedDecision.createdAt).getTime() : null;
+
+                      const originalUpdates = stageUpdates.filter(su => !returnTime || new Date(su.date).getTime() < returnTime);
+                      const reworkUpdates = stageUpdates.filter(su => returnTime && new Date(su.date).getTime() >= returnTime);
+
+                      return (
+                        <div style={{ padding: "10px", background: "var(--bg)", borderRadius: "6px", border: "1px solid var(--line-light)", marginBottom: "var(--sp-3)", fontSize: "var(--text-xs)" }}>
+                          <div style={{ fontWeight: 700, color: "var(--muted)", marginBottom: "6px", textTransform: "uppercase", fontSize: "9px", letterSpacing: "0.5px" }}>
+                            Attached Site Evidence
+                          </div>
+
+                          {originalUpdates.length > 0 && (
+                            <div style={{ marginBottom: "8px" }}>
+                              <div style={{ fontWeight: 700, color: "var(--muted)", fontSize: "9px", marginBottom: "4px", textTransform: "uppercase" }}>Original Submission:</div>
+                              {originalUpdates.map(su => (
+                                <div key={su.id} style={{ padding: "6px 8px", background: "white", border: "1px solid var(--line-light)", borderRadius: "4px", marginBottom: "4px" }}>
+                                  <p style={{ margin: 0, fontWeight: 500, color: "var(--ink)" }}>{su.workDone}</p>
+                                  {su.attachments && su.attachments.length > 0 && (
+                                    <div style={{ display: "flex", gap: "6px", marginTop: "6px", flexWrap: "wrap" }}>
+                                      {su.attachments.map((url, idx) => (
+                                        <a key={idx} href={url} target="_blank" rel="noreferrer" style={{ display: "block" }}>
+                                          <img src={url} alt="Evidence photo" style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px", border: "1px solid var(--line)" }} />
+                                        </a>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {su.voiceNote && (
+                                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "6px", color: "var(--brand-yellow-hover)", fontWeight: 600, fontSize: "10px" }}>
+                                      <span>🎤 Voice note attached</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {reworkUpdates.length > 0 && (
+                            <div>
+                              <div style={{ fontWeight: 700, color: "var(--error)", fontSize: "9px", marginBottom: "4px", textTransform: "uppercase" }}>Rework Remedial Evidence:</div>
+                              {reworkUpdates.map(su => (
+                                <div key={su.id} style={{ padding: "6px 8px", background: "rgba(217, 56, 58, 0.03)", border: "1px solid rgba(217, 56, 58, 0.12)", borderRadius: "4px", marginBottom: "4px" }}>
+                                  <p style={{ margin: 0, fontWeight: 500, color: "var(--ink)" }}>{su.workDone}</p>
+                                  {su.attachments && su.attachments.length > 0 && (
+                                    <div style={{ display: "flex", gap: "6px", marginTop: "6px", flexWrap: "wrap" }}>
+                                      {su.attachments.map((url, idx) => (
+                                        <a key={idx} href={url} target="_blank" rel="noreferrer" style={{ display: "block" }}>
+                                          <img src={url} alt="Rework photo" style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px", border: "1px solid rgba(217, 56, 58, 0.15)" }} />
+                                        </a>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {su.voiceNote && (
+                                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "6px", color: "var(--error)", fontWeight: 600, fontSize: "10px" }}>
+                                      <span>🎤 Rework Voice note attached</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
                     {/* Decision Timeline */}
                     <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-1)", marginBottom: canAct ? "var(--sp-3)" : 0 }}>
                       {s.decisions.map((d: any, i: number) => (

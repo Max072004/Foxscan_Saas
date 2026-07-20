@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getData, saveData, audit } from "@/lib/store";
+import { getData, saveData, audit, id } from "@/lib/store";
 import { createStage, decide } from "@/lib/workflow";
 import { notify } from "@/lib/notifications";
 import type { AppData, User } from "@/lib/domain";
@@ -43,17 +43,47 @@ export async function POST(req: NextRequest) {
   if (!project)
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
 
-  const stage = createStage(
-    activity,
-    project,
-    body.actorId,
-    body.evidence || [],
-    body.checklist || {},
-    body.tatHours || 48
-  );
+  let stage = data.stages.find(s => s.activityId === activity.id);
+  if (stage) {
+    let initialState: any = "MANUFACTURER";
+    if (!project.manufacturerId) {
+      initialState = project.consultantId ? "CONSULTANT" : "CLIENT";
+    }
+    const now = new Date().toISOString();
+    stage.state = initialState;
+    stage.raisedAt = now;
+    stage.dueAt = new Date(Date.now() + (body.tatHours || 48) * 60 * 60 * 1000).toISOString();
+    stage.submittedBy = body.actorId;
+    stage.checklist = body.checklist || {};
+    stage.evidence = body.evidence || [];
+    stage.decisions.push({
+      id: id(),
+      actorId: body.actorId,
+      role: "CONTRACTOR",
+      decision: "RAISED",
+      createdAt: now
+    });
+  } else {
+    stage = createStage(
+      activity,
+      project,
+      body.actorId,
+      body.evidence || [],
+      body.checklist || {},
+      body.tatHours || 48
+    );
+    data.stages.push(stage);
+  }
+
+  // Link unassigned site updates for this activity to this stage
+  for (const su of data.siteUpdates) {
+    if (su.activityId === activity.id && !su.stageId) {
+      su.stageId = stage.id;
+    }
+  }
+
   activity.status = "SUBMITTED";
   activity.progress = 50;
-  data.stages.push(stage);
 
   await audit(data, {
     tenantId: project.tenantId,

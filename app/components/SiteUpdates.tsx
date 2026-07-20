@@ -13,6 +13,7 @@ interface SiteUpdatesProps {
 
 export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUpdatesProps) {
   const [workDone, setWorkDone] = useState("");
+  const [selectedActivityId, setSelectedActivityId] = useState("");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +25,7 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
         projectId,
         authorId: actorId,
         workDone,
+        activityId: selectedActivityId || undefined,
         weather: "Clear",
         manpower: 0,
         equipment: "",
@@ -31,6 +33,7 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
       }),
     });
     setWorkDone("");
+    setSelectedActivityId("");
     reload();
   };
 
@@ -46,6 +49,33 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
         {/* Post Form */}
         <form className="card" onSubmit={submit}>
           <h3>New Site Log</h3>
+          <div style={{ marginBottom: "var(--sp-3)" }}>
+            <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--muted)", marginBottom: "var(--sp-1)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              Link to Activity (Optional)
+            </label>
+            <select
+              value={selectedActivityId}
+              onChange={(e) => setSelectedActivityId(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "var(--sp-2)",
+                borderRadius: "var(--radius)",
+                border: "1px solid var(--line)",
+                background: "var(--bg)",
+                fontSize: "var(--text-sm)",
+                fontFamily: "var(--font)",
+                color: "var(--ink)",
+                outline: "none"
+              }}
+            >
+              <option value="">General Log / None</option>
+              {data.activities.filter(a => a.projectId === projectId).sort((a, b) => a.sequence - b.sequence).map((a) => (
+                <option key={a.id} value={a.id}>
+                  Stage {a.sequence}: {a.name} ({a.status.replace("_", " ")})
+                </option>
+              ))}
+            </select>
+          </div>
           <textarea
             value={workDone}
             onChange={(e) => setWorkDone(e.target.value)}
@@ -121,6 +151,11 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
                     </div>
                     <div className="feed-body">{s.workDone}</div>
                     <div className="feed-tags">
+                      {s.activityId && (
+                        <span className="feed-tag" style={{ background: "rgba(234, 172, 31, 0.08)", color: "#c68d0e", fontWeight: 700 }}>
+                          {data.activities.find(a => a.id === s.activityId)?.name || "Linked Activity"}
+                        </span>
+                      )}
                       {s.weather && s.weather !== "Clear" && (
                         <span className="feed-tag">
                           <Cloud size={10} style={{ marginRight: 4 }} />

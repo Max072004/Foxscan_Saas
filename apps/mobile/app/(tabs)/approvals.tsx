@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Text, View, ScrollView, Pressable, TextInput } from "react-native";
+import { Text, View, ScrollView, Pressable, TextInput, Image } from "react-native";
 import { Screen, Title, Card, Button } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
@@ -84,7 +84,98 @@ export default function Approvals() {
   const getActivityName = (activityId: string) => {
     return activities.find((a: any) => a.id === activityId)?.name || "Activity";
   };
+  const renderEvidenceBlock = (stage: any) => {
+    const stageUpdates = data?.siteUpdates?.filter((su: any) => su.stageId === stage.id) || [];
+    if (stageUpdates.length === 0) return null;
 
+    const returnedDecision = stage.decisions?.find((d: any) => d.decision === "RETURNED");
+    const returnTime = returnedDecision ? new Date(returnedDecision.createdAt).getTime() : null;
+
+    const originalUpdates = stageUpdates.filter((su: any) => !returnTime || new Date(su.date).getTime() < returnTime);
+    const reworkUpdates = stageUpdates.filter((su: any) => returnTime && new Date(su.date).getTime() >= returnTime);
+
+    return (
+      <View className="bg-slate-50 border border-slate-200/50 rounded-xl p-3 mb-4 mt-2">
+        <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+          Attached Site Evidence
+        </Text>
+
+        {originalUpdates.length > 0 && (
+          <View className={reworkUpdates.length > 0 ? "mb-3" : ""}>
+            <Text className="text-[9px] font-extrabold text-slate-500 uppercase mb-1">
+              Original Submission:
+            </Text>
+            {originalUpdates.map((su: any) => (
+              <View key={su.id} className="bg-white border border-slate-100 rounded-lg p-2.5 mb-1.5">
+                <Text className="text-xs font-semibold text-slate-800 leading-normal">
+                  {su.workDone}
+                </Text>
+                
+                {su.attachments && su.attachments.length > 0 && (
+                  <View className="flex-row gap-2 mt-2 flex-wrap">
+                    {su.attachments.map((url: string, idx: number) => (
+                      <Image
+                        key={idx}
+                        source={{ uri: url }}
+                        className="w-12 h-12 rounded bg-slate-100"
+                        resizeMode="cover"
+                      />
+                    ))}
+                  </View>
+                )}
+
+                {su.voiceNote && (
+                  <View className="flex-row items-center mt-1.5">
+                    <Ionicons name="volume-high" size={12} color="#EAAC1F" />
+                    <Text className="text-[9px] font-bold text-brandAmber ml-1">
+                      Voice note attached
+                    </Text>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {reworkUpdates.length > 0 && (
+          <View>
+            <Text className="text-[9px] font-extrabold text-alertRed uppercase mb-1">
+              Rework Remedial Evidence:
+            </Text>
+            {reworkUpdates.map((su: any) => (
+              <View key={su.id} className="bg-red-50/30 border border-red-100 rounded-lg p-2.5 mb-1.5">
+                <Text className="text-xs font-semibold text-slate-800 leading-normal">
+                  {su.workDone}
+                </Text>
+
+                {su.attachments && su.attachments.length > 0 && (
+                  <View className="flex-row gap-2 mt-2 flex-wrap">
+                    {su.attachments.map((url: string, idx: number) => (
+                      <Image
+                        key={idx}
+                        source={{ uri: url }}
+                        className="w-12 h-12 rounded bg-slate-100"
+                        resizeMode="cover"
+                      />
+                    ))}
+                  </View>
+                )}
+
+                {su.voiceNote && (
+                  <View className="flex-row items-center mt-1.5">
+                    <Ionicons name="volume-high" size={12} color="#D9383A" />
+                    <Text className="text-[9px] font-bold text-alertRed ml-1">
+                      Rework Voice note attached
+                    </Text>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  };
   // Contractor: see activities they can raise + stages returned for rework
   if (role === "CONTRACTOR") {
     const reworkStages = stages.filter((s: any) => s.state === "REWORK");
@@ -172,6 +263,7 @@ export default function Approvals() {
                           Due: {new Date(stage.dueAt).toLocaleDateString()}
                         </Text>
                       </View>
+                      {renderEvidenceBlock(stage)}
                       <Button
                         label="Re-submit Stage"
                         onPress={() => {
@@ -233,6 +325,7 @@ export default function Approvals() {
                           </Text>
                         </View>
                       </View>
+                      {renderEvidenceBlock(stage)}
                     </Card>
                   );
                 })}
@@ -388,6 +481,7 @@ export default function Approvals() {
                       </Text>
                     </View>
                   </View>
+                  {renderEvidenceBlock(stage)}
                   <Button
                     label="Release Payment"
                     onPress={() => {
@@ -502,6 +596,7 @@ export default function Approvals() {
                     </Text>
                   </View>
                 </View>
+                {renderEvidenceBlock(stage)}
                 <View className="flex-row space-x-3 gap-3">
                   <View className="flex-1">
                     <Button

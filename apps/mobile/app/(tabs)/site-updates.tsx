@@ -26,16 +26,22 @@ export default function SiteUpdates() {
   });
 
   const [workDone, setWorkDone] = useState("");
+  const [selectedActivityId, setSelectedActivityId] = useState("");
   const [capture, setCapture] = useState<any>();
   const [voice, setVoice] = useState<string>();
   const [showSuccess, setShowSuccess] = useState(false);
 
+  const project = data?.projects?.[0];
+  const projectActivities = data?.activities?.filter((a: any) => a.projectId === project?.id)
+    ?.sort((a: any, b: any) => a.sequence - b.sequence) || [];
+
   const submit = async () => {
     Keyboard.dismiss();
     const body = {
-      projectId: data?.projects?.[0]?.id,
+      projectId: project?.id,
       authorId: "mobile",
       workDone,
+      activityId: selectedActivityId || undefined,
       weather: "Clear",
       manpower: 0,
       equipment: "",
@@ -52,6 +58,7 @@ export default function SiteUpdates() {
     }
     await syncQueue();
     setWorkDone("");
+    setSelectedActivityId("");
     setCapture(null);
     setVoice(undefined);
     setShowSuccess(true);
@@ -74,6 +81,50 @@ export default function SiteUpdates() {
               <Title>Site Log</Title>
 
               <Card>
+                {/* Activity Selector Pills */}
+                {projectActivities.length > 0 && (
+                  <View className="mb-4">
+                    <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+                      Link to Activity (Optional)
+                    </Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row py-1">
+                      <Pressable
+                        onPress={() => setSelectedActivityId("")}
+                        className={`px-4 py-2 rounded-full mr-2 border ${
+                          selectedActivityId === ""
+                            ? "bg-brandAmber border-brandAmber"
+                            : "bg-white border-slate-200"
+                        }`}
+                        style={({ pressed }) => pressed ? { transform: [{ scale: 0.96 }] } : {}}
+                      >
+                        <Text className={`text-xs font-bold ${
+                          selectedActivityId === "" ? "text-brandCharcoal font-extrabold" : "text-slate-500"
+                        }`}>
+                          General Log / None
+                        </Text>
+                      </Pressable>
+                      {projectActivities.map((a: any) => (
+                        <Pressable
+                          key={a.id}
+                          onPress={() => setSelectedActivityId(a.id)}
+                          className={`px-4 py-2 rounded-full mr-2 border ${
+                            selectedActivityId === a.id
+                              ? "bg-brandAmber border-brandAmber"
+                              : "bg-white border-slate-200"
+                          }`}
+                          style={({ pressed }) => pressed ? { transform: [{ scale: 0.96 }] } : {}}
+                        >
+                          <Text className={`text-xs font-bold ${
+                            selectedActivityId === a.id ? "text-brandCharcoal font-extrabold" : "text-slate-500"
+                          }`}>
+                            Stage {a.sequence}: {a.name}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+
                 <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
                   Work progress & Observations
                 </Text>
