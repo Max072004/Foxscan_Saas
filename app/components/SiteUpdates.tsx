@@ -14,8 +14,7 @@ interface SiteUpdatesProps {
 export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUpdatesProps) {
   const [workDone, setWorkDone] = useState("");
   const [selectedActivityId, setSelectedActivityId] = useState("");
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [voiceFile, setVoiceFile] = useState<File | null>(null);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -25,41 +24,22 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
 
     try {
       let attachmentUrls: string[] = [];
-      let voiceUrl: string | undefined = undefined;
 
-      if (photoFile) {
+      for (const file of photoFiles) {
         const formData = new FormData();
-        formData.append("file", photoFile);
+        formData.append("file", file);
         formData.append("projectId", projectId);
         formData.append("activityId", selectedActivityId || "general");
-        formData.append("filename", photoFile.name);
+        formData.append("filename", file.name);
 
         const response = await fetch("/api/upload", {
           method: "POST",
           body: formData,
         });
-        if (!response.ok) throw new Error("Photo upload failed");
+        if (!response.ok) throw new Error(`Photo ${file.name} upload failed`);
         const resJson = await response.json();
         if (resJson.url) {
           attachmentUrls.push(resJson.url);
-        }
-      }
-
-      if (voiceFile) {
-        const formData = new FormData();
-        formData.append("file", voiceFile);
-        formData.append("projectId", projectId);
-        formData.append("activityId", selectedActivityId || "general");
-        formData.append("filename", voiceFile.name);
-
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-        if (!response.ok) throw new Error("Audio upload failed");
-        const resJson = await response.json();
-        if (resJson.url) {
-          voiceUrl = resJson.url;
         }
       }
 
@@ -76,14 +56,13 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
           equipment: "",
           important: false,
           attachments: attachmentUrls,
-          voiceNote: voiceUrl,
+          voiceNote: undefined,
         }),
       });
 
       setWorkDone("");
       setSelectedActivityId("");
-      setPhotoFile(null);
-      setVoiceFile(null);
+      setPhotoFiles([]);
       reload();
     } catch (err: any) {
       alert("Upload failed: " + err.message);
@@ -152,37 +131,39 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
           />
           
           {/* File input selectors */}
-          <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "var(--muted)", cursor: "pointer", padding: "6px 12px", border: "1px dashed var(--line)", borderRadius: "6px", background: "var(--bg)" }}>
-              <Paperclip size={14} />
-              <span>{photoFile ? `Photo: ${photoFile.name}` : "Attach Photo"}</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
-                style={{ display: "none" }}
-              />
-            </label>
-            {photoFile && (
-              <button type="button" onClick={() => setPhotoFile(null)} style={{ fontSize: "11px", color: "var(--error)", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
-                Remove
-              </button>
-            )}
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "var(--muted)", cursor: "pointer", padding: "6px 12px", border: "1px dashed var(--line)", borderRadius: "6px", background: "var(--bg)" }}>
+                <Paperclip size={14} />
+                <span>{photoFiles.length > 0 ? `${photoFiles.length} Photos Selected` : "Attach Photo(s)"}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      setPhotoFiles(Array.from(e.target.files));
+                    }
+                  }}
+                  style={{ display: "none" }}
+                />
+              </label>
+              {photoFiles.length > 0 && (
+                <button type="button" onClick={() => setPhotoFiles([])} style={{ fontSize: "11px", color: "var(--error)", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
+                  Clear All
+                </button>
+              )}
+            </div>
 
-            <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "var(--muted)", cursor: "pointer", padding: "6px 12px", border: "1px dashed var(--line)", borderRadius: "6px", background: "var(--bg)" }}>
-              <Cloud size={14} />
-              <span>{voiceFile ? `Audio: ${voiceFile.name}` : "Attach Audio / Voice"}</span>
-              <input
-                type="file"
-                accept="audio/*"
-                onChange={(e) => setVoiceFile(e.target.files?.[0] || null)}
-                style={{ display: "none" }}
-              />
-            </label>
-            {voiceFile && (
-              <button type="button" onClick={() => setVoiceFile(null)} style={{ fontSize: "11px", color: "var(--error)", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
-                Remove
-              </button>
+            {photoFiles.length > 0 && (
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", width: "100%" }}>
+                {photoFiles.map((file, idx) => (
+                  <div key={idx} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "var(--ink)", background: "var(--bg)", border: "1px solid var(--line)", padding: "4px 8px", borderRadius: "4px" }}>
+                    <span>{file.name} ({Math.round(file.size / 1024)} KB)</span>
+                    <button type="button" onClick={() => setPhotoFiles(prev => prev.filter((_, i) => i !== idx))} style={{ border: "none", background: "none", color: "var(--error)", cursor: "pointer", fontWeight: "bold", fontSize: "12px", padding: 0 }}>×</button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 

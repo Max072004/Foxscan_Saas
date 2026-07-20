@@ -28,10 +28,11 @@ export default function SiteUpdates() {
 
   const [workDone, setWorkDone] = useState("");
   const [selectedActivityId, setSelectedActivityId] = useState("");
-  const [capture, setCapture] = useState<any>();
+  const [captures, setCaptures] = useState<any[]>([]);
   const [voice, setVoice] = useState<string>();
   const [showSuccess, setShowSuccess] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgressText, setUploadProgressText] = useState<string | null>(null);
 
   const { activityId } = useLocalSearchParams<{ activityId?: string }>();
 
@@ -58,87 +59,49 @@ export default function SiteUpdates() {
   const submit = async () => {
     Keyboard.dismiss();
     setIsUploading(true);
+    setUploadProgressText("Preparing uploads...");
     try {
       let attachmentUrls: string[] = [];
-      let voiceUrl: string | undefined = undefined;
 
-      if (capture && capture.uri) {
-        console.log("[MediaUpload] [Photo] Fetching local photo URI:", capture.uri);
+      for (let i = 0; i < captures.length; i++) {
+        const cap = captures[i];
+        setUploadProgressText(`Uploading photo ${i + 1} of ${captures.length}...`);
+
         const fileResponse = await withTimeout(
-          fetch(capture.uri),
+          fetch(cap.uri),
           15000,
-          "Fetching local photo file timed out"
+          `Fetching photo ${i + 1} file timed out`
         );
-        console.log("[MediaUpload] [Photo] Converting photo to Blob...");
         const blob = await withTimeout(
           fileResponse.blob(),
           15000,
-          "Converting photo file to blob timed out"
+          `Converting photo ${i + 1} to blob timed out`
         );
-        console.log("[MediaUpload] [Photo] Blob retrieved. Size:", blob.size);
 
         const formData = new FormData();
-        formData.append("file", blob, "photo.jpg");
+        formData.append("file", blob, `photo_${i}.jpg`);
         formData.append("projectId", project?.id || "");
         formData.append("activityId", selectedActivityId || "general");
-        formData.append("filename", "photo.jpg");
+        formData.append("filename", `photo_${i}.jpg`);
 
-        console.log("[MediaUpload] [Photo] Sending upload request to backend...");
         const response = await withTimeout(
           fetch(`${baseUrl}/api/upload`, {
             method: "POST",
             body: formData,
           }),
           30000,
-          "Uploading photo to server timed out"
+          `Uploading photo ${i + 1} to server timed out`
         );
-        console.log("[MediaUpload] [Photo] Backend response status:", response.status);
-        if (!response.ok) throw new Error("Photo upload failed");
+        if (!response.ok) throw new Error(`Photo ${i + 1} upload failed`);
         const resJson = await response.json();
-        console.log("[MediaUpload] [Photo] Upload succeeded. URL:", resJson.url);
         if (resJson.url) {
           attachmentUrls.push(resJson.url);
         }
       }
 
-      if (voice) {
-        console.log("[MediaUpload] [Voice] Fetching local voice note URI:", voice);
-        const fileResponse = await withTimeout(
-          fetch(voice),
-          15000,
-          "Fetching local voice note file timed out"
-        );
-        console.log("[MediaUpload] [Voice] Converting voice to Blob...");
-        const blob = await withTimeout(
-          fileResponse.blob(),
-          15000,
-          "Converting voice file to blob timed out"
-        );
-        console.log("[MediaUpload] [Voice] Blob retrieved. Size:", blob.size);
+      setUploadProgressText("Saving site update...");
 
-        const formData = new FormData();
-        formData.append("file", blob, "voice.m4a");
-        formData.append("projectId", project?.id || "");
-        formData.append("activityId", selectedActivityId || "general");
-        formData.append("filename", "voice.m4a");
-
-        console.log("[MediaUpload] [Voice] Sending upload request to backend...");
-        const response = await withTimeout(
-          fetch(`${baseUrl}/api/upload`, {
-            method: "POST",
-            body: formData,
-          }),
-          30000,
-          "Uploading voice note to server timed out"
-        );
-        console.log("[MediaUpload] [Voice] Backend response status:", response.status);
-        if (!response.ok) throw new Error("Voice note upload failed");
-        const resJson = await response.json();
-        console.log("[MediaUpload] [Voice] Upload succeeded. URL:", resJson.url);
-        if (resJson.url) {
-          voiceUrl = resJson.url;
-        }
-      }
+      const firstCapture = captures[0];
 
       const body = {
         projectId: project?.id,
@@ -150,9 +113,9 @@ export default function SiteUpdates() {
         equipment: "",
         important: false,
         attachments: attachmentUrls,
-        voiceNote: voiceUrl,
-        latitude: capture?.latitude,
-        longitude: capture?.longitude,
+        voiceNote: undefined,
+        latitude: firstCapture?.latitude,
+        longitude: firstCapture?.longitude,
       };
 
       try {
@@ -163,14 +126,14 @@ export default function SiteUpdates() {
       await syncQueue();
       setWorkDone("");
       setSelectedActivityId("");
-      setCapture(null);
+      setCaptures([]);
       setVoice(undefined);
       setShowSuccess(true);
     } catch (err: any) {
-      console.error("[MediaUpload] UPLOAD FLOW EXCEPTION:", err);
       alert("Error uploading media: " + err.message);
     } finally {
       setIsUploading(false);
+      setUploadProgressText(null);
     }
   };
 
@@ -258,62 +221,58 @@ export default function SiteUpdates() {
                   
                   <View className="flex-row space-x-3 gap-3 mb-3">
                     <View className="flex-1">
-                      <CameraCapture onCapture={setCapture} />
+                      <CameraCapture onCapture={(c) => setCaptures(prev => [...prev, c])} />
                     </View>
+                    {/* Hide voice note recorder for this deadline build
                     <View className="flex-1">
                       <VoiceNote onRecorded={setVoice} />
                     </View>
+                    */}
                   </View>
 
-                  {/* Photo Preview Container */}
-                  {capture ? (
-                    <View className="flex-row items-center bg-slate-50 border border-slate-200/60 rounded-xl p-2 mb-3">
-                      <Image
-                        source={{ uri: capture.uri }}
-                        className="w-12 h-12 rounded-lg"
-                      />
-                      <View className="ml-3 flex-1">
-                        <Text className="text-brandCharcoal font-bold text-xs">
-                          Photo Geotagged
-                        </Text>
-                        <Text className="text-slate-400 text-[10px] font-semibold mt-0.5">
-                          Lat: {capture.latitude?.toFixed(4)}, Lon: {capture.longitude?.toFixed(4)}
-                        </Text>
-                      </View>
-                      <Ionicons name="checkmark-circle" size={20} color="#1B8755" className="mr-1" />
+                  {/* Multiple Photos Preview Container */}
+                  {captures.length > 0 ? (
+                    <View className="mb-3">
+                      <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">
+                        Captured Evidence ({captures.length})
+                      </Text>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row py-1">
+                        {captures.map((cap, index) => (
+                          <View key={index} className="relative mr-3">
+                            <Image
+                              source={{ uri: cap.uri }}
+                              className="w-20 h-20 rounded-xl bg-slate-100 border border-slate-200"
+                            />
+                            <Pressable
+                              onPress={() => setCaptures(prev => prev.filter((_, idx) => idx !== index))}
+                              className="absolute -top-1.5 -right-1.5 bg-brandCharcoal/80 rounded-full w-5 h-5 items-center justify-center border border-slate-700/50"
+                              style={{ zIndex: 10 }}
+                            >
+                              <Ionicons name="close" size={12} color="#FFFFFF" />
+                            </Pressable>
+                            {cap.latitude && cap.longitude && (
+                              <View className="absolute bottom-1 left-1 bg-black/50 px-1 py-0.5 rounded">
+                                <Text className="text-[7px] text-white font-bold">
+                                  {cap.latitude.toFixed(2)}, {cap.longitude.toFixed(2)}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                        ))}
+                      </ScrollView>
                     </View>
                   ) : (
                     <View className="flex-row items-center bg-slate-50/50 border border-slate-100 rounded-xl p-3 mb-3">
                       <Ionicons name="image-outline" size={18} color="#64748B" />
                       <Text className="text-slate-400 font-semibold text-xs ml-2">
-                        No photo captured yet
-                      </Text>
-                    </View>
-                  )}
-
-                  {/* Voice Note Status */}
-                  {voice ? (
-                    <View className="flex-row items-center bg-slate-50 border border-slate-200/60 rounded-xl p-3 mb-3">
-                      <Ionicons name="volume-high" size={18} color="#EAAC1F" />
-                      <View className="ml-2 flex-1">
-                        <Text className="text-brandCharcoal font-bold text-xs">
-                          Voice Note Attached
-                        </Text>
-                      </View>
-                      <Ionicons name="checkmark-circle" size={20} color="#1B8755" />
-                    </View>
-                  ) : (
-                    <View className="flex-row items-center bg-slate-50/50 border border-slate-100 rounded-xl p-3 mb-3">
-                      <Ionicons name="mic-outline" size={18} color="#64748B" />
-                      <Text className="text-slate-400 font-semibold text-xs ml-2">
-                        No voice note recorded yet
+                        No photos captured yet
                       </Text>
                     </View>
                   )}
                 </View>
 
                 <Button
-                  label={isUploading ? "Uploading & Saving..." : "Submit Site Update"}
+                  label={isUploading ? (uploadProgressText || "Uploading & Saving...") : "Submit Site Update"}
                   onPress={submit}
                   disabled={!workDone.trim() || isUploading}
                 />
