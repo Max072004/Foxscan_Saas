@@ -151,11 +151,28 @@ export default function ProjectDetails() {
                       </View>
                     </View>
 
-                    <View className="flex-row items-center space-x-1.5 mb-3">
+                    <View className="flex-row items-center space-x-1.5 mb-2">
                       <Ionicons name="calendar-outline" size={12} color="#64748B" />
                       <Text className="text-slate-400 text-[10px] font-semibold ml-1">
                         {a.plannedStart} — {a.plannedEnd}
                       </Text>
+                    </View>
+
+                    <View className="flex-row items-center justify-between mb-3 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                      <View className="flex-row items-center">
+                        <Ionicons name="time-outline" size={12} color="#64748B" />
+                        <Text className="text-slate-500 text-[10px] font-bold ml-1">
+                          Duration: {a.durationDays || Math.max(1, Math.round((new Date(a.plannedEnd).getTime() - new Date(a.plannedStart).getTime()) / (1000 * 60 * 60 * 24)) + 1)} days
+                        </Text>
+                      </View>
+                      {project && project.contractValue > 0 && (
+                        <View className="flex-row items-center">
+                          <Ionicons name="pie-chart-outline" size={12} color="#EAAC1F" />
+                          <Text className="text-slate-500 text-[10px] font-bold ml-1">
+                            Allocation: {(((a.paymentValue || 0) / project.contractValue) * 100).toFixed(1)}%
+                          </Text>
+                        </View>
+                      )}
                     </View>
 
                     {/* Completion progress bar */}

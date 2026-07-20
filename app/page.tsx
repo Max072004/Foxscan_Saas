@@ -128,7 +128,7 @@ export default function Home() {
             />
           )}
           {tab === "Setup" && (
-            <Setup project={project} token={token} reload={reload} />
+            <Setup project={project} activities={activities} token={token} reload={reload} />
           )}
           {tab === "Documents" && (
             <Documents data={data} token={token} projectId={project.id} />
