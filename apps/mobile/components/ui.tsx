@@ -38,8 +38,27 @@ export function Button({
   let textClass = "font-bold text-center text-sm ";
 
   if (disabled) {
-    btnClass += "bg-slate-200 border border-slate-200";
-    textClass += "text-slate-400";
+    switch (variant) {
+      case "primary":
+        btnClass += "bg-brandAmber/40 border border-brandAmber/10";
+        textClass += "text-brandCharcoal/45 font-extrabold";
+        break;
+      case "secondary":
+        btnClass += "bg-brandCharcoal/40 border border-brandCharcoal/10";
+        textClass += "text-white/45";
+        break;
+      case "outline":
+        btnClass += "bg-transparent border border-brandAmber/30";
+        textClass += "text-brandAmber/30";
+        break;
+      case "danger":
+        btnClass += "bg-alertRed/40 border border-alertRed/10";
+        textClass += "text-white/45";
+        break;
+      default:
+        btnClass += "bg-slate-200 border border-slate-200";
+        textClass += "text-slate-400";
+    }
   } else {
     switch (variant) {
       case "primary":

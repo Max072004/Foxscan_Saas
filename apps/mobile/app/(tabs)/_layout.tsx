@@ -84,9 +84,9 @@ export default function TabsLayout() {
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
 
       {/* Hidden Routes (registered but not displayed on bottom tab bar) */}
-      <Tabs.Screen name="activities" options={{ href: null }} />
-      <Tabs.Screen name="documents" options={{ href: null }} />
-      <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="activities" options={{ href: null, title: "Timeline" }} />
+      <Tabs.Screen name="documents" options={{ href: null, title: "Documents" }} />
+      <Tabs.Screen name="notifications" options={{ href: null, title: "Notifications" }} />
     </Tabs>
   );
 }
