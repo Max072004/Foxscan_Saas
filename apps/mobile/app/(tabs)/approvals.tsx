@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Text, View, ScrollView, Pressable } from "react-native";
+import { Text, View, ScrollView, Pressable, TextInput } from "react-native";
 import { Screen, Title, Card, Button } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
