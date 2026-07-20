@@ -53,15 +53,20 @@ export default function SiteUpdates() {
       let voiceUrl: string | undefined = undefined;
 
       if (capture && capture.uri) {
-        const formData = new FormData();
-        formData.append("file", {
+        const filePart = {
           uri: capture.uri,
           type: "image/jpeg",
           name: "photo.jpg",
-        } as any);
+        };
+        console.log("Photo file part being appended:", filePart);
+
+        const formData = new FormData();
+        formData.append("file", filePart as any);
         formData.append("projectId", project?.id || "");
         formData.append("activityId", selectedActivityId || "general");
         formData.append("filename", "photo.jpg");
+
+        console.log("FormData photo constructed. Sending request to:", `${baseUrl}/api/upload`);
 
         const response = await fetch(`${baseUrl}/api/upload`, {
           method: "POST",
@@ -75,15 +80,20 @@ export default function SiteUpdates() {
       }
 
       if (voice) {
-        const formData = new FormData();
-        formData.append("file", {
+        const filePart = {
           uri: voice,
           type: "audio/m4a",
           name: "voice.m4a",
-        } as any);
+        };
+        console.log("Voice file part being appended:", filePart);
+
+        const formData = new FormData();
+        formData.append("file", filePart as any);
         formData.append("projectId", project?.id || "");
         formData.append("activityId", selectedActivityId || "general");
         formData.append("filename", "voice.m4a");
+
+        console.log("FormData voice constructed. Sending request to:", `${baseUrl}/api/upload`);
 
         const response = await fetch(`${baseUrl}/api/upload`, {
           method: "POST",
@@ -123,6 +133,8 @@ export default function SiteUpdates() {
       setVoice(undefined);
       setShowSuccess(true);
     } catch (err: any) {
+      console.log("FULL UPLOAD ERROR OBJECT:", err);
+      console.error("UPLOAD ERROR DETAILS:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
       alert("Error uploading media: " + err.message);
     } finally {
       setIsUploading(false);
