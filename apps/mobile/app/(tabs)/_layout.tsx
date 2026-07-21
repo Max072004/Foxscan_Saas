@@ -87,6 +87,12 @@ export default function TabsLayout() {
       <Tabs.Screen name="activities" options={{ href: null, title: "Timeline" }} />
       <Tabs.Screen name="documents" options={{ href: null, title: "Documents" }} />
       <Tabs.Screen name="notifications" options={{ href: null, title: "Notifications" }} />
+      <Tabs.Screen name="payments" options={{ href: null, title: "Payments" }} />
+      <Tabs.Screen name="delays" options={{ href: null, title: "Delays" }} />
+      <Tabs.Screen name="assurance" options={{ href: null, title: "Assurance" }} />
+      <Tabs.Screen name="discussion" options={{ href: null, title: "Discussion" }} />
+      <Tabs.Screen name="reports" options={{ href: null, title: "Reports" }} />
+      <Tabs.Screen name="quotations" options={{ href: null, title: "Quotations" }} />
     </Tabs>
   );
 }
