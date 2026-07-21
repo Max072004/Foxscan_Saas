@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Screen, Title, Card, Button } from "@/components/ui";
 import { CameraCapture } from "@/components/camera-capture";
 import { VoiceNote } from "@/components/voice-note";
+import { File as ExpoFile } from "expo-file-system";
 import { api, baseUrl } from "@/lib/api";
 import { enqueue, syncQueue } from "@/lib/offline";
 import { Ionicons } from "@expo/vector-icons";
@@ -47,7 +48,7 @@ export default function SiteUpdates() {
     ?.sort((a: any, b: any) => a.sequence - b.sequence) || [];
 
   const withTimeout = <T,>(promise: Promise<T>, ms: number, message: string): Promise<T> => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutId = setTimeout(() => {
         reject(new Error(`Timeout: ${message}`));
@@ -99,6 +100,29 @@ export default function SiteUpdates() {
         }
       }
 
+      let voiceNoteUrl: string | undefined;
+      if (voice) {
+        setUploadProgressText("Uploading voice note...");
+        // NOTE: fetch(uri).blob() hangs indefinitely for audio in this RN environment (confirmed).
+        // expo-file-system's File class implements the Blob interface and reads via native FS
+        // instead of going through fetch, so it sidesteps that hang entirely.
+        const audioFile = new ExpoFile(voice);
+        const formData = new FormData();
+        formData.append("file", audioFile as unknown as Blob, "voice.m4a");
+        formData.append("projectId", project?.id || "");
+        formData.append("activityId", selectedActivityId || "general");
+        formData.append("filename", "voice.m4a");
+
+        const response = await withTimeout(
+          fetch(`${baseUrl}/api/upload`, { method: "POST", body: formData }),
+          30000,
+          "Uploading voice note timed out"
+        );
+        if (!response.ok) throw new Error("Voice note upload failed");
+        const resJson = await response.json();
+        voiceNoteUrl = resJson.url;
+      }
+
       setUploadProgressText("Saving site update...");
 
       const firstCapture = captures[0];
@@ -113,7 +137,7 @@ export default function SiteUpdates() {
         equipment: "",
         important: false,
         attachments: attachmentUrls,
-        voiceNote: undefined,
+        voiceNote: voiceNoteUrl,
         latitude: firstCapture?.latitude,
         longitude: firstCapture?.longitude,
       };
@@ -151,13 +175,15 @@ export default function SiteUpdates() {
             keyboardDismissMode="on-drag"
           >
             <Screen>
-              <Title>Site Log</Title>
+              <Title icon="camera-outline" eyebrow="Daily Record" subtitle="Log work done, attach photos, and link to an activity">
+                Site Log
+              </Title>
 
               <Card>
                 {/* Activity Selector Pills */}
                 {projectActivities.length > 0 && (
                   <View className="mb-4">
-                    <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+                    <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">
                       Link to Activity (Optional)
                     </Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row py-1">
@@ -170,7 +196,7 @@ export default function SiteUpdates() {
                         }`}
                         style={({ pressed }) => pressed ? { transform: [{ scale: 0.96 }] } : {}}
                       >
-                        <Text className={`text-xs font-bold ${
+                        <Text className={`text-sm font-bold ${
                           selectedActivityId === "" ? "text-brandCharcoal font-extrabold" : "text-slate-500"
                         }`}>
                           General Log / None
@@ -187,7 +213,7 @@ export default function SiteUpdates() {
                           }`}
                           style={({ pressed }) => pressed ? { transform: [{ scale: 0.96 }] } : {}}
                         >
-                          <Text className={`text-xs font-bold ${
+                          <Text className={`text-sm font-bold ${
                             selectedActivityId === a.id ? "text-brandCharcoal font-extrabold" : "text-slate-500"
                           }`}>
                             Stage {a.sequence}: {a.name}
@@ -198,7 +224,7 @@ export default function SiteUpdates() {
                   </View>
                 )}
 
-                <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+                <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">
                   Work progress & Observations
                 </Text>
                 <TextInput
@@ -215,7 +241,7 @@ export default function SiteUpdates() {
                 />
 
                 <View className="mb-4">
-                  <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+                  <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">
                     Evidence Media
                   </Text>
                   
@@ -223,17 +249,25 @@ export default function SiteUpdates() {
                     <View className="flex-1">
                       <CameraCapture onCapture={(c) => setCaptures(prev => [...prev, c])} />
                     </View>
-                    {/* Hide voice note recorder for this deadline build
                     <View className="flex-1">
                       <VoiceNote onRecorded={setVoice} />
                     </View>
-                    */}
                   </View>
+
+                  {voice ? (
+                    <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 mb-3" style={{ gap: 8 }}>
+                      <Ionicons name="mic" size={16} color="#EAAC1F" />
+                      <Text className="text-xs font-semibold text-slate-600 flex-1">Voice note recorded</Text>
+                      <Pressable onPress={() => setVoice(undefined)}>
+                        <Ionicons name="close-circle" size={18} color="#94A3B8" />
+                      </Pressable>
+                    </View>
+                  ) : null}
 
                   {/* Multiple Photos Preview Container */}
                   {captures.length > 0 ? (
                     <View className="mb-3">
-                      <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">
+                      <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">
                         Captured Evidence ({captures.length})
                       </Text>
                       <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row py-1">
@@ -252,7 +286,7 @@ export default function SiteUpdates() {
                             </Pressable>
                             {cap.latitude && cap.longitude && (
                               <View className="absolute bottom-1 left-1 bg-black/50 px-1 py-0.5 rounded">
-                                <Text className="text-[7px] text-white font-bold">
+                                <Text className="text-[9px] text-white font-bold">
                                   {cap.latitude.toFixed(2)}, {cap.longitude.toFixed(2)}
                                 </Text>
                               </View>
@@ -264,7 +298,7 @@ export default function SiteUpdates() {
                   ) : (
                     <View className="flex-row items-center bg-slate-50/50 border border-slate-100 rounded-xl p-3 mb-3">
                       <Ionicons name="image-outline" size={18} color="#64748B" />
-                      <Text className="text-slate-400 font-semibold text-xs ml-2">
+                      <Text className="text-slate-400 font-semibold text-sm ml-2">
                         No photos captured yet
                       </Text>
                     </View>
@@ -292,7 +326,7 @@ export default function SiteUpdates() {
             <Text className="text-brandCharcoal font-extrabold text-lg text-center mb-2">
               Daily Log Submitted
             </Text>
-            <Text className="text-slate-400 text-xs font-semibold text-center mb-6 leading-relaxed">
+            <Text className="text-slate-400 text-sm font-semibold text-center mb-6 leading-relaxed">
               Your site log has been saved and queued for synchronization.
             </Text>
             <View className="w-full">

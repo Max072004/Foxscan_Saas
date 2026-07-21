@@ -39,7 +39,7 @@ export default function Login() {
               FOXSCAN
             </Text>
           </View>
-          <Text className="text-xs font-bold text-brandAmber mt-3 tracking-[2px]">
+          <Text className="text-sm font-bold text-brandAmber mt-3 tracking-[2px]">
             FIELD INTELLIGENCE
           </Text>
         </View>
@@ -62,7 +62,7 @@ export default function Login() {
           <Button label="Send OTP" onPress={request} />
           {message ? (
             <View className="mt-4 p-3 bg-slate-50 border border-slate-100 rounded-xl">
-              <Text className="text-center text-xs font-semibold text-slate-500">
+              <Text className="text-center text-sm font-semibold text-slate-500">
                 {message}
               </Text>
             </View>

@@ -7,6 +7,38 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { useAudioPlayer } from "expo-audio";
 import { useRouter } from "expo-router";
+import { tatStatus } from "@/lib/scheduling";
+
+const TAT_TIER_STYLE: Record<string, { bg: string; text: string }> = {
+  WARNING: { bg: "bg-amber-50 border border-amber-200", text: "text-amber-700" },
+  OVERDUE: { bg: "bg-red-50 border border-red-200", text: "text-alertRed" },
+  ESCALATED: { bg: "bg-red-100 border border-red-300", text: "text-red-900" },
+};
+
+function TatBadge({ stage }: { stage: any }) {
+  const tat = tatStatus(stage);
+  const style = TAT_TIER_STYLE[tat.tier];
+  if (!style) return null;
+  return (
+    <View className={`px-2 py-0.5 rounded-full self-start mt-1 ${style.bg}`}>
+      <Text className={`text-[10px] font-extrabold ${style.text}`}>
+        {tat.tier === "ESCALATED" ? "ESCALATED" : tat.tier === "OVERDUE" ? "OVERDUE" : "TAT 50%+"} · {tat.pct}%
+      </Text>
+    </View>
+  );
+}
+
+const CHECKLIST_LABELS: Record<string, string> = {
+  prep: "Substrate Prep",
+  coating: "Coating Uniformity",
+  cleanup: "Housekeeping",
+  evidence: "Evidence Logged",
+};
+
+function checklistLabel(key: string) {
+  return CHECKLIST_LABELS[key] || key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export function VoiceNotePlayer({ url, color = "#EAAC1F" }: { url: string; color?: string }) {
   const player = useAudioPlayer(url);
   const isPlaying = player.playing;
@@ -26,7 +58,7 @@ export function VoiceNotePlayer({ url, color = "#EAAC1F" }: { url: string; color
       style={{ gap: 6 }}
     >
       <Ionicons name={isPlaying ? "pause" : "play"} size={12} color={color} />
-      <Text className="text-[11px] font-bold text-slate-700">
+      <Text className="text-[12px] font-bold text-slate-700">
         {isPlaying ? "Pause Voice" : "Play Voice"}
       </Text>
     </Pressable>
@@ -125,18 +157,18 @@ export default function Approvals() {
 
     return (
       <View className="bg-slate-50 border border-slate-200/50 rounded-xl p-3 mb-4 mt-2">
-        <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+        <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
           Attached Site Evidence
         </Text>
 
         {originalUpdates.length > 0 && (
           <View className={reworkUpdates.length > 0 ? "mb-3" : ""}>
-            <Text className="text-[9px] font-extrabold text-slate-500 uppercase mb-1">
+            <Text className="text-[10px] font-extrabold text-slate-500 uppercase mb-1">
               Original Submission:
             </Text>
             {originalUpdates.map((su: any) => (
               <View key={su.id} className="bg-white border border-slate-100 rounded-lg p-2.5 mb-1.5">
-                <Text className="text-xs font-semibold text-slate-800 leading-normal">
+                <Text className="text-sm font-semibold text-slate-800 leading-normal">
                   {su.workDone}
                 </Text>
                 
@@ -164,12 +196,12 @@ export default function Approvals() {
 
         {reworkUpdates.length > 0 && (
           <View>
-            <Text className="text-[9px] font-extrabold text-alertRed uppercase mb-1">
+            <Text className="text-[10px] font-extrabold text-alertRed uppercase mb-1">
               Rework Remedial Evidence:
             </Text>
             {reworkUpdates.map((su: any) => (
               <View key={su.id} className="bg-red-50/30 border border-red-100 rounded-lg p-2.5 mb-1.5">
-                <Text className="text-xs font-semibold text-slate-800 leading-normal">
+                <Text className="text-sm font-semibold text-slate-800 leading-normal">
                   {su.workDone}
                 </Text>
 
@@ -197,13 +229,87 @@ export default function Approvals() {
       </View>
     );
   };
+  const renderStageDetailsBlock = (stage: any) => {
+    const activity = activities.find((a: any) => a.id === stage.activityId);
+    const boqItems = (data?.boqItems || []).filter(
+      (b: any) => b.activityId === stage.activityId || (!b.activityId && b.projectId === activity?.projectId)
+    );
+    return (
+      <View className="mb-1">
+        {activity && (
+          <View className="bg-slate-50 border border-slate-200/50 rounded-xl p-3 mb-2">
+            <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              Payment Breakdown
+            </Text>
+            <View className="flex-row justify-between mb-1">
+              <Text className="text-sm text-slate-500">Base value</Text>
+              <Text className="text-sm text-slate-700 font-semibold">₹{activity.paymentValue.toLocaleString("en-IN")}</Text>
+            </View>
+            <View className="flex-row justify-between mb-1">
+              <Text className="text-sm text-slate-500">GST ({activity.gstPct}%)</Text>
+              <Text className="text-sm text-slate-700 font-semibold">+ ₹{Math.round(activity.paymentValue * activity.gstPct / 100).toLocaleString("en-IN")}</Text>
+            </View>
+            <View className="flex-row justify-between mb-1">
+              <Text className="text-sm text-slate-500">Retention held ({activity.retentionPct}%)</Text>
+              <Text className="text-sm text-alertRed font-semibold">− ₹{Math.round(activity.paymentValue * activity.retentionPct / 100).toLocaleString("en-IN")}</Text>
+            </View>
+            <View className="flex-row justify-between pt-1.5 mt-1 border-t border-slate-200">
+              <Text className="text-sm font-extrabold text-brandCharcoal">Net payable now</Text>
+              <Text className="text-sm font-extrabold text-brandCharcoal">₹{stage.amountDue?.toLocaleString("en-IN") ?? "0"}</Text>
+            </View>
+          </View>
+        )}
+
+        {stage.checklist && (
+          <View className="bg-slate-50 border border-slate-200/50 rounded-xl p-3 mb-2">
+            <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              Contractor QA Checklist
+            </Text>
+            <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+              {Object.keys(stage.checklist).length === 0 && (
+                <Text className="text-sm text-slate-400 font-medium">No checklist recorded.</Text>
+              )}
+              {Object.entries(stage.checklist).map(([key, value]) => {
+                const ok = !!value;
+                return (
+                  <View
+                    key={key}
+                    className={`flex-row items-center px-2 py-1 rounded-full ${ok ? "bg-emerald-50 border border-emerald-200" : "bg-red-50 border border-red-200"}`}
+                    style={{ gap: 4 }}
+                  >
+                    <Ionicons name={ok ? "checkmark-circle" : "close-circle"} size={11} color={ok ? "#1B8755" : "#D9383A"} />
+                    <Text className={`text-[11px] font-bold ${ok ? "text-successGreen" : "text-alertRed"}`}>{checklistLabel(key)}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
+        {boqItems.length > 0 && (
+          <View className="bg-slate-50 border border-slate-200/50 rounded-xl p-3 mb-2">
+            <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              BOQ / Material Spec Reference
+            </Text>
+            {boqItems.map((b: any) => (
+              <Text key={b.id} className="text-sm text-slate-700 font-medium mb-1">
+                <Text className="font-extrabold">{b.code}</Text> — {b.description} · {b.quantity} {b.unit} @ ₹{b.rate}
+                {b.manufacturer ? <Text className="text-slate-400"> · Brand: {b.manufacturer}</Text> : null}
+              </Text>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  };
+
   const renderDecisionTimeline = (stage: any) => {
     const decisions = stage.decisions || [];
     if (decisions.length === 0) return null;
 
     return (
       <View className="mb-4 bg-slate-50/60 border border-slate-200/40 rounded-xl p-3">
-        <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+        <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
           Approval Timeline
         </Text>
         {decisions.map((d: any) => {
@@ -217,17 +323,17 @@ export default function Approvals() {
               />
               <View className="flex-1">
                 <View className="flex-row items-center flex-wrap" style={{ gap: 4 }}>
-                  <Text className="text-xs font-bold text-slate-700">{d.role}</Text>
-                  <Text className="text-[9px] font-semibold text-slate-400 uppercase">
+                  <Text className="text-sm font-bold text-slate-700">{d.role}</Text>
+                  <Text className="text-[10px] font-semibold text-slate-400 uppercase">
                     {d.decision.replace("_", " ")}
                   </Text>
-                  <Text className="text-[9px] text-slate-400">
+                  <Text className="text-[10px] text-slate-400">
                     · {new Date(d.createdAt).toLocaleDateString()} {new Date(d.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </Text>
                 </View>
                 {d.note ? (
                   <View className="mt-1 bg-white border border-slate-100 p-2 rounded-lg">
-                    <Text className="text-xs text-slate-600 font-medium italic">
+                    <Text className="text-sm text-slate-600 font-medium italic">
                       "{d.note}"
                     </Text>
                   </View>
@@ -262,7 +368,7 @@ export default function Approvals() {
       <View className="flex-1 relative bg-offWhite">
         <ScrollView className="flex-grow" contentContainerStyle={{ flexGrow: 1 }}>
           <Screen>
-            <Title>Approvals</Title>
+            <Title icon="checkmark-done-outline" eyebrow="Stage Workflow">Approvals</Title>
 
             {raisableActivities.length > 0 && (
               <View className="mb-6">
@@ -276,7 +382,7 @@ export default function Approvals() {
                         {activity.name}
                       </Text>
                       <View className="bg-slate-100 px-2.5 py-1 rounded-full">
-                        <Text className="text-xs font-bold text-slate-600 uppercase">
+                        <Text className="text-sm font-bold text-slate-600 uppercase">
                           {activity.status}
                         </Text>
                       </View>
@@ -314,18 +420,19 @@ export default function Approvals() {
                         </View>
                         {returnComment && (
                           <View className="bg-red-50/70 border border-red-100 p-3 rounded-xl mb-3">
-                            <Text className="text-alertRed font-bold text-xs mb-1">
+                            <Text className="text-alertRed font-bold text-sm mb-1">
                               REWORK REASON:
                             </Text>
-                            <Text className="text-brandCharcoal font-semibold text-xs leading-relaxed">
+                            <Text className="text-brandCharcoal font-semibold text-sm leading-relaxed">
                               {returnComment.text}
                             </Text>
                           </View>
                         )}
-                        <Text className="text-slate-400 text-xs font-semibold">
+                        <Text className="text-slate-400 text-sm font-semibold">
                           Due: {new Date(stage.dueAt).toLocaleDateString()}
                         </Text>
                       </View>
+                      {renderStageDetailsBlock(stage)}
                       {renderDecisionTimeline(stage)}
                       {renderEvidenceBlock(stage)}
                       <View className="mb-2">
@@ -364,7 +471,7 @@ export default function Approvals() {
                       <Text className="font-extrabold text-brandCharcoal text-base">
                         {getActivityName(stage.activityId)}
                       </Text>
-                      <Text className="text-slate-500 text-[10px] font-bold mt-1.5 leading-relaxed">
+                      <Text className="text-slate-500 text-[11px] font-bold mt-1.5 leading-relaxed">
                         Proof Reference: <Text className="text-brandCharcoal font-extrabold">{stage.evidence?.[0] || "Confirmed by Client"}</Text>
                       </Text>
                     </View>
@@ -392,16 +499,18 @@ export default function Approvals() {
                           <Text className="font-bold text-brandCharcoal text-base mb-1">
                             {getActivityName(stage.activityId)}
                           </Text>
-                          <Text className="text-slate-400 text-xs font-semibold">
+                          <Text className="text-slate-400 text-sm font-semibold">
                             Due: {new Date(stage.dueAt).toLocaleDateString()}
                           </Text>
+                          <TatBadge stage={stage} />
                         </View>
                         <View className={`${badge.bg} px-2.5 py-1 rounded-full`}>
-                          <Text className={`text-[10px] font-bold uppercase ${badge.text}`}>
+                          <Text className={`text-[11px] font-bold uppercase ${badge.text}`}>
                             {badge.label}
                           </Text>
                         </View>
                       </View>
+                      {renderStageDetailsBlock(stage)}
                       {renderDecisionTimeline(stage)}
                       {renderEvidenceBlock(stage)}
                     </Card>
@@ -441,7 +550,7 @@ export default function Approvals() {
                 </Pressable>
               </View>
               
-              <Text className="text-slate-400 text-xs font-semibold mb-4 leading-relaxed">
+              <Text className="text-slate-400 text-sm font-semibold mb-4 leading-relaxed">
                 Verify and confirm all quality checks before raising stage approval for {selectedActivity.name}.
               </Text>
 
@@ -454,8 +563,8 @@ export default function Approvals() {
                     {checklist.prep && <Ionicons name="checkmark" size={12} color="#1A1D24" />}
                   </View>
                   <View className="flex-1">
-                    <Text className="text-brandCharcoal font-extrabold text-xs">Substrate Prep</Text>
-                    <Text className="text-slate-400 text-[10px] font-semibold mt-0.5">Surface is clean, dry, and free of dust/loose paint.</Text>
+                    <Text className="text-brandCharcoal font-extrabold text-sm">Substrate Prep</Text>
+                    <Text className="text-slate-400 text-[11px] font-semibold mt-0.5">Surface is clean, dry, and free of dust/loose paint.</Text>
                   </View>
                 </Pressable>
 
@@ -467,8 +576,8 @@ export default function Approvals() {
                     {checklist.coating && <Ionicons name="checkmark" size={12} color="#1A1D24" />}
                   </View>
                   <View className="flex-1">
-                    <Text className="text-brandCharcoal font-extrabold text-xs">Coating Uniformity</Text>
-                    <Text className="text-slate-400 text-[10px] font-semibold mt-0.5">Material is applied evenly without runs or patches.</Text>
+                    <Text className="text-brandCharcoal font-extrabold text-sm">Coating Uniformity</Text>
+                    <Text className="text-slate-400 text-[11px] font-semibold mt-0.5">Material is applied evenly without runs or patches.</Text>
                   </View>
                 </Pressable>
 
@@ -480,8 +589,8 @@ export default function Approvals() {
                     {checklist.cleanup && <Ionicons name="checkmark" size={12} color="#1A1D24" />}
                   </View>
                   <View className="flex-1">
-                    <Text className="text-brandCharcoal font-extrabold text-xs">Housekeeping</Text>
-                    <Text className="text-slate-400 text-[10px] font-semibold mt-0.5">Workspace is cleared of scaffolding debris and hazards.</Text>
+                    <Text className="text-brandCharcoal font-extrabold text-sm">Housekeeping</Text>
+                    <Text className="text-slate-400 text-[11px] font-semibold mt-0.5">Workspace is cleared of scaffolding debris and hazards.</Text>
                   </View>
                 </Pressable>
 
@@ -493,8 +602,8 @@ export default function Approvals() {
                     {checklist.evidence && <Ionicons name="checkmark" size={12} color="#1A1D24" />}
                   </View>
                   <View className="flex-1">
-                    <Text className="text-brandCharcoal font-extrabold text-xs">Evidence Logged</Text>
-                    <Text className="text-slate-400 text-[10px] font-semibold mt-0.5">Photo and/or voice logs have been attached.</Text>
+                    <Text className="text-brandCharcoal font-extrabold text-sm">Evidence Logged</Text>
+                    <Text className="text-slate-400 text-[11px] font-semibold mt-0.5">Photo and/or voice logs have been attached.</Text>
                   </View>
                 </Pressable>
               </View>
@@ -525,7 +634,7 @@ export default function Approvals() {
       <View className="flex-1 relative bg-offWhite">
         <ScrollView className="flex-grow" contentContainerStyle={{ flexGrow: 1 }}>
           <Screen>
-            <Title>Approvals</Title>
+            <Title icon="checkmark-done-outline" eyebrow="Stage Workflow">Approvals</Title>
             <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
               Awaiting Payment Release
             </Text>
@@ -543,15 +652,16 @@ export default function Approvals() {
                 <Card key={stage.id}>
                   <View className="flex-row items-center justify-between mb-4">
                     <View className="flex-1 pr-2">
-                      <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                      <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">
                         {getActivityName(stage.activityId)}
                       </Text>
-                      <Text className="font-extrabold text-brandCharcoal text-xs">
+                      <Text className="font-extrabold text-brandCharcoal text-sm">
                         Due: {new Date(stage.dueAt).toLocaleDateString()}
                       </Text>
+                      <TatBadge stage={stage} />
                     </View>
                     <View className="ml-2">
-                      <Text className="text-xs text-slate-400 font-bold text-right mb-0.5">
+                      <Text className="text-sm text-slate-400 font-bold text-right mb-0.5">
                         AMOUNT DUE
                       </Text>
                       <Text className="font-extrabold text-xl text-successGreen text-right">
@@ -559,6 +669,7 @@ export default function Approvals() {
                       </Text>
                     </View>
                   </View>
+                  {renderStageDetailsBlock(stage)}
                   {renderDecisionTimeline(stage)}
                   {renderEvidenceBlock(stage)}
                   <Button
@@ -590,12 +701,12 @@ export default function Approvals() {
                 </Pressable>
               </View>
               
-              <Text className="text-slate-400 text-xs font-semibold mb-4 leading-relaxed">
+              <Text className="text-slate-400 text-sm font-semibold mb-4 leading-relaxed">
                 Confirm you have paid ₹{selectedPaymentStage.amountDue?.toLocaleString("en-IN")} externally and enter details (e.g. cheque number, transaction ID).
               </Text>
 
               <View className="mb-6">
-                <Text className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5">
+                <Text className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1.5">
                   Cheque Number / Transfer Reference
                 </Text>
                 <TextInput
@@ -603,7 +714,7 @@ export default function Approvals() {
                   onChangeText={setPaymentRefText}
                   placeholder="e.g. Cheque #482931 or IMPS reference ID"
                   placeholderTextColor="#94A3B8"
-                  className="h-12 border border-slate-200 bg-white rounded-xl px-4 text-brandCharcoal text-xs font-semibold"
+                  className="h-12 border border-slate-200 bg-white rounded-xl px-4 text-brandCharcoal text-sm font-semibold"
                 />
               </View>
 
@@ -642,7 +753,7 @@ export default function Approvals() {
   return (
     <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
       <Screen>
-        <Title>Approvals</Title>
+        <Title icon="checkmark-done-outline" eyebrow="Stage Workflow">Approvals</Title>
         <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
           Awaiting Your Review
         </Text>
@@ -665,16 +776,18 @@ export default function Approvals() {
                     <Text className="font-bold text-brandCharcoal text-base mb-1">
                       {getActivityName(stage.activityId)}
                     </Text>
-                    <Text className="text-slate-400 text-xs font-semibold">
+                    <Text className="text-slate-400 text-sm font-semibold">
                       Due: {new Date(stage.dueAt).toLocaleDateString()}
                     </Text>
+                    <TatBadge stage={stage} />
                   </View>
                   <View className={`${badge.bg} px-2.5 py-1 rounded-full`}>
-                    <Text className={`text-[10px] font-bold uppercase ${badge.text}`}>
+                    <Text className={`text-[11px] font-bold uppercase ${badge.text}`}>
                       {badge.label}
                     </Text>
                   </View>
                 </View>
+                {renderStageDetailsBlock(stage)}
                 {renderDecisionTimeline(stage)}
                 {renderEvidenceBlock(stage)}
                 <View className="flex-row space-x-3 gap-3">
@@ -714,7 +827,7 @@ export default function Approvals() {
             <Text className="text-brandCharcoal font-extrabold text-lg mb-2">
               Reason for Return
             </Text>
-            <Text className="text-slate-500 text-xs font-semibold mb-4 leading-relaxed">
+            <Text className="text-slate-500 text-sm font-semibold mb-4 leading-relaxed">
               Please specify the rework required. This comment will be visible to the Contractor.
             </Text>
 

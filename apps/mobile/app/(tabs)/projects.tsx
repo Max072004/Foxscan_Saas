@@ -29,7 +29,9 @@ export default function Projects() {
   return (
     <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
       <Screen>
-        <Title>Projects</Title>
+        <Title icon="business-outline" eyebrow="Your Workspace" subtitle="All societies and sites you're assigned to">
+          Projects
+        </Title>
         {error ? (
           <View className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl">
             <Text className="text-alertRed font-bold text-sm">{error.message}</Text>
@@ -52,7 +54,7 @@ export default function Projects() {
                         {project.name}
                       </Text>
                       <View className={`${status.bg} px-2.5 py-1 rounded-full`}>
-                        <Text className={`text-[10px] font-extrabold uppercase ${status.text}`}>
+                        <Text className={`text-[11px] font-extrabold uppercase ${status.text}`}>
                           {status.label}
                         </Text>
                       </View>
@@ -60,17 +62,17 @@ export default function Projects() {
 
                     <View className="flex-row items-center space-x-1 mb-3">
                       <Ionicons name="location-outline" size={14} color="#64748B" />
-                      <Text className="text-slate-500 text-xs font-semibold ml-1">
+                      <Text className="text-slate-500 text-sm font-semibold ml-1">
                         {project.address}
                       </Text>
                     </View>
 
                     <View className="border-t border-slate-100 pt-3 flex-row justify-between items-center">
-                      <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+                      <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider">
                         Contract Details
                       </Text>
                       <View className="flex-row items-center">
-                        <Text className="text-brandAmber text-xs font-extrabold mr-1">
+                        <Text className="text-brandAmber text-sm font-extrabold mr-1">
                           View details
                         </Text>
                         <Ionicons name="arrow-forward" size={14} color="#EAAC1F" />

@@ -16,7 +16,7 @@ export function CameraCapture({
   if (!permission?.granted) {
     return (
       <View>
-        <Text className="mb-2 text-slate-500 text-xs font-semibold">
+        <Text className="mb-2 text-slate-500 text-sm font-semibold">
           Camera access is required for photo evidence.
         </Text>
         <Button label="Allow camera" onPress={() => requestPermission()} />

@@ -46,7 +46,7 @@ export default function Dashboard() {
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-row items-center">
             <View className="w-8 h-8 rounded-full bg-brandAmber items-center justify-center mr-2 border border-brandCharcoal/10">
-              <Text className="text-brandCharcoal font-extrabold text-[10px] tracking-tighter">
+              <Text className="text-brandCharcoal font-extrabold text-[11px] tracking-tighter">
                 FS
               </Text>
             </View>
@@ -70,14 +70,14 @@ export default function Dashboard() {
             <Card>
               <View className="flex-row items-center justify-between">
                 <View className="flex-1 pr-4">
-                  <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                  <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">
                     Overall Project Health
                   </Text>
                   <Text className="text-xl font-extrabold text-brandCharcoal leading-tight">
                     {firstProject?.name || "Greenview External Repainting"}
                   </Text>
                   {activeSlippage ? (
-                    <Text className={`text-xs font-bold mt-1.5 ${
+                    <Text className={`text-sm font-bold mt-1.5 ${
                       activeSlippage.status === "BEHIND" 
                         ? "text-alertRed" 
                         : activeSlippage.status === "AHEAD" 
@@ -91,7 +91,7 @@ export default function Dashboard() {
                         : "On track (no slippage)"}
                     </Text>
                   ) : (
-                    <Text className="text-slate-500 text-xs font-semibold mt-1">
+                    <Text className="text-slate-500 text-sm font-semibold mt-1">
                       Scaffolding and coatings active
                     </Text>
                   )}
@@ -132,12 +132,12 @@ export default function Dashboard() {
                       <View className="w-8 h-8 rounded-xl bg-emerald-50 items-center justify-center border border-emerald-100">
                         <Ionicons name="cash-outline" size={18} color="#1B8755" />
                       </View>
-                      <Text className="text-successGreen text-[10px] font-bold uppercase">
+                      <Text className="text-successGreen text-[11px] font-bold uppercase">
                         Cleared
                       </Text>
                     </View>
                     <View className="mt-4">
-                      <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                      <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">
                         Disbursed
                       </Text>
                       <Text className="text-2xl font-extrabold text-successGreen leading-none">
@@ -153,7 +153,7 @@ export default function Dashboard() {
                 <Card>
                   <View className="min-h-[46px] justify-between flex-row items-center">
                     <View className="flex-1">
-                      <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+                      <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
                         Overdue
                       </Text>
                       <Text className={`text-base font-extrabold ${overdueCount > 0 ? "text-alertRed" : "text-brandCharcoal"}`}>
@@ -169,7 +169,7 @@ export default function Dashboard() {
                 <Card>
                   <View className="min-h-[46px] justify-between flex-row items-center">
                     <View className="flex-1">
-                      <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+                      <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
                         Projects
                       </Text>
                       <Text className="text-base font-extrabold text-brandCharcoal">
@@ -204,7 +204,7 @@ export default function Dashboard() {
                         <Text className="text-brandCharcoal font-extrabold text-sm">
                           Review Stage Approvals
                         </Text>
-                        <Text className="text-slate-400 text-xs font-semibold mt-0.5">
+                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
                           Pending workflow stages requiring clearance
                         </Text>
                       </View>
@@ -229,8 +229,158 @@ export default function Dashboard() {
                         <Text className="text-brandCharcoal font-extrabold text-sm">
                           Submit Daily Site Log
                         </Text>
-                        <Text className="text-slate-400 text-xs font-semibold mt-0.5">
+                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
                           Record geotagged photos and audio logs
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
+                  </View>
+                </Card>
+              </Pressable>
+
+              <Pressable
+                onPress={() => router.push("/payments")}
+                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
+                className="mt-1"
+              >
+                <Card>
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center flex-1">
+                      <View className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 items-center justify-center mr-3">
+                        <Ionicons name="cash-outline" size={20} color="#1B8755" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-brandCharcoal font-extrabold text-sm">
+                          View Payments &amp; GST Breakdown
+                        </Text>
+                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
+                          Contract value, retention, and dues per activity
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
+                  </View>
+                </Card>
+              </Pressable>
+
+              <Pressable
+                onPress={() => router.push("/delays")}
+                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
+                className="mt-1"
+              >
+                <Card>
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center flex-1">
+                      <View className="w-10 h-10 rounded-xl bg-red-50 border border-red-100 items-center justify-center mr-3">
+                        <Ionicons name="alert-circle-outline" size={20} color="#D9383A" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-brandCharcoal font-extrabold text-sm">
+                          Track Delays
+                        </Text>
+                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
+                          Log causes and mitigation plans
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
+                  </View>
+                </Card>
+              </Pressable>
+
+              <Pressable
+                onPress={() => router.push("/assurance")}
+                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
+                className="mt-1"
+              >
+                <Card>
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center flex-1">
+                      <View className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 items-center justify-center mr-3">
+                        <Ionicons name="shield-checkmark-outline" size={20} color="#8B5CF6" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-brandCharcoal font-extrabold text-sm">
+                          DLP, Warranty &amp; Disputes
+                        </Text>
+                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
+                          Defect liability, warranty register, and disputes
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
+                  </View>
+                </Card>
+              </Pressable>
+
+              <Pressable
+                onPress={() => router.push("/discussion")}
+                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
+                className="mt-1"
+              >
+                <Card>
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center flex-1">
+                      <View className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 items-center justify-center mr-3">
+                        <Ionicons name="chatbubbles-outline" size={20} color="#0284C7" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-brandCharcoal font-extrabold text-sm">
+                          Discussion
+                        </Text>
+                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
+                          Per-activity comments, off WhatsApp and on record
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
+                  </View>
+                </Card>
+              </Pressable>
+
+              <Pressable
+                onPress={() => router.push("/reports")}
+                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
+                className="mt-1"
+              >
+                <Card>
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center flex-1">
+                      <View className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 items-center justify-center mr-3">
+                        <Ionicons name="bar-chart-outline" size={20} color="#1A1D24" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-brandCharcoal font-extrabold text-sm">
+                          Reports
+                        </Text>
+                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
+                          Portfolio analytics and SLA compliance
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
+                  </View>
+                </Card>
+              </Pressable>
+
+              <Pressable
+                onPress={() => router.push("/quotations")}
+                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
+                className="mt-1"
+              >
+                <Card>
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center flex-1">
+                      <View className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 items-center justify-center mr-3">
+                        <Ionicons name="document-text-outline" size={20} color="#6366F1" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-brandCharcoal font-extrabold text-sm">
+                          Quotations &amp; Award
+                        </Text>
+                        <Text className="text-slate-400 text-xs font-semibold mt-0.5">
+                          Compare vendor quotes and award the contract
                         </Text>
                       </View>
                     </View>

@@ -27,7 +27,7 @@ export default function Profile() {
   return (
     <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
       <Screen>
-        <Title>Profile</Title>
+        <Title icon="person-outline" eyebrow="Account">Profile</Title>
 
         {/* User Card with Initial Avatar */}
         <Card>
@@ -43,7 +43,7 @@ export default function Profile() {
               </Text>
               <View className="flex-row mt-1">
                 <View className="bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/50">
-                  <Text className="text-[10px] font-bold text-slate-600 uppercase">
+                  <Text className="text-[11px] font-bold text-slate-600 uppercase">
                     {role || "No Role"}
                   </Text>
                 </View>
@@ -66,7 +66,7 @@ export default function Profile() {
                   <Text className="text-brandCharcoal font-bold text-sm">
                     Biometric Authentication
                   </Text>
-                  <Text className="text-slate-400 text-xs font-semibold mt-0.5">
+                  <Text className="text-slate-400 text-sm font-semibold mt-0.5">
                     Unlock application using fingerprint/face ID
                   </Text>
                 </View>

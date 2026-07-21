@@ -78,7 +78,7 @@ export default function ProjectDetails() {
         {/* Project Header Info Card */}
         <View className="mb-4">
           <View className="flex-row items-center justify-between mb-1.5 px-0.5">
-            <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+            <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider">
               Project Overview
             </Text>
             {role && role !== "MANUFACTURER" && (
@@ -88,7 +88,7 @@ export default function ProjectDetails() {
                 style={({ pressed }) => pressed ? { transform: [{ scale: 0.96 }] } : {}}
               >
                 <Ionicons name="settings-outline" size={14} color="#EAAC1F" />
-                <Text className="text-brandAmber text-xs font-bold ml-1">Setup</Text>
+                <Text className="text-brandAmber text-sm font-bold ml-1">Setup</Text>
               </Pressable>
             )}
           </View>
@@ -97,14 +97,14 @@ export default function ProjectDetails() {
               <Text className="text-xl font-extrabold text-brandCharcoal leading-tight mb-1">
                 {project?.name || "Project Details"}
               </Text>
-              <Text className="text-slate-500 text-xs font-semibold mb-3">
+              <Text className="text-slate-500 text-sm font-semibold mb-3">
                 {project?.address}
               </Text>
             </View>
 
             <View className="flex-row justify-between items-center border-t border-slate-100 pt-3 mt-1">
               <View>
-                <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+                <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
                   Contract Value
                 </Text>
                 <Text className="text-sm font-extrabold text-brandCharcoal">
@@ -112,10 +112,10 @@ export default function ProjectDetails() {
                 </Text>
               </View>
               <View>
-                <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+                <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
                   Planned Schedule
                 </Text>
-                <Text className="text-xs font-extrabold text-slate-500">
+                <Text className="text-sm font-extrabold text-slate-500">
                   {project?.startDate} — {project?.endDate}
                 </Text>
               </View>
@@ -157,7 +157,7 @@ export default function ProjectDetails() {
                     ? "bg-green-50" 
                     : "bg-slate-100"
                 }`}>
-                  <Text className={`text-[10px] font-bold uppercase ${
+                  <Text className={`text-[11px] font-bold uppercase ${
                     slippageInfo.status === "BEHIND" 
                       ? "text-alertRed" 
                       : slippageInfo.status === "AHEAD" 
@@ -171,7 +171,7 @@ export default function ProjectDetails() {
 
               <View className="flex-row justify-between items-center mt-1">
                 <View>
-                  <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+                  <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
                     Slippage Metric
                   </Text>
                   <Text className={`text-sm font-extrabold ${
@@ -189,10 +189,10 @@ export default function ProjectDetails() {
                   </Text>
                 </View>
                 <View>
-                  <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+                  <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
                     Projected Completion
                   </Text>
-                  <Text className="text-xs font-extrabold text-brandCharcoal">
+                  <Text className="text-sm font-extrabold text-brandCharcoal">
                     {slippageInfo.projectedEndDate || project.endDate}
                   </Text>
                 </View>
@@ -211,7 +211,7 @@ export default function ProjectDetails() {
                   <View className="mt-4 pt-3 border-t border-slate-100">
                     <View className="flex-row items-center mb-2">
                       <Ionicons name="warning-outline" size={14} color="#D9383A" />
-                      <Text className="text-alertRed text-xs font-bold uppercase tracking-wider ml-1">
+                      <Text className="text-alertRed text-sm font-bold uppercase tracking-wider ml-1">
                         Escalated Delays (Overdue)
                       </Text>
                     </View>
@@ -225,14 +225,14 @@ export default function ProjectDetails() {
                       
                       return (
                         <View key={s.id} className="bg-red-50/50 rounded-xl p-2.5 mb-1.5 border border-red-100/50">
-                          <Text className="text-xs font-bold text-slate-800">
+                          <Text className="text-sm font-bold text-slate-800">
                             {act?.name || "Unknown Activity"}
                           </Text>
                           <View className="flex-row justify-between items-center mt-1">
-                            <Text className="text-[10px] font-semibold text-slate-500">
+                            <Text className="text-[11px] font-semibold text-slate-500">
                               Stuck with: <Text className="font-extrabold text-brandCharcoal">{s.state}</Text>
                             </Text>
-                            <Text className="text-[10px] font-bold text-alertRed bg-red-100 px-1.5 py-0.5 rounded">
+                            <Text className="text-[11px] font-bold text-alertRed bg-red-100 px-1.5 py-0.5 rounded">
                               Overdue by {displayOverdue}
                             </Text>
                           </View>
@@ -255,7 +255,7 @@ export default function ProjectDetails() {
           >
             <View className="flex-row items-center justify-center space-x-1.5">
               <Ionicons name="trail-sign-outline" size={16} color={activeSubTab === "timeline" ? "#EAAC1F" : "#64748B"} />
-              <Text className={`text-xs font-bold ml-1.5 ${activeSubTab === "timeline" ? "text-brandCharcoal font-extrabold" : "text-slate-500"}`}>
+              <Text className={`text-sm font-bold ml-1.5 ${activeSubTab === "timeline" ? "text-brandCharcoal font-extrabold" : "text-slate-500"}`}>
                 Timeline
               </Text>
             </View>
@@ -268,7 +268,7 @@ export default function ProjectDetails() {
           >
             <View className="flex-row items-center justify-center space-x-1.5">
               <Ionicons name="document-attach-outline" size={16} color={activeSubTab === "docs" ? "#EAAC1F" : "#64748B"} />
-              <Text className={`text-xs font-bold ml-1.5 ${activeSubTab === "docs" ? "text-brandCharcoal font-extrabold" : "text-slate-500"}`}>
+              <Text className={`text-sm font-bold ml-1.5 ${activeSubTab === "docs" ? "text-brandCharcoal font-extrabold" : "text-slate-500"}`}>
                 Documents
               </Text>
             </View>
@@ -288,7 +288,7 @@ export default function ProjectDetails() {
                         {a.name}
                       </Text>
                       <View className={`${badge.bg} px-2 py-0.5 rounded-full`}>
-                        <Text className={`text-[9px] font-bold uppercase ${badge.text}`}>
+                        <Text className={`text-[10px] font-bold uppercase ${badge.text}`}>
                           {badge.label}
                         </Text>
                       </View>
@@ -296,7 +296,7 @@ export default function ProjectDetails() {
 
                     <View className="flex-row items-center space-x-1.5 mb-2">
                       <Ionicons name="calendar-outline" size={12} color="#64748B" />
-                      <Text className="text-slate-400 text-[10px] font-semibold ml-1">
+                      <Text className="text-slate-400 text-[11px] font-semibold ml-1">
                         {a.plannedStart} — {a.plannedEnd}
                       </Text>
                     </View>
@@ -304,14 +304,14 @@ export default function ProjectDetails() {
                     <View className="flex-row items-center justify-between mb-3 bg-slate-50 p-2 rounded-lg border border-slate-100">
                       <View className="flex-row items-center">
                         <Ionicons name="time-outline" size={12} color="#64748B" />
-                        <Text className="text-slate-500 text-[10px] font-bold ml-1">
+                        <Text className="text-slate-500 text-[11px] font-bold ml-1">
                           Duration: {a.durationDays || Math.max(1, Math.round((new Date(a.plannedEnd).getTime() - new Date(a.plannedStart).getTime()) / (1000 * 60 * 60 * 24)) + 1)} days
                         </Text>
                       </View>
                       {project && project.contractValue > 0 && (
                         <View className="flex-row items-center">
                           <Ionicons name="pie-chart-outline" size={12} color="#EAAC1F" />
-                          <Text className="text-slate-500 text-[10px] font-bold ml-1">
+                          <Text className="text-slate-500 text-[11px] font-bold ml-1">
                             Allocation: {(((a.paymentValue || 0) / project.contractValue) * 100).toFixed(1)}%
                           </Text>
                         </View>
@@ -321,10 +321,10 @@ export default function ProjectDetails() {
                     {/* Completion progress bar */}
                     <View className="space-y-1">
                       <View className="flex-row justify-between items-center mb-0.5">
-                        <Text className="text-slate-400 text-[9px] font-bold uppercase tracking-wider">
+                        <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">
                           Progress
                         </Text>
-                        <Text className="text-brandCharcoal font-extrabold text-[10px]">
+                        <Text className="text-brandCharcoal font-extrabold text-[11px]">
                           {a.progress}%
                         </Text>
                       </View>
@@ -359,7 +359,7 @@ export default function ProjectDetails() {
                   onChangeText={setSearchQuery}
                   placeholder="Search files (e.g. Contract, BOQ)..."
                   placeholderTextColor="#94A3B8"
-                  className="h-12 border border-slate-200 bg-white rounded-xl px-4 text-brandCharcoal text-xs font-semibold focus:border-brandAmber"
+                  className="h-12 border border-slate-200 bg-white rounded-xl px-4 text-brandCharcoal text-sm font-semibold focus:border-brandAmber"
                 />
               </View>
               <Pressable
@@ -384,7 +384,7 @@ export default function ProjectDetails() {
                         <Text className="text-brandCharcoal font-bold text-sm">
                           {doc.name}
                         </Text>
-                        <Text className="text-slate-400 text-xs font-semibold mt-0.5">
+                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
                           {doc.type} · Version {doc.version}
                         </Text>
                       </View>

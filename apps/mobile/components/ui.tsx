@@ -1,21 +1,80 @@
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export function Screen({ children }: { children: ReactNode }) {
   return <View className="flex-1 bg-offWhite px-5 pt-6">{children}</View>;
 }
 
-export function Title({ children }: { children: ReactNode }) {
+interface TitleProps {
+  children: ReactNode;
+  eyebrow?: string;
+  subtitle?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
+}
+
+export function Title({ children, eyebrow, subtitle, icon }: TitleProps) {
   return (
-    <Text className="text-2xl font-extrabold text-brandCharcoal tracking-tight mb-4">
+    <View className="mb-5 flex-row items-start justify-between">
+      <View className="flex-1 pr-3">
+        {eyebrow ? (
+          <Text className="text-brandAmber text-[11px] font-extrabold uppercase tracking-[1.5px] mb-1">
+            {eyebrow}
+          </Text>
+        ) : null}
+        <Text className="text-2xl font-extrabold text-brandCharcoal tracking-tight">
+          {children}
+        </Text>
+        {subtitle ? (
+          <Text className="text-slate-400 text-sm font-semibold mt-1 leading-relaxed">
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+      {icon ? (
+        <View className="w-11 h-11 rounded-2xl bg-brandAmber/12 border border-brandAmber/20 items-center justify-center">
+          <Ionicons name={icon} size={20} color="#EAAC1F" />
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+export function SectionLabel({ children }: { children: ReactNode }) {
+  return (
+    <Text className="text-[12px] font-extrabold text-slate-400 uppercase tracking-[1px] mb-3">
       {children}
     </Text>
   );
 }
 
+export function EmptyState({
+  icon = "file-tray-outline",
+  title,
+  subtitle,
+}: {
+  icon?: keyof typeof Ionicons.glyphMap;
+  title: string;
+  subtitle?: string;
+}) {
+  return (
+    <View className="rounded-2xl border border-dashed border-slate-200 bg-white/60 items-center justify-center py-12 px-6 mb-4">
+      <View className="w-14 h-14 rounded-2xl bg-slate-100 items-center justify-center mb-3">
+        <Ionicons name={icon} size={26} color="#94A3B8" />
+      </View>
+      <Text className="text-brandCharcoal font-bold text-sm text-center">{title}</Text>
+      {subtitle ? (
+        <Text className="text-slate-400 text-sm font-semibold text-center mt-1.5 leading-relaxed max-w-[240px]">
+          {subtitle}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 export function Card({ children }: { children: ReactNode }) {
   return (
-    <View className="rounded-2xl border border-slate-200/50 bg-white p-5 mb-4 shadow-[0_2px_8px_rgba(26,29,36,0.03)]">
+    <View className="rounded-2xl border border-slate-200/60 bg-white p-5 mb-4 shadow-[0_4px_16px_rgba(26,29,36,0.055)]">
       {children}
     </View>
   );

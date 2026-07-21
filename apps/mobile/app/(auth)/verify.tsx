@@ -38,7 +38,7 @@ export default function Verify() {
               FOXSCAN
             </Text>
           </View>
-          <Text className="text-xs font-bold text-brandAmber mt-3 tracking-[2px]">
+          <Text className="text-sm font-bold text-brandAmber mt-3 tracking-[2px]">
             SECURE VERIFICATION
           </Text>
         </View>
@@ -61,7 +61,7 @@ export default function Verify() {
           <Button label="Verify and continue" onPress={verify} />
           {message ? (
             <View className="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl">
-              <Text className="text-center text-xs font-semibold text-alertRed">
+              <Text className="text-center text-sm font-semibold text-alertRed">
                 {message}
               </Text>
             </View>

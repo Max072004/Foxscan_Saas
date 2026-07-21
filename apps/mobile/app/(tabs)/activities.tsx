@@ -33,7 +33,9 @@ export default function Activities() {
   return (
     <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
       <Screen>
-        <Title>Activities</Title>
+        <Title icon="calendar-outline" eyebrow="Project Timeline" subtitle="Sequenced work with planned dates and live progress">
+          Activities
+        </Title>
 
         {data?.activities?.length ? (
           data.activities.map((a) => {
@@ -45,7 +47,7 @@ export default function Activities() {
                     {a.name}
                   </Text>
                   <View className={`${badge.bg} px-2.5 py-1 rounded-full`}>
-                    <Text className={`text-[10px] font-bold uppercase ${badge.text}`}>
+                    <Text className={`text-[11px] font-bold uppercase ${badge.text}`}>
                       {badge.label}
                     </Text>
                   </View>
@@ -54,7 +56,7 @@ export default function Activities() {
                 {/* Timeline info row */}
                 <View className="flex-row items-center space-x-1.5 mb-4">
                   <Ionicons name="calendar-outline" size={14} color="#64748B" />
-                  <Text className="text-slate-500 text-xs font-semibold ml-1">
+                  <Text className="text-slate-500 text-sm font-semibold ml-1">
                     {a.plannedStart} — {a.plannedEnd}
                   </Text>
                 </View>
@@ -62,10 +64,10 @@ export default function Activities() {
                 {/* Progress bar container */}
                 <View className="space-y-1 mt-1">
                   <View className="flex-row justify-between items-center mb-1">
-                    <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">
+                    <Text className="text-slate-400 text-[12px] font-bold uppercase tracking-wider">
                       Completion Progress
                     </Text>
-                    <Text className="text-brandCharcoal font-extrabold text-xs">
+                    <Text className="text-brandCharcoal font-extrabold text-sm">
                       {a.progress}%
                     </Text>
                   </View>

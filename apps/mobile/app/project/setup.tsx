@@ -59,8 +59,8 @@ export default function MobileProjectSetup() {
     };
   });
 
-  const totalDuration = processedActivities.reduce((sum, a) => sum + a.durationDays, 0);
-  const totalPercentage = processedActivities.reduce((sum, a) => sum + a.paymentPct, 0);
+  const totalDuration = processedActivities.reduce((sum: number, a: any) => sum + a.durationDays, 0);
+  const totalPercentage = processedActivities.reduce((sum: number, a: any) => sum + a.paymentPct, 0);
 
   const addDays = (dateStr: string, days: number): string => {
     const d = new Date(dateStr);
@@ -166,11 +166,11 @@ export default function MobileProjectSetup() {
           className="flex-row items-center mb-4 active:opacity-75"
         >
           <Ionicons name="arrow-back" size={16} color="#EAAC1F" />
-          <Text className="text-brandAmber text-xs font-bold ml-1.5">Back to Project</Text>
+          <Text className="text-brandAmber text-sm font-bold ml-1.5">Back to Project</Text>
         </Pressable>
 
         <Title>Project Setup</Title>
-        <Text className="text-slate-400 text-xs font-semibold mb-4">
+        <Text className="text-slate-400 text-sm font-semibold mb-4">
           Configure milestones and timeline planning for {project?.name}
         </Text>
 
@@ -182,10 +182,10 @@ export default function MobileProjectSetup() {
                 <View className="flex-row items-center border-l-4 border-amber-500 pl-3">
                   <Ionicons name="warning-outline" size={20} color="#EAAC1F" />
                   <View className="ml-3 flex-1">
-                    <Text className="text-brandCharcoal font-extrabold text-xs">
+                    <Text className="text-brandCharcoal font-extrabold text-sm">
                       Budget Warning: Incremental Allocation
                     </Text>
-                    <Text className="text-slate-400 text-[10px] font-semibold mt-0.5 leading-relaxed">
+                    <Text className="text-slate-400 text-[11px] font-semibold mt-0.5 leading-relaxed">
                       Allocated: {totalPercentage.toFixed(1)}% of ₹{project?.contractValue.toLocaleString("en-IN")}. Must add up to 100%.
                     </Text>
                   </View>
@@ -196,10 +196,10 @@ export default function MobileProjectSetup() {
                 <View className="flex-row items-center border-l-4 border-emerald-500 pl-3">
                   <Ionicons name="checkmark-circle-outline" size={20} color="#1B8755" />
                   <View className="ml-3 flex-1">
-                    <Text className="text-brandCharcoal font-extrabold text-xs">
+                    <Text className="text-brandCharcoal font-extrabold text-sm">
                       Budget Verified
                     </Text>
-                    <Text className="text-slate-400 text-[10px] font-semibold mt-0.5">
+                    <Text className="text-slate-400 text-[11px] font-semibold mt-0.5">
                       Timeline activities allocate exactly 100% of the contract value.
                     </Text>
                   </View>
@@ -212,12 +212,12 @@ export default function MobileProjectSetup() {
         {/* Add Activity Section */}
         <View className="mb-4">
           <Card>
-            <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-3">
+            <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-3">
               Add New Activity
             </Text>
             
             <View className="mb-3">
-              <Text className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">
+              <Text className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1">
                 Activity Name
               </Text>
               <TextInput
@@ -225,13 +225,13 @@ export default function MobileProjectSetup() {
                 onChangeText={setName}
                 placeholder="e.g. Surface preparation — Wing A"
                 placeholderTextColor="#94A3B8"
-                className="h-11 border border-slate-200 bg-white rounded-xl px-3 text-brandCharcoal text-xs font-semibold"
+                className="h-11 border border-slate-200 bg-white rounded-xl px-3 text-brandCharcoal text-sm font-semibold"
               />
             </View>
 
             <View className="flex-row space-x-3 gap-3 mb-3">
               <View className="flex-1">
-                <Text className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">
+                <Text className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1">
                   Duration (Days)
                 </Text>
                 <TextInput
@@ -240,11 +240,11 @@ export default function MobileProjectSetup() {
                   keyboardType="numeric"
                   placeholder="14"
                   placeholderTextColor="#94A3B8"
-                  className="h-11 border border-slate-200 bg-white rounded-xl px-3 text-brandCharcoal text-xs font-semibold"
+                  className="h-11 border border-slate-200 bg-white rounded-xl px-3 text-brandCharcoal text-sm font-semibold"
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">
+                <Text className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1">
                   Payment (%)
                 </Text>
                 <TextInput
@@ -253,14 +253,14 @@ export default function MobileProjectSetup() {
                   keyboardType="numeric"
                   placeholder="10"
                   placeholderTextColor="#94A3B8"
-                  className="h-11 border border-slate-200 bg-white rounded-xl px-3 text-brandCharcoal text-xs font-semibold"
+                  className="h-11 border border-slate-200 bg-white rounded-xl px-3 text-brandCharcoal text-sm font-semibold"
                 />
               </View>
             </View>
 
             <View className="flex-row space-x-3 gap-3 mb-4">
               <View className="flex-1">
-                <Text className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">
+                <Text className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1">
                   GST %
                 </Text>
                 <TextInput
@@ -269,11 +269,11 @@ export default function MobileProjectSetup() {
                   keyboardType="numeric"
                   placeholder="18"
                   placeholderTextColor="#94A3B8"
-                  className="h-11 border border-slate-200 bg-white rounded-xl px-3 text-brandCharcoal text-xs font-semibold"
+                  className="h-11 border border-slate-200 bg-white rounded-xl px-3 text-brandCharcoal text-sm font-semibold"
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">
+                <Text className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1">
                   Retention %
                 </Text>
                 <TextInput
@@ -282,7 +282,7 @@ export default function MobileProjectSetup() {
                   keyboardType="numeric"
                   placeholder="5"
                   placeholderTextColor="#94A3B8"
-                  className="h-11 border border-slate-200 bg-white rounded-xl px-3 text-brandCharcoal text-xs font-semibold"
+                  className="h-11 border border-slate-200 bg-white rounded-xl px-3 text-brandCharcoal text-sm font-semibold"
                 />
               </View>
             </View>
@@ -310,10 +310,10 @@ export default function MobileProjectSetup() {
                       <Text className="font-extrabold text-brandCharcoal text-sm leading-tight">
                         {index + 1}. {a.name}
                       </Text>
-                      <Text className="text-slate-400 text-[10px] font-semibold mt-1">
+                      <Text className="text-slate-400 text-[11px] font-semibold mt-1">
                         Duration: {a.durationDays} days · Offset: +{a.startOffset}d
                       </Text>
-                      <Text className="text-slate-500 text-[10px] font-bold mt-0.5">
+                      <Text className="text-slate-500 text-[11px] font-bold mt-0.5">
                         Allocation: {a.paymentPct.toFixed(1)}% (₹{a.paymentValue?.toLocaleString("en-IN")})
                       </Text>
                     </View>
