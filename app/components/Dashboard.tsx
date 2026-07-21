@@ -18,7 +18,13 @@ import {
 } from "lucide-react";
 import type { Role } from "@/lib/domain";
 import { FoxscanLogo } from "./Sidebar";
-import { calculateProjectSlippage } from "@/lib/scheduling";
+import { calculateProjectSlippage, tatStatus } from "@/lib/scheduling";
+
+const TAT_TIER_COLOR: Record<string, string> = {
+  WARNING: "var(--warning)",
+  OVERDUE: "var(--error)",
+  ESCALATED: "#7F1D1D",
+};
 
 interface DashboardProps {
   data: AppData;
@@ -312,12 +318,18 @@ export default function Dashboard({ data, activities, stages, role }: DashboardP
               {pendingStages
                 .map((s) => {
                   const a = activities.find((x: any) => x.id === s.activityId);
-                  const isOverdue = new Date(s.dueAt) < new Date();
+                  const tat = tatStatus(s);
+                  const tierColor = TAT_TIER_COLOR[tat.tier];
                   return (
-                    <div className={`alert${isOverdue ? " alert-error" : ""}`} key={s.id} style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "10px 12px" }}>
+                    <div className={`alert${tierColor ? " alert-error" : ""}`} key={s.id} style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "10px 12px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        {isOverdue ? <Clock size={13} /> : <AlertTriangle size={13} />}
+                        {tierColor ? <Clock size={13} style={{ color: tierColor }} /> : <AlertTriangle size={13} />}
                         <span style={{ fontSize: "13px", fontWeight: 700 }}>{a?.name || "Activity"}</span>
+                        {tierColor && (
+                          <span style={{ fontSize: "9px", fontWeight: 800, color: tierColor, marginLeft: "auto" }}>
+                            {tat.tier} · {tat.pct}%
+                          </span>
+                        )}
                       </div>
                       <div style={{ fontSize: "11px", color: "var(--muted)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span>Awaiting: <span className={`badge ${s.state}`} style={{ padding: "1px 6px" }}>{s.state}</span></span>

@@ -1163,6 +1163,57 @@ td { font-size: 13px; color: var(--ink-secondary); }
   .user-menu-name { display: none; }
 }
 
+/* --- Bottom Nav (mobile only) --- */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  background: var(--sidebar-bg);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-lg);
+  padding: var(--sp-2) var(--sp-2) calc(var(--sp-2) + env(safe-area-inset-bottom, 0px));
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--sp-1);
+}
+
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--sp-2) var(--sp-1);
+  border: none;
+  background: transparent;
+  color: var(--sidebar-text);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.bottom-nav-item svg {
+  width: 20px;
+  height: 20px;
+}
+
+.bottom-nav-item:hover {
+  color: var(--sidebar-text-active);
+  background: var(--sidebar-hover);
+}
+
+.bottom-nav-item.active {
+  color: var(--brand-yellow);
+  background: var(--sidebar-active);
+}
+
 @media (max-width: 768px) {
   .four { grid-template-columns: 1fr; }
   .two, .two-equal { grid-template-columns: 1fr; }
@@ -1170,7 +1221,7 @@ td { font-size: 13px; color: var(--ink-secondary); }
   .workflow-board { grid-template-columns: 1fr; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
 
-  .app-content { padding: var(--sp-4); padding-bottom: 80px; }
+  .app-content { padding: var(--sp-4); padding-bottom: 88px; }
   .bottom-nav { display: flex; }
   .user-menu-wrapper { display: none; }
 
@@ -1184,4 +1235,25 @@ td { font-size: 13px; color: var(--ink-secondary); }
   .app-content { padding: var(--sp-3); padding-bottom: 80px; }
   .card { padding: var(--sp-4); }
   .kpi-card { padding: var(--sp-4); }
+}
+
+/* --- Print (Reports "Print / Save as PDF") --- */
+@media print {
+  .sidebar, .bottom-nav, .app-header, .print-hide {
+    display: none !important;
+  }
+  .app-main, .app-main.sidebar-collapsed {
+    margin-left: 0 !important;
+  }
+  .app-content {
+    padding: 0 !important;
+  }
+  body, .app-layout {
+    background: white !important;
+  }
+  .card, .kpi-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
 }

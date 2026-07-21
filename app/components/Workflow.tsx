@@ -3,6 +3,13 @@
 import { useState } from "react";
 import type { AppData, Role } from "@/lib/domain";
 import { CheckCircle2, RotateCcw, ArrowRight, User, Clock } from "lucide-react";
+import { tatStatus } from "@/lib/scheduling";
+
+const TAT_TIER_STYLE: Record<string, { bg: string; color: string; border: string; label: string }> = {
+  WARNING: { bg: "rgba(245, 158, 11, 0.08)", color: "var(--warning)", border: "rgba(245, 158, 11, 0.2)", label: "TAT 50%+" },
+  OVERDUE: { bg: "rgba(217, 56, 58, 0.08)", color: "var(--error)", border: "rgba(217, 56, 58, 0.2)", label: "OVERDUE" },
+  ESCALATED: { bg: "rgba(153, 27, 27, 0.1)", color: "#7F1D1D", border: "rgba(153, 27, 27, 0.3)", label: "ESCALATED" },
+};
 
 interface WorkflowProps {
   data: AppData;
@@ -11,6 +18,17 @@ interface WorkflowProps {
   role: Role;
   actorId: string;
   reload: () => Promise<void>;
+}
+
+const CHECKLIST_LABELS: Record<string, string> = {
+  prep: "Substrate Prep",
+  coating: "Coating Uniformity",
+  cleanup: "Housekeeping",
+  evidence: "Evidence Logged",
+};
+
+function checklistLabel(key: string) {
+  return CHECKLIST_LABELS[key] || key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 const COLUMNS: { state: string; label: string; color: string }[] = [
@@ -110,29 +128,105 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
                   (["MANUFACTURER", "CONSULTANT", "CLIENT"] as Role[]).includes(role) &&
                   s.state === role;
 
-                const isOverdue = s.state !== "PAID" && s.state !== "REWORK" && new Date(s.dueAt) < new Date();
+                const tat = tatStatus(s);
+                const tierStyle = TAT_TIER_STYLE[tat.tier];
                 return (
                   <div className="item" key={s.id}>
                     <div className="row" style={{ marginBottom: "var(--sp-2)" }}>
                       <b style={{ fontSize: "var(--text-sm)" }}>{a?.name}</b>
                       <div style={{ display: "flex", gap: "var(--sp-2)", alignItems: "center" }}>
-                        {isOverdue && (
-                          <span className="badge REWORK" style={{ background: "rgba(217, 56, 58, 0.08)", color: "var(--error)", border: "1px solid rgba(217, 56, 58, 0.2)", fontSize: "10px", fontWeight: 700 }}>
-                            OVERDUE
+                        {tierStyle && (
+                          <span className="badge" style={{ background: tierStyle.bg, color: tierStyle.color, border: `1px solid ${tierStyle.border}`, fontSize: "10px", fontWeight: 700 }}>
+                            {tierStyle.label} · {tat.pct}%
                           </span>
                         )}
                         <span className={`badge ${s.state}`}>{s.state}</span>
                       </div>
                     </div>
-                    {isOverdue && (
-                      <div className="row" style={{ marginBottom: "var(--sp-2)", gap: "4px", color: "var(--error)", fontSize: "var(--text-xs)", fontWeight: 700 }}>
+                    {tierStyle && (
+                      <div className="row" style={{ marginBottom: "var(--sp-2)", gap: "4px", color: tierStyle.color, fontSize: "var(--text-xs)", fontWeight: 700 }}>
                         <Clock size={12} />
-                        <span>ESCALATED: Stuck with {s.state} (Overdue by {Math.max(0, Math.floor((new Date().getTime() - new Date(s.dueAt).getTime()) / 3600000))}h)</span>
+                        <span>
+                          {tat.tier === "ESCALATED"
+                            ? `ESCALATED: Stuck with ${s.state} at ${tat.pct}% of TAT — flagged for admin follow-up`
+                            : tat.tier === "OVERDUE"
+                              ? `Overdue: ${s.state} has breached its TAT window (${tat.pct}%)`
+                              : `Approaching TAT deadline with ${s.state} (${tat.pct}% elapsed)`}
+                        </span>
                       </div>
                     )}
                     <div className="muted" style={{ marginBottom: "var(--sp-2)" }}>
                       ₹{s.amountDue.toLocaleString("en-IN")} due · {s.decisions.length} decisions
                     </div>
+
+                    {/* Payment Breakdown: GST + Retention (was previously a flat number only) */}
+                    {a && (
+                      <div style={{ padding: "10px", background: "var(--bg)", borderRadius: "6px", border: "1px solid var(--line-light)", marginBottom: "var(--sp-3)", fontSize: "var(--text-xs)" }}>
+                        <div style={{ fontWeight: 700, color: "var(--muted)", marginBottom: "6px", textTransform: "uppercase", fontSize: "9px", letterSpacing: "0.5px" }}>
+                          Payment Breakdown
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", rowGap: "3px" }}>
+                          <span className="muted">Base value</span>
+                          <span>₹{a.paymentValue.toLocaleString("en-IN")}</span>
+                          <span className="muted">GST ({a.gstPct}%)</span>
+                          <span>+ ₹{Math.round(a.paymentValue * a.gstPct / 100).toLocaleString("en-IN")}</span>
+                          <span className="muted">Retention held ({a.retentionPct}%)</span>
+                          <span style={{ color: "var(--error)" }}>− ₹{Math.round(a.paymentValue * a.retentionPct / 100).toLocaleString("en-IN")}</span>
+                          <span style={{ fontWeight: 700, borderTop: "1px solid var(--line-light)", paddingTop: "3px", marginTop: "2px" }}>Net payable now</span>
+                          <span style={{ fontWeight: 700, borderTop: "1px solid var(--line-light)", paddingTop: "3px", marginTop: "2px" }}>₹{s.amountDue.toLocaleString("en-IN")}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* QA Checklist results (captured on raise, previously never shown to reviewers) */}
+                    {s.checklist && (
+                      <div style={{ padding: "10px", background: "var(--bg)", borderRadius: "6px", border: "1px solid var(--line-light)", marginBottom: "var(--sp-3)", fontSize: "var(--text-xs)" }}>
+                        <div style={{ fontWeight: 700, color: "var(--muted)", marginBottom: "6px", textTransform: "uppercase", fontSize: "9px", letterSpacing: "0.5px" }}>
+                          Contractor QA Checklist
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                          {Object.keys(s.checklist).length === 0 && (
+                            <span className="muted">No checklist recorded.</span>
+                          )}
+                          {Object.entries(s.checklist).map(([key, value]) => {
+                            const ok = !!value;
+                            return (
+                              <span key={key} style={{
+                                display: "inline-flex", alignItems: "center", gap: "4px",
+                                padding: "2px 8px", borderRadius: "var(--radius-full)",
+                                fontSize: "10px", fontWeight: 600,
+                                background: ok ? "rgba(27,135,85,0.08)" : "rgba(217,56,58,0.08)",
+                                color: ok ? "var(--success)" : "var(--error)",
+                                border: `1px solid ${ok ? "rgba(27,135,85,0.2)" : "rgba(217,56,58,0.2)"}`,
+                              }}>
+                                {ok ? <CheckCircle2 size={11} /> : "✕"} {checklistLabel(key)}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* BOQ / material spec reference for Manufacturer verification */}
+                    {(() => {
+                      const boqItems = (data.boqItems || []).filter(
+                        (b: any) => b.activityId === s.activityId || (!b.activityId && b.projectId === a?.projectId)
+                      );
+                      if (boqItems.length === 0) return null;
+                      return (
+                        <div style={{ padding: "10px", background: "var(--bg)", borderRadius: "6px", border: "1px solid var(--line-light)", marginBottom: "var(--sp-3)", fontSize: "var(--text-xs)" }}>
+                          <div style={{ fontWeight: 700, color: "var(--muted)", marginBottom: "6px", textTransform: "uppercase", fontSize: "9px", letterSpacing: "0.5px" }}>
+                            BOQ / Material Spec Reference
+                          </div>
+                          {boqItems.map((b: any) => (
+                            <div key={b.id} style={{ marginBottom: "4px" }}>
+                              <strong>{b.code}</strong> — {b.description} · {b.quantity} {b.unit} @ ₹{b.rate}
+                              {b.manufacturer && <span className="muted"> · Brand: {b.manufacturer}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
 
                     {/* Site Update Evidence Section */}
                     {(() => {

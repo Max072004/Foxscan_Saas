@@ -15,6 +15,8 @@ import {
   PieChart,
   Activity,
   Award,
+  Download,
+  Printer,
 } from "lucide-react";
 import { FoxscanLogo } from "./Sidebar";
 
@@ -69,15 +71,58 @@ export default function Reports({ token }: ReportsProps) {
   const invoicedPct = contractVal > 0 ? Math.round((report.payments.invoiced / contractVal) * 100) : 0;
   const paidPct = contractVal > 0 ? Math.round((report.payments.paid / contractVal) * 100) : 0;
 
+  const exportCsv = () => {
+    const rows: (string | number)[][] = [
+      ["FOXSCAN Executive Report", new Date().toLocaleString("en-IN")],
+      [],
+      ["Metric", "Value"],
+      ["Active Projects", report.portfolio.projects],
+      ["Portfolio Capital", contractVal],
+      ["Averaged Progress %", progress],
+      ["SLA Violations", report.tat.overdue],
+      ["Total Invoiced", report.payments.invoiced],
+      ["Paid Disbursements", report.payments.paid],
+      ["Retention Retained", report.payments.retention],
+      ["TAT Steps Logged", report.tat.total],
+      ["TAT Cleared On-Time", report.tat.onTime],
+      ["TAT Overdue", report.tat.overdue],
+      [],
+      ["Delay Reason", "Impact Days", "Mitigation Plan", "Target Resolution"],
+      ...report.delays.map((d: any) => [d.reason, d.impactDays, d.mitigationPlan || "", new Date(d.targetClose).toLocaleDateString("en-IN")]),
+    ];
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `foxscan-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="animate-fade" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       {/* Top Section */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--line)", paddingBottom: "14px" }}>
+      <div className="print-hide" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--line)", paddingBottom: "14px" }}>
         <div>
           <h2 className="page-title">Executive Intelligence</h2>
           <p className="page-description" style={{ marginBottom: 0 }}>High-fidelity audit of portfolio progress, financial metrics, and operational SLA adherence.</p>
         </div>
-        <div style={{ opacity: 0.12, marginRight: "10px" }}><FoxscanLogo size={40} /></div>
+        <div style={{ display: "flex", gap: "var(--sp-2)", alignItems: "center" }}>
+          <button className="btn-secondary" onClick={exportCsv} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "var(--text-xs)" }}>
+            <Download size={14} />
+            Export to Excel (CSV)
+          </button>
+          <button className="btn-secondary" onClick={() => window.print()} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "var(--text-xs)" }}>
+            <Printer size={14} />
+            Print / Save as PDF
+          </button>
+          <div style={{ opacity: 0.12, marginLeft: "6px" }}><FoxscanLogo size={40} /></div>
+        </div>
       </div>
 
       {/* KPI Cards Section */}
