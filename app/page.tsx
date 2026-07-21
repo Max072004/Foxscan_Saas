@@ -17,6 +17,9 @@ import Documents from "./components/Documents";
 import Reports from "./components/Reports";
 import Admin from "./components/Admin";
 import Delays from "./components/Delays";
+import Assurance from "./components/Assurance";
+import Discussion from "./components/Discussion";
+import Quotations from "./components/Quotations";
 import { FoxscanLogo } from "./components/Sidebar";
 
 export default function Home() {
@@ -115,7 +118,9 @@ export default function Home() {
               reload={reload}
             />
           )}
-          {tab === "Timeline" && <Timeline activities={activities} />}
+          {tab === "Timeline" && (
+            <Timeline activities={activities} token={token} projectId={project.id} reload={reload} />
+          )}
           {tab === "Payments" && (
             <Payments data={data} activities={activities} />
           )}
@@ -136,6 +141,15 @@ export default function Home() {
           {tab === "Reports" && <Reports token={token} />}
           {tab === "Delays" && (
             <Delays data={data} token={token} projectId={project.id} reload={reload} />
+          )}
+          {tab === "Assurance" && (
+            <Assurance data={data} token={token} projectId={project.id} contractorId={project.contractorId} reload={reload} />
+          )}
+          {tab === "Discussion" && (
+            <Discussion data={data} activities={activities} actorId={me.id} reload={reload} />
+          )}
+          {tab === "Quotations" && (
+            <Quotations data={data} token={token} projectId={project.id} reload={reload} />
           )}
           {tab === "Admin" && <Admin data={data} token={token} />}
         </div>
