@@ -1,6 +1,33 @@
 import {describe,expect,it} from "vitest";import {criticalPath} from "./scheduling";import type {Activity} from "./domain";
 const a=(id:string,start:string,end:string,dependencies:string[]=[]):Activity=>({id,projectId:"p",name:id,sequence:1,plannedStart:start,plannedEnd:end,progress:0,status:"NOT_STARTED",dependencyIds:dependencies,paymentMode:"FIXED",paymentValue:0,retentionPct:0,gstPct:0});
-import {calculateProjectSlippage} from "./scheduling";
+import {calculateProjectSlippage, tatStatus} from "./scheduling";
+
+describe("tatStatus", () => {
+  const raisedAt = "2026-07-20T00:00:00Z";
+  const dueAt = "2026-07-22T00:00:00Z"; // 48h window
+  const stage = (now: string) => ({ state: "MANUFACTURER" as const, raisedAt, dueAt, decisions: [{ id: "d1", actorId: "u1", role: "CONTRACTOR" as const, decision: "RAISED" as const, createdAt: raisedAt }] });
+
+  it("is ON_TRACK before 50% elapsed", () => {
+    const r = tatStatus(stage("x"), new Date("2026-07-20T12:00:00Z")); // 25%
+    expect(r.tier).toBe("ON_TRACK");
+  });
+  it("is WARNING at 50%+ elapsed", () => {
+    const r = tatStatus(stage("x"), new Date("2026-07-21T00:00:00Z")); // 50%
+    expect(r.tier).toBe("WARNING");
+  });
+  it("is OVERDUE once past dueAt", () => {
+    const r = tatStatus(stage("x"), new Date("2026-07-22T01:00:00Z")); // ~102%
+    expect(r.tier).toBe("OVERDUE");
+  });
+  it("is ESCALATED at 150%+ elapsed", () => {
+    const r = tatStatus(stage("x"), new Date("2026-07-23T00:00:00Z")); // 150%
+    expect(r.tier).toBe("ESCALATED");
+  });
+  it("is always ON_TRACK for terminal states", () => {
+    expect(tatStatus({ state: "PAID", raisedAt, dueAt, decisions: [] }).tier).toBe("ON_TRACK");
+    expect(tatStatus({ state: "REWORK", raisedAt, dueAt, decisions: [] }).tier).toBe("ON_TRACK");
+  });
+});
 
 describe("critical path",()=>it("selects the longest dependency chain",()=>{const r=criticalPath([a("a","2026-01-01","2026-01-03"),a("b","2026-01-04","2026-01-08",["a"]),a("c","2026-01-01","2026-01-04")]);expect(r.path).toEqual(["a","b"]);expect(r.duration).toBe(8);}));
 
