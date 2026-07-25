@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Text, View, ScrollView, TextInput, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { Screen, Title, Card, Button } from "@/components/ui";
+import { Screen, Title, Card, Button, useTheme } from "@/components/ui";
 import { useAuthStore } from "@/stores/auth";
 import { authenticateWithBiometrics } from "@/lib/biometrics";
 import { api } from "@/lib/api";
@@ -24,6 +24,7 @@ const ROLE_LABELS: Record<Role, string> = {
 };
 
 export default function Profile() {
+  const t = useTheme();
   const { name, role, signOut } = useAuthStore();
   const router = useRouter();
 
@@ -90,67 +91,62 @@ export default function Profile() {
       .slice(0, 2);
   };
 
+  const inputStyle = {
+    borderWidth: 2,
+    borderColor: t.inputBorder,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 48,
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: t.text,
+    marginBottom: 10,
+    backgroundColor: t.inputBg,
+  };
+
   return (
-    <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      <Screen>
+    <ScrollView style={{ flex: 1, backgroundColor: t.bg }} contentContainerStyle={{ flexGrow: 1 }}>
+      <Screen scroll>
         <Title icon="person-outline" eyebrow="Account">Profile</Title>
 
         {/* User Card with Initial Avatar */}
         <Card>
-          <View className="flex-row items-center py-2">
-            <View className="w-16 h-16 rounded-full bg-brandAmber items-center justify-center border border-brandCharcoal/10 shadow-sm">
-              <Text className="text-brandCharcoal font-extrabold text-xl">
+          <View style={{ flexDirection: "row", alignItems: "center", paddingVertical: 8 }}>
+            <View style={{ width: 64, height: 64, borderRadius: 24, backgroundColor: "#F5B81F", alignItems: "center", justifyContent: "center", marginRight: 16 }}>
+              <Text style={{ color: "#0F172A", fontWeight: "900", fontSize: 24, letterSpacing: -1 }}>
                 {getInitials(name)}
               </Text>
             </View>
-            <View className="ml-4 flex-1">
-              <Text className="text-xl font-extrabold text-brandCharcoal">
-                {name || "FOXSCAN User"}
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: "#F5B81F", fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>
+                {role || "User"}
               </Text>
-              <View className="flex-row mt-1">
-                <View className="bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/50">
-                  <Text className="text-[11px] font-bold text-slate-600 uppercase">
-                    {role || "No Role"}
-                  </Text>
-                </View>
-              </View>
+              <Text style={{ fontSize: 22, fontWeight: "900", color: t.text, lineHeight: 28 }}>
+                {name || "Authenticated Member"}
+              </Text>
             </View>
           </View>
         </Card>
 
         {/* Invite Users */}
         {canInvite && (
-          <View className="mb-6">
-            <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
+          <View style={{ marginBottom: 24 }}>
+            <Text style={{ fontSize: 13, fontWeight: "700", color: t.textSecondary, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>
               Invite Users
             </Text>
             <Card>
-              <TextInput
-                value={inviteName}
-                onChangeText={setInviteName}
-                placeholder="Full name"
-                placeholderTextColor="#94A3B8"
-                className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5"
-              />
-              <TextInput
-                value={inviteEmail}
-                onChangeText={setInviteEmail}
-                placeholder="Email address"
-                placeholderTextColor="#94A3B8"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5"
-              />
+              <TextInput value={inviteName} onChangeText={setInviteName} placeholder="Full name" placeholderTextColor={t.textMuted} style={inputStyle} />
+              <TextInput value={inviteEmail} onChangeText={setInviteEmail} placeholder="Email address" placeholderTextColor={t.textMuted} autoCapitalize="none" keyboardType="email-address" style={inputStyle} />
 
-              <Text className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1.5">Role</Text>
-              <View className="flex-row flex-wrap mb-2.5" style={{ gap: 6 }}>
+              <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Role</Text>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 10, gap: 6 }}>
                 {invitableRoles.map((r) => (
                   <Pressable
                     key={r}
                     onPress={() => setInviteRole(r)}
-                    className={`px-3 py-2 rounded-full border ${inviteRole === r ? "bg-brandAmber border-brandAmber" : "bg-white border-slate-200"}`}
+                    style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 1, backgroundColor: inviteRole === r ? "#F5B81F" : t.card, borderColor: inviteRole === r ? "#F5B81F" : t.cardBorder }}
                   >
-                    <Text className={`text-sm font-bold ${inviteRole === r ? "text-brandCharcoal" : "text-slate-500"}`}>
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: inviteRole === r ? "#0F172A" : t.textSecondary }}>
                       {ROLE_LABELS[r]}
                     </Text>
                   </Pressable>
@@ -159,16 +155,16 @@ export default function Profile() {
 
               {(role === "ADMIN" || myProjects.length > 0) && (
                 <>
-                  <Text className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1.5">
+                  <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
                     Project {role !== "ADMIN" ? "(required)" : "(optional)"}
                   </Text>
-                  <View className="flex-row flex-wrap mb-3" style={{ gap: 6 }}>
+                  <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 12, gap: 6 }}>
                     {role === "ADMIN" && (
                       <Pressable
                         onPress={() => setInviteProjectId("")}
-                        className={`px-3 py-2 rounded-full border ${inviteProjectId === "" ? "bg-brandAmber border-brandAmber" : "bg-white border-slate-200"}`}
+                        style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 1, backgroundColor: inviteProjectId === "" ? "#F5B81F" : t.card, borderColor: inviteProjectId === "" ? "#F5B81F" : t.cardBorder }}
                       >
-                        <Text className={`text-sm font-bold ${inviteProjectId === "" ? "text-brandCharcoal" : "text-slate-500"}`}>
+                        <Text style={{ fontSize: 14, fontWeight: "700", color: inviteProjectId === "" ? "#0F172A" : t.textSecondary }}>
                           No specific project
                         </Text>
                       </Pressable>
@@ -177,9 +173,9 @@ export default function Profile() {
                       <Pressable
                         key={p.id}
                         onPress={() => setInviteProjectId(p.id)}
-                        className={`px-3 py-2 rounded-full border ${inviteProjectId === p.id ? "bg-brandAmber border-brandAmber" : "bg-white border-slate-200"}`}
+                        style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 1, backgroundColor: inviteProjectId === p.id ? "#F5B81F" : t.card, borderColor: inviteProjectId === p.id ? "#F5B81F" : t.cardBorder }}
                       >
-                        <Text className={`text-sm font-bold ${inviteProjectId === p.id ? "text-brandCharcoal" : "text-slate-500"}`}>
+                        <Text style={{ fontSize: 14, fontWeight: "700", color: inviteProjectId === p.id ? "#0F172A" : t.textSecondary }}>
                           {p.name}
                         </Text>
                       </Pressable>
@@ -188,8 +184,8 @@ export default function Profile() {
                 </>
               )}
 
-              {inviteError ? <Text className="text-alertRed text-xs font-semibold mb-2">{inviteError}</Text> : null}
-              {inviteSuccess ? <Text className="text-successGreen text-xs font-semibold mb-2">{inviteSuccess}</Text> : null}
+              {inviteError ? <Text style={{ color: "#EF4444", fontSize: 12, fontWeight: "600", marginBottom: 8 }}>{inviteError}</Text> : null}
+              {inviteSuccess ? <Text style={{ color: "#22C55E", fontSize: 12, fontWeight: "600", marginBottom: 8 }}>{inviteSuccess}</Text> : null}
 
               <Button label={inviting ? "Adding…" : "Add User"} onPress={sendInvite} disabled={inviting} />
             </Card>
@@ -197,26 +193,26 @@ export default function Profile() {
         )}
 
         {/* Settings options */}
-        <View className="mb-6">
-          <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
+        <View style={{ marginBottom: 24 }}>
+          <Text style={{ fontSize: 13, fontWeight: "700", color: t.textSecondary, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>
             Security Settings
           </Text>
           
           <Card>
-            <View className="flex-row items-center justify-between py-1">
-              <View className="flex-row items-center flex-1">
-                <Ionicons name="finger-print-outline" size={20} color="#EAAC1F" />
-                <View className="ml-3">
-                  <Text className="text-brandCharcoal font-bold text-sm">
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 4 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                <Ionicons name="finger-print-outline" size={20} color="#F5B81F" />
+                <View style={{ marginLeft: 12 }}>
+                  <Text style={{ color: t.text, fontWeight: "700", fontSize: 14 }}>
                     Biometric Authentication
                   </Text>
-                  <Text className="text-slate-400 text-sm font-semibold mt-0.5">
+                  <Text style={{ color: t.textSecondary, fontSize: 13, fontWeight: "600", marginTop: 2 }}>
                     Unlock application using fingerprint/face ID
                   </Text>
                 </View>
               </View>
             </View>
-            <View className="mt-4">
+            <View style={{ marginTop: 16 }}>
               <Button
                 label="Unlock with biometrics"
                 onPress={biometric}
@@ -227,7 +223,7 @@ export default function Profile() {
         </View>
 
         {/* Account actions */}
-        <View className="mt-2">
+        <View style={{ marginTop: 8 }}>
           <Button
             label="Sign Out"
             variant="danger"

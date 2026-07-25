@@ -1,7 +1,8 @@
 import { createHash, randomBytes } from "crypto";
-import { addHours } from "date-fns";
+import { addDays, addHours } from "date-fns";
 import type { AppData, Project, Role, Session, User } from "./domain";
 import { id } from "./store";
+
 
 const INVITE_PERMISSIONS: Record<Role, Role[]> = {
   ADMIN: ["ADMIN", "CONTRACTOR", "MANUFACTURER", "CONSULTANT", "CLIENT"],
@@ -32,7 +33,7 @@ export function verifyOtp(data: AppData, rawIdentifier: string, code: string): {
   if (!pending || pending.token.split(":")[1] !== hash(code.trim())) throw new Error("Invalid or expired one-time password.");
   const user = data.users.find(u => (u.email && u.email.toLowerCase() === identifier) || (u.phone && u.phone.toLowerCase() === identifier));
   if (!user || !user.active) throw new Error("No active user is registered for this identifier.");
-  const session = { token: `fs_${randomBytes(32).toString("hex")}`, userId: user.id, expiresAt: addHours(new Date(), 24).toISOString() };
+  const session = { token: `fs_${randomBytes(32).toString("hex")}`, userId: user.id, expiresAt: addDays(new Date(), 30).toISOString() };
   data.sessions = data.sessions.filter(s => s !== pending);
   data.sessions.push(session);
   return { user, session };

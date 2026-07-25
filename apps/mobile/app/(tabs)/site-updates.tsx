@@ -10,19 +10,21 @@ import {
   Image,
   View,
   Pressable,
+  Modal,
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
-import { Screen, Title, Card, Button } from "@/components/ui";
+import { Screen, Title, Card, Button, useTheme } from "@/components/ui";
 import { CameraCapture } from "@/components/camera-capture";
-import { VoiceNote } from "@/components/voice-note";
-import { File as ExpoFile } from "expo-file-system";
 import { api, baseUrl } from "@/lib/api";
 import { useProjectStore } from "@/stores/project";
+import { useAuthStore } from "@/stores/auth";
 import { enqueue, syncQueue } from "@/lib/offline";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 
 export default function SiteUpdates() {
+  const t = useTheme();
+  const { role } = useAuthStore();
   const { data } = useQuery({
     queryKey: ["data"],
     queryFn: () => api<any>("/api/data"),
@@ -31,10 +33,12 @@ export default function SiteUpdates() {
   const [workDone, setWorkDone] = useState("");
   const [selectedActivityId, setSelectedActivityId] = useState("");
   const [captures, setCaptures] = useState<any[]>([]);
-  const [voice, setVoice] = useState<string>();
   const [showSuccess, setShowSuccess] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgressText, setUploadProgressText] = useState<string | null>(null);
+
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [showActivityModal, setShowActivityModal] = useState(false);
 
   const { activityId } = useLocalSearchParams<{ activityId?: string }>();
 
@@ -44,7 +48,7 @@ export default function SiteUpdates() {
     }
   }, [activityId]);
 
-  const { selectedProjectId } = useProjectStore();
+  const { selectedProjectId, setSelectedProjectId } = useProjectStore();
   const project = data?.projects?.find((p: any) => p.id === selectedProjectId) ?? data?.projects?.[0];
   const projectActivities = data?.activities?.filter((a: any) => a.projectId === project?.id)
     ?.sort((a: any, b: any) => a.sequence - b.sequence) || [];
@@ -102,31 +106,7 @@ export default function SiteUpdates() {
         }
       }
 
-      let voiceNoteUrl: string | undefined;
-      if (voice) {
-        setUploadProgressText("Uploading voice note...");
-        // NOTE: fetch(uri).blob() hangs indefinitely for audio in this RN environment (confirmed).
-        // expo-file-system's File class implements the Blob interface and reads via native FS
-        // instead of going through fetch, so it sidesteps that hang entirely.
-        const audioFile = new ExpoFile(voice);
-        const formData = new FormData();
-        formData.append("file", audioFile as unknown as Blob, "voice.m4a");
-        formData.append("projectId", project?.id || "");
-        formData.append("activityId", selectedActivityId || "general");
-        formData.append("filename", "voice.m4a");
-
-        const response = await withTimeout(
-          fetch(`${baseUrl}/api/upload`, { method: "POST", body: formData }),
-          30000,
-          "Uploading voice note timed out"
-        );
-        if (!response.ok) throw new Error("Voice note upload failed");
-        const resJson = await response.json();
-        voiceNoteUrl = resJson.url;
-      }
-
       setUploadProgressText("Saving site update...");
-
       const firstCapture = captures[0];
 
       const body = {
@@ -139,7 +119,6 @@ export default function SiteUpdates() {
         equipment: "",
         important: false,
         attachments: attachmentUrls,
-        voiceNote: voiceNoteUrl,
         latitude: firstCapture?.latitude,
         longitude: firstCapture?.longitude,
       };
@@ -153,7 +132,6 @@ export default function SiteUpdates() {
       setWorkDone("");
       setSelectedActivityId("");
       setCaptures([]);
-      setVoice(undefined);
       setShowSuccess(true);
     } catch (err: any) {
       alert("Error uploading media: " + err.message);
@@ -164,7 +142,7 @@ export default function SiteUpdates() {
   };
 
   return (
-    <View className="flex-1 relative bg-offWhite">
+    <View style={{ flex: 1, backgroundColor: t.bg }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -176,131 +154,133 @@ export default function SiteUpdates() {
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
           >
-            <Screen>
-              <Title icon="camera-outline" eyebrow="Daily Record" subtitle="Log work done, attach photos, and link to an activity">
+            <Screen scroll>
+              <Title icon="camera-outline" eyebrow="Daily Record" subtitle="Log work done, attach evidence photos, and link to an activity">
                 Site Log
               </Title>
 
               <Card>
-                {/* Activity Selector Pills */}
-                {projectActivities.length > 0 && (
-                  <View className="mb-4">
-                    <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">
-                      Link to Activity (Optional)
+                {/* Contractor nested Project Dropdown Selector */}
+                {role === "CONTRACTOR" && (
+                  <View style={{ marginBottom: 16 }}>
+                    <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+                      Select Project
                     </Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row py-1">
-                      <Pressable
-                        onPress={() => setSelectedActivityId("")}
-                        className={`px-4 py-2 rounded-full mr-2 border ${
-                          selectedActivityId === ""
-                            ? "bg-brandAmber border-brandAmber"
-                            : "bg-white border-slate-200"
-                        }`}
-                        style={({ pressed }) => pressed ? { transform: [{ scale: 0.96 }] } : {}}
-                      >
-                        <Text className={`text-sm font-bold ${
-                          selectedActivityId === "" ? "text-brandCharcoal font-extrabold" : "text-slate-500"
-                        }`}>
-                          General Log / None
-                        </Text>
-                      </Pressable>
-                      {projectActivities.map((a: any) => (
-                        <Pressable
-                          key={a.id}
-                          onPress={() => setSelectedActivityId(a.id)}
-                          className={`px-4 py-2 rounded-full mr-2 border ${
-                            selectedActivityId === a.id
-                              ? "bg-brandAmber border-brandAmber"
-                              : "bg-white border-slate-200"
-                          }`}
-                          style={({ pressed }) => pressed ? { transform: [{ scale: 0.96 }] } : {}}
-                        >
-                          <Text className={`text-sm font-bold ${
-                            selectedActivityId === a.id ? "text-brandCharcoal font-extrabold" : "text-slate-500"
-                          }`}>
-                            Stage {a.sequence}: {a.name}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </ScrollView>
+                    <Pressable
+                      onPress={() => setShowProjectModal(true)}
+                      style={{
+                        height: 56,
+                        borderWidth: 2,
+                        borderColor: t.inputBorder,
+                        borderRadius: 16,
+                        paddingHorizontal: 16,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor: t.inputBg,
+                      }}
+                    >
+                      <Ionicons name="business-outline" size={20} color={t.textMuted} style={{ marginRight: 10 }} />
+                      <Text style={{ flex: 1, fontSize: 16, fontWeight: "600", color: t.text }}>
+                        {project?.name || "Select Project..."}
+                      </Text>
+                      <Ionicons name="chevron-down" size={18} color={t.textMuted} />
+                    </Pressable>
                   </View>
                 )}
 
-                <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">
+                {/* Activity Dropdown Selector */}
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+                    Link to Activity (Optional)
+                  </Text>
+                  <Pressable
+                    onPress={() => setShowActivityModal(true)}
+                    style={{
+                      height: 56,
+                      borderWidth: 2,
+                      borderColor: t.inputBorder,
+                      borderRadius: 16,
+                      paddingHorizontal: 16,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      backgroundColor: t.inputBg,
+                    }}
+                  >
+                    <Ionicons name="list-outline" size={20} color={t.textMuted} style={{ marginRight: 10 }} />
+                    <Text style={{ flex: 1, fontSize: 16, fontWeight: "600", color: t.text }}>
+                      {selectedActivityId
+                        ? projectActivities.find((a: any) => a.id === selectedActivityId)
+                          ? `Stage ${projectActivities.find((a: any) => a.id === selectedActivityId).sequence}: ${projectActivities.find((a: any) => a.id === selectedActivityId).name}`
+                          : "General Log / None"
+                        : "General Log / None"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={18} color={t.textMuted} />
+                  </Pressable>
+                </View>
+
+                <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
                   Work progress & Observations
                 </Text>
                 <TextInput
                   value={workDone}
                   onChangeText={setWorkDone}
-                  placeholder="Describe work completed, manpower count, weather, or list any site issues..."
-                  placeholderTextColor="#94A3B8"
+                  placeholder="Describe work completed, worker count, or list any site observations..."
+                  placeholderTextColor={t.textMuted}
                   multiline
                   returnKeyType="done"
                   blurOnSubmit
                   onSubmitEditing={Keyboard.dismiss}
-                  className="border border-slate-200 rounded-xl p-4 mb-4 min-h-[100px] text-brandCharcoal text-sm font-medium focus:border-brandAmber"
-                  style={{ textAlignVertical: "top" }}
+                  style={{
+                    borderWidth: 2,
+                    borderColor: t.inputBorder,
+                    borderRadius: 16,
+                    padding: 16,
+                    marginBottom: 20,
+                    minHeight: 120,
+                    color: t.text,
+                    fontSize: 16,
+                    fontWeight: "600",
+                    backgroundColor: t.inputBg,
+                    textAlignVertical: "top",
+                  }}
                 />
 
-                <View className="mb-4">
-                  <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={{ color: t.textSecondary, fontSize: 13, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>
                     Evidence Media
                   </Text>
                   
-                  <View className="flex-row space-x-3 gap-3 mb-3">
-                    <View className="flex-1">
-                      <CameraCapture onCapture={(c) => setCaptures(prev => [...prev, c])} />
-                    </View>
-                    <View className="flex-1">
-                      <VoiceNote onRecorded={setVoice} />
-                    </View>
+                  <View style={{ marginBottom: 12 }}>
+                    <CameraCapture onCapture={(c) => setCaptures(prev => [...prev, c])} />
                   </View>
 
-                  {voice ? (
-                    <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 mb-3" style={{ gap: 8 }}>
-                      <Ionicons name="mic" size={16} color="#EAAC1F" />
-                      <Text className="text-xs font-semibold text-slate-600 flex-1">Voice note recorded</Text>
-                      <Pressable onPress={() => setVoice(undefined)}>
-                        <Ionicons name="close-circle" size={18} color="#94A3B8" />
-                      </Pressable>
-                    </View>
-                  ) : null}
-
-                  {/* Multiple Photos Preview Container */}
+                  {/* Photos Preview */}
                   {captures.length > 0 ? (
-                    <View className="mb-3">
-                      <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+                    <View style={{ marginBottom: 12 }}>
+                      <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
                         Captured Evidence ({captures.length})
                       </Text>
-                      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row py-1">
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         {captures.map((cap, index) => (
-                          <View key={index} className="relative mr-3">
+                          <View key={index} style={{ position: "relative", marginRight: 12 }}>
                             <Image
                               source={{ uri: cap.uri }}
-                              className="w-20 h-20 rounded-xl bg-slate-100 border border-slate-200"
+                              style={{ width: 96, height: 96, borderRadius: 16, backgroundColor: t.isDark ? "#222733" : "#F1F5F9", borderWidth: 1, borderColor: t.cardBorder }}
                             />
                             <Pressable
                               onPress={() => setCaptures(prev => prev.filter((_, idx) => idx !== index))}
-                              className="absolute -top-1.5 -right-1.5 bg-brandCharcoal/80 rounded-full w-5 h-5 items-center justify-center border border-slate-700/50"
-                              style={{ zIndex: 10 }}
+                              style={{ position: "absolute", top: -8, right: -8, backgroundColor: "#EF4444", borderRadius: 12, width: 24, height: 24, alignItems: "center", justifyContent: "center", zIndex: 10 }}
                             >
-                              <Ionicons name="close" size={12} color="#FFFFFF" />
+                              <Ionicons name="close" size={14} color="#FFFFFF" />
                             </Pressable>
-                            {cap.latitude && cap.longitude && (
-                              <View className="absolute bottom-1 left-1 bg-black/50 px-1 py-0.5 rounded">
-                                <Text className="text-[10px] text-white font-bold">
-                                  {cap.latitude.toFixed(2)}, {cap.longitude.toFixed(2)}
-                                </Text>
-                              </View>
-                            )}
                           </View>
                         ))}
                       </ScrollView>
                     </View>
                   ) : (
-                    <View className="flex-row items-center bg-slate-50/50 border border-slate-100 rounded-xl p-3 mb-3">
-                      <Ionicons name="image-outline" size={18} color="#64748B" />
-                      <Text className="text-slate-400 font-semibold text-sm ml-2">
+                    <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: t.isDark ? "#181B22" : "#F8FAFC", borderWidth: 1, borderColor: t.cardBorder, borderRadius: 16, padding: 16, marginBottom: 12 }}>
+                      <Ionicons name="image-outline" size={20} color={t.textMuted} />
+                      <Text style={{ color: t.textSecondary, fontWeight: "600", fontSize: 14, marginLeft: 12 }}>
                         No photos captured yet
                       </Text>
                     </View>
@@ -310,6 +290,7 @@ export default function SiteUpdates() {
                 <Button
                   label={isUploading ? (uploadProgressText || "Uploading & Saving...") : "Submit Site Update"}
                   onPress={submit}
+                  loading={isUploading}
                   disabled={!workDone.trim() || isUploading}
                 />
               </Card>
@@ -318,25 +299,130 @@ export default function SiteUpdates() {
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
 
-      {/* FULL-SCREEN OVERLAY SUCCESS STATE */}
+      {/* SUCCESS OVERLAY */}
       {showSuccess && (
-        <View className="absolute inset-0 bg-brandCharcoal/70 z-50 items-center justify-center p-6" style={{ elevation: 20 }}>
-          <View className="bg-white rounded-3xl p-6 w-full items-center shadow-lg border border-slate-100">
-            <View className="w-16 h-16 rounded-full bg-emerald-50 items-center justify-center mb-4">
-              <Ionicons name="checkmark-circle" size={40} color="#1B8755" />
+        <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.75)", zIndex: 50, alignItems: "center", justifyContent: "center", padding: 24, elevation: 20 }}>
+          <View style={{ backgroundColor: t.card, borderRadius: 24, padding: 24, width: "100%", alignItems: "center", borderWidth: 1, borderColor: t.cardBorder }}>
+            <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: "rgba(34,197,94,0.1)", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+              <Ionicons name="checkmark-circle" size={42} color="#22C55E" />
             </View>
-            <Text className="text-brandCharcoal font-extrabold text-lg text-center mb-2">
+            <Text style={{ color: t.text, fontWeight: "900", fontSize: 20, textAlign: "center", marginBottom: 8 }}>
               Daily Log Submitted
             </Text>
-            <Text className="text-slate-400 text-sm font-semibold text-center mb-6 leading-relaxed">
-              Your site log has been saved and queued for synchronization.
+            <Text style={{ color: t.textSecondary, fontSize: 16, fontWeight: "600", textAlign: "center", marginBottom: 24, lineHeight: 22 }}>
+              Your site update and geotagged evidence have been saved successfully.
             </Text>
-            <View className="w-full">
+            <View style={{ width: "100%" }}>
               <Button label="Done" onPress={() => setShowSuccess(false)} />
             </View>
           </View>
         </View>
       )}
+
+      {/* Project Selector Modal */}
+      <Modal
+        visible={showProjectModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowProjectModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" }}>
+          <View style={{ backgroundColor: t.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, maxHeight: "75%" }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <Text style={{ fontSize: 18, fontWeight: "900", color: t.text }}>Select Project</Text>
+              <Pressable onPress={() => setShowProjectModal(false)} style={{ padding: 4 }}>
+                <Ionicons name="close" size={24} color={t.text} />
+              </Pressable>
+            </View>
+            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+              {(data?.projects || []).map((p: any) => (
+                <Pressable
+                  key={p.id}
+                  onPress={() => {
+                    setSelectedProjectId(p.id);
+                    setSelectedActivityId("");
+                    setShowProjectModal(false);
+                  }}
+                  style={({ pressed }) => ({
+                    paddingVertical: 16,
+                    borderBottomWidth: 1,
+                    borderBottomColor: t.cardBorder,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text style={{ fontSize: 16, fontWeight: "600", color: project?.id === p.id ? "#F5B81F" : t.text }}>{p.name}</Text>
+                  {project?.id === p.id && <Ionicons name="checkmark" size={20} color="#F5B81F" />}
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Activity Selector Modal */}
+      <Modal
+        visible={showActivityModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowActivityModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" }}>
+          <View style={{ backgroundColor: t.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, maxHeight: "75%" }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <Text style={{ fontSize: 18, fontWeight: "900", color: t.text }}>Select Activity</Text>
+              <Pressable onPress={() => setShowActivityModal(false)} style={{ padding: 4 }}>
+                <Ionicons name="close" size={24} color={t.text} />
+              </Pressable>
+            </View>
+            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+              <Pressable
+                onPress={() => {
+                  setSelectedActivityId("");
+                  setShowActivityModal(false);
+                }}
+                style={({ pressed }) => ({
+                  paddingVertical: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: t.cardBorder,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Text style={{ fontSize: 16, fontWeight: "600", color: selectedActivityId === "" ? "#F5B81F" : t.text }}>General Log / None</Text>
+                {selectedActivityId === "" && <Ionicons name="checkmark" size={20} color="#F5B81F" />}
+              </Pressable>
+              {projectActivities.map((a: any) => (
+                <Pressable
+                  key={a.id}
+                  onPress={() => {
+                    setSelectedActivityId(a.id);
+                    setShowActivityModal(false);
+                  }}
+                  style={({ pressed }) => ({
+                    paddingVertical: 16,
+                    borderBottomWidth: 1,
+                    borderBottomColor: t.cardBorder,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text style={{ fontSize: 16, fontWeight: "600", color: selectedActivityId === a.id ? "#F5B81F" : t.text }}>
+                    Stage {a.sequence}: {a.name}
+                  </Text>
+                  {selectedActivityId === a.id && <Ionicons name="checkmark" size={20} color="#F5B81F" />}
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

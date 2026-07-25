@@ -71,8 +71,8 @@ export default function Delays() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      <Screen>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+      <Screen scroll>
         <Title icon="alert-circle-outline" eyebrow="Schedule Risk" subtitle="Causes, impact days, and mitigation plans">
           Delays
         </Title>
@@ -81,19 +81,19 @@ export default function Delays() {
           <View className="flex-1">
             <Card>
               <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Open</Text>
-              <Text className={`text-lg font-extrabold ${openDelays.length > 0 ? "text-alertRed" : "text-successGreen"}`}>{openDelays.length}</Text>
+              <Text className={`text-lg font-extrabold ${openDelays.length > 0 ? "text-[#EF4444]" : "text-[#22C55E]"}`}>{openDelays.length}</Text>
             </Card>
           </View>
           <View className="flex-1">
             <Card>
               <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Impact</Text>
-              <Text className="text-lg font-extrabold text-brandAmber">{totalImpactDays}d</Text>
+              <Text className="text-lg font-extrabold text-[#F5B81F]">{totalImpactDays}d</Text>
             </Card>
           </View>
           <View className="flex-1">
             <Card>
               <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Resolved</Text>
-              <Text className="text-lg font-extrabold text-successGreen">{resolvedDelays.length}</Text>
+              <Text className="text-lg font-extrabold text-[#22C55E]">{resolvedDelays.length}</Text>
             </Card>
           </View>
         </View>
@@ -108,7 +108,7 @@ export default function Delays() {
                 onPress={() => setActivityId(a.id)}
                 className={`px-3 py-1.5 rounded-full border ${activityId === a.id ? "bg-brandAmber border-brandAmber" : "bg-slate-50 border-slate-200"}`}
               >
-                <Text className={`text-[12px] font-bold ${activityId === a.id ? "text-brandCharcoal" : "text-slate-600"}`}>{a.name}</Text>
+                <Text className={`text-[12px] font-bold ${activityId === a.id ? "text-slate-800 dark:text-white" : "text-slate-600"}`}>{a.name}</Text>
               </Pressable>
             ))}
           </View>
@@ -131,7 +131,7 @@ export default function Delays() {
             value={impactDays}
             onChangeText={setImpactDays}
             keyboardType="number-pad"
-            className="h-11 border border-slate-200 bg-white rounded-xl px-4 text-brandCharcoal text-sm font-semibold mb-3"
+            className="h-11 border border-slate-200 bg-white rounded-xl px-4 text-slate-800 dark:text-white text-sm font-semibold mb-3"
           />
 
           <Text className="text-[11px] font-bold text-slate-400 uppercase mb-1.5">Mitigation Plan</Text>
@@ -141,11 +141,11 @@ export default function Delays() {
             placeholder="Describe the mitigation strategy…"
             placeholderTextColor="#94A3B8"
             multiline
-            className="border border-slate-200 rounded-xl p-3 mb-3 min-h-[70px] text-brandCharcoal text-sm font-medium"
+            className="border border-slate-200 rounded-xl p-3 mb-3 min-h-[70px] text-slate-800 dark:text-white text-sm font-medium"
             style={{ textAlignVertical: "top" }}
           />
 
-          {error ? <Text className="text-alertRed text-sm font-semibold mb-2">{error}</Text> : null}
+          {error ? <Text className="text-[#EF4444] text-sm font-semibold mb-2">{error}</Text> : null}
           {!token && <Text className="text-slate-400 text-[11px] font-semibold mb-2">Sign in to log delays.</Text>}
 
           <Button label={submitting ? "Logging…" : "Log Delay"} onPress={submit} disabled={!token || submitting} />
@@ -167,14 +167,14 @@ export default function Delays() {
             return (
               <Card key={d.id}>
                 <View className="flex-row justify-between items-center mb-1.5">
-                  <Text className="font-bold text-brandCharcoal text-sm flex-1 pr-2">{getActivityName(d.activityId)}</Text>
+                  <Text className="font-bold text-slate-800 dark:text-white text-sm flex-1 pr-2">{getActivityName(d.activityId)}</Text>
                   <View className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
                     <Text className="text-[11px] font-bold text-slate-600 uppercase">{getReasonLabel(d.reason)}</Text>
                   </View>
                 </View>
                 <Text className="text-sm text-slate-500 font-semibold mb-2">
-                  Impact: <Text className="text-alertRed font-extrabold">{d.impactDays} days</Text> · Target: {new Date(d.targetClose).toLocaleDateString("en-IN")}
-                  {isOverdue ? <Text className="text-alertRed font-extrabold"> · OVERDUE</Text> : null}
+                  Impact: <Text className="text-[#EF4444] font-extrabold">{d.impactDays} days</Text> · Target: {new Date(d.targetClose).toLocaleDateString("en-IN")}
+                  {isOverdue ? <Text className="text-[#EF4444] font-extrabold"> · OVERDUE</Text> : null}
                 </Text>
                 {d.mitigationPlan ? (
                   <Text className="text-sm text-slate-600 mb-2">{d.mitigationPlan}</Text>

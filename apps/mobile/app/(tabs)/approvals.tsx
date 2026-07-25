@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Text, View, ScrollView, Pressable, TextInput, Image, Modal } from "react-native";
-import { Screen, Title, Card, Button } from "@/components/ui";
+import { Screen, Title, Card, Button, useTheme } from "@/components/ui";
 import { CameraCapture } from "@/components/camera-capture";
 import { api, baseUrl } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
@@ -11,9 +11,9 @@ import { useRouter } from "expo-router";
 import { tatStatus } from "@/lib/scheduling";
 
 const TAT_TIER_STYLE: Record<string, { bg: string; text: string }> = {
-  WARNING: { bg: "bg-amber-50 border border-amber-200", text: "text-amber-700" },
-  OVERDUE: { bg: "bg-red-50 border border-red-200", text: "text-alertRed" },
-  ESCALATED: { bg: "bg-red-100 border border-red-300", text: "text-red-900" },
+  WARNING: { bg: "bg-amber-950/50 border border-amber-700/50", text: "text-amber-400" },
+  OVERDUE: { bg: "bg-rose-950/50 border border-rose-700/50", text: "text-rose-400" },
+  ESCALATED: { bg: "bg-rose-900/60 border border-rose-600/60", text: "text-rose-300" },
 };
 
 function TatBadge({ stage }: { stage: any }) {
@@ -21,8 +21,8 @@ function TatBadge({ stage }: { stage: any }) {
   const style = TAT_TIER_STYLE[tat.tier];
   if (!style) return null;
   return (
-    <View className={`px-2 py-0.5 rounded-full self-start mt-1 ${style.bg}`}>
-      <Text className={`text-[11px] font-extrabold ${style.text}`}>
+    <View className={`px-2.5 py-1 rounded-full self-start mt-1.5 ${style.bg}`}>
+      <Text className={`text-xs font-black ${style.text}`}>
         {tat.tier === "ESCALATED" ? "ESCALATED" : tat.tier === "OVERDUE" ? "OVERDUE" : "TAT 50%+"} · {tat.pct}%
       </Text>
     </View>
@@ -74,8 +74,46 @@ export function VoiceNotePlayer({ url, color = "#EAAC1F" }: { url: string; color
 }
 
 export default function Approvals() {
+  const t = useTheme();
   const { role, userId } = useAuthStore();
   const router = useRouter();
+
+  const renderPaymentProofBlock = (stage: any) => {
+    if (!stage.evidence || stage.evidence.length === 0) {
+      return (
+        <Text style={{ color: t.isDark ? "#94A3B8" : "#64748B", fontSize: 13, fontWeight: "600", marginTop: 6 }}>
+          Proof Reference: <Text style={{ color: t.text, fontWeight: "800" }}>Confirmed by Client</Text>
+        </Text>
+      );
+    }
+
+    const urls = stage.evidence.filter((item: string) => item.startsWith("http://") || item.startsWith("https://"));
+    const textRefs = stage.evidence.filter((item: string) => !item.startsWith("http://") && !item.startsWith("https://"));
+
+    return (
+      <View style={{ marginTop: 6, gap: 8 }}>
+        {textRefs.map((ref: string, idx: number) => (
+          <Text key={idx} style={{ color: t.isDark ? "#94A3B8" : "#64748B", fontSize: 13, fontWeight: "600" }}>
+            Proof Reference: <Text style={{ color: t.text, fontWeight: "800" }}>{ref}</Text>
+          </Text>
+        ))}
+        {urls.map((url: string, idx: number) => (
+          <View key={idx} style={{ marginTop: 8 }}>
+            <Text style={{ color: t.isDark ? "#94A3B8" : "#64748B", fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
+              Payment Proof Attached:
+            </Text>
+            <Pressable onPress={() => setActiveImageUrl(url)} style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}>
+              <Image
+                source={{ uri: url }}
+                style={{ width: "100%", height: 180, borderRadius: 12, backgroundColor: t.isDark ? "#222733" : "#F1F5F9", borderWidth: 1, borderColor: t.cardBorder }}
+                resizeMode="cover"
+              />
+            </Pressable>
+          </View>
+        ))}
+      </View>
+    );
+  };
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
   const [selectedPaymentStage, setSelectedPaymentStage] = useState<any>(null);
   const [paymentRefText, setPaymentRefText] = useState("");
@@ -150,25 +188,25 @@ export default function Approvals() {
   const getStateBadge = (state: string) => {
     switch (state) {
       case "NOT_STARTED":
-        return { bg: "bg-slate-100 border border-slate-200", text: "text-slate-500", label: "Not Started" };
+        return { bg: "bg-[#292E3A] border border-[#373E4F]", text: "text-slate-400", label: "Not Started" };
       case "CONTRACTOR":
       case "IN_PROGRESS":
-        return { bg: "bg-sky-50 border border-sky-100", text: "text-sky-700", label: "Contractor Stage" };
+        return { bg: "bg-sky-950/50 border border-sky-800/40", text: "text-sky-400", label: "Contractor Stage" };
       case "SUBMITTED":
       case "MANUFACTURER":
       case "CONSULTANT":
-        return { bg: "bg-amber-50 border border-amber-200", text: "text-amber-700", label: `Awaiting ${state}` };
+        return { bg: "bg-amber-950/50 border border-amber-800/40", text: "text-amber-400", label: `Awaiting ${state}` };
       case "APPROVED":
       case "CLIENT":
-        return { bg: "bg-teal-50 border border-teal-200", text: "text-teal-700", label: "Approved (Awaiting Release)" };
+        return { bg: "bg-teal-950/50 border border-teal-800/40", text: "text-teal-400", label: "Approved (Awaiting Release)" };
       case "PAID":
-        return { bg: "bg-emerald-50 border border-emerald-200", text: "text-successGreen", label: "Paid & Closed" };
+        return { bg: "bg-emerald-950/50 border border-emerald-800/40", text: "text-emerald-400", label: "Paid & Closed" };
       case "REWORK":
-        return { bg: "bg-rose-50 border border-rose-200", text: "text-alertRed", label: "Rework Required" };
+        return { bg: "bg-rose-950/50 border border-rose-800/40", text: "text-rose-400", label: "Rework Required" };
       case "OVERDUE":
-        return { bg: "bg-red-50 border border-red-200", text: "text-alertRed", label: "Overdue" };
+        return { bg: "bg-rose-950/50 border border-rose-800/40", text: "text-rose-400", label: "Overdue" };
       default:
-        return { bg: "bg-slate-50 border border-slate-200", text: "text-slate-600", label: state };
+        return { bg: "bg-[#292E3A] border border-[#373E4F]", text: "text-slate-300", label: state };
     }
   };
 
@@ -226,7 +264,7 @@ export default function Approvals() {
 
         {reworkUpdates.length > 0 && (
           <View>
-            <Text className="text-[11px] font-extrabold text-alertRed uppercase mb-1">
+            <Text className="text-[11px] font-extrabold text-[#EF4444] uppercase mb-1">
               Rework Remedial Evidence:
             </Text>
             {reworkUpdates.map((su: any) => (
@@ -281,11 +319,11 @@ export default function Approvals() {
             </View>
             <View className="flex-row justify-between mb-1">
               <Text className="text-sm text-slate-500">Retention held ({activity.retentionPct}%)</Text>
-              <Text className="text-sm text-alertRed font-semibold">− ₹{Math.round(activity.paymentValue * activity.retentionPct / 100).toLocaleString("en-IN")}</Text>
+              <Text className="text-sm text-[#EF4444] font-semibold">− ₹{Math.round(activity.paymentValue * activity.retentionPct / 100).toLocaleString("en-IN")}</Text>
             </View>
             <View className="flex-row justify-between pt-1.5 mt-1 border-t border-slate-200">
-              <Text className="text-sm font-extrabold text-brandCharcoal">Net payable now</Text>
-              <Text className="text-sm font-extrabold text-brandCharcoal">₹{stage.amountDue?.toLocaleString("en-IN") ?? "0"}</Text>
+              <Text className="text-sm font-extrabold text-slate-800 dark:text-white">Net payable now</Text>
+              <Text className="text-sm font-extrabold text-slate-800 dark:text-white">₹{stage.amountDue?.toLocaleString("en-IN") ?? "0"}</Text>
             </View>
           </View>
         )}
@@ -308,7 +346,7 @@ export default function Approvals() {
                     style={{ gap: 4 }}
                   >
                     <Ionicons name={ok ? "checkmark-circle" : "close-circle"} size={11} color={ok ? "#1B8755" : "#D9383A"} />
-                    <Text className={`text-[11px] font-bold ${ok ? "text-successGreen" : "text-alertRed"}`}>{checklistLabel(key)}</Text>
+                    <Text className={`text-[11px] font-bold ${ok ? "text-[#22C55E]" : "text-[#EF4444]"}`}>{checklistLabel(key)}</Text>
                   </View>
                 );
               })}
@@ -395,13 +433,13 @@ export default function Approvals() {
     );
 
     return (
-      <View className="flex-1 relative bg-offWhite">
+      <View className="flex-1 relative bg-[#F8FAFC] dark:bg-[#101218]">
         <ScrollView className="flex-grow" contentContainerStyle={{ flexGrow: 1 }}>
-          <Screen>
+          <Screen scroll>
             <Title icon="checkmark-done-outline" eyebrow="Stage Workflow">Approvals</Title>
             {actionError ? (
               <View className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
-                <Text className="text-alertRed font-bold text-sm">{actionError}</Text>
+                <Text className="text-[#EF4444] font-bold text-sm">{actionError}</Text>
               </View>
             ) : null}
 
@@ -413,7 +451,7 @@ export default function Approvals() {
                 {raisableActivities.map((activity: any) => (
                   <Card key={activity.id}>
                     <View className="flex-row items-center justify-between mb-3">
-                      <Text className="font-bold text-brandCharcoal text-base flex-1 pr-2">
+                      <Text className="font-bold text-slate-800 dark:text-white text-base flex-1 pr-2">
                         {activity.name}
                       </Text>
                       <View className="bg-slate-100 px-2.5 py-1 rounded-full">
@@ -436,7 +474,7 @@ export default function Approvals() {
 
             {reworkStages.length > 0 && (
               <View className="mb-6">
-                <Text className="text-sm font-bold text-alertRed uppercase tracking-wider mb-3">
+                <Text className="text-sm font-bold text-[#EF4444] uppercase tracking-wider mb-3">
                   Returned for Rework
                 </Text>
                 {reworkStages.map((stage: any) => {
@@ -449,16 +487,16 @@ export default function Approvals() {
                       <View className="mb-3">
                         <View className="flex-row items-center space-x-2 mb-2">
                           <Ionicons name="alert-circle" size={18} color="#D9383A" />
-                          <Text className="font-extrabold text-brandCharcoal text-base ml-1">
+                          <Text className="font-extrabold text-slate-800 dark:text-white text-base ml-1">
                             {getActivityName(stage.activityId)}
                           </Text>
                         </View>
                         {returnComment && (
                           <View className="bg-red-50/70 border border-red-100 p-3 rounded-xl mb-3">
-                            <Text className="text-alertRed font-bold text-sm mb-1">
+                            <Text className="text-[#EF4444] font-bold text-sm mb-1">
                               REWORK REASON:
                             </Text>
-                            <Text className="text-brandCharcoal font-semibold text-sm leading-relaxed">
+                            <Text className="text-slate-800 dark:text-white font-semibold text-sm leading-relaxed">
                               {returnComment.text}
                             </Text>
                           </View>
@@ -503,12 +541,10 @@ export default function Approvals() {
                 {receiptStages.map((stage: any) => (
                   <Card key={stage.id}>
                     <View className="mb-3">
-                      <Text className="font-extrabold text-brandCharcoal text-base">
+                      <Text className="font-extrabold text-slate-800 dark:text-white text-base">
                         {getActivityName(stage.activityId)}
                       </Text>
-                      <Text className="text-slate-500 text-[11px] font-bold mt-1.5 leading-relaxed">
-                        Proof Reference: <Text className="text-brandCharcoal font-extrabold">{stage.evidence?.[0] || "Confirmed by Client"}</Text>
-                      </Text>
+                      {renderPaymentProofBlock(stage)}
                     </View>
                     {renderDecisionTimeline(stage)}
                     <Button
@@ -531,7 +567,7 @@ export default function Approvals() {
                     <Card key={stage.id}>
                       <View className="flex-row items-start justify-between mb-3">
                         <View className="flex-1 pr-2">
-                          <Text className="font-bold text-brandCharcoal text-base mb-1">
+                          <Text className="font-bold text-slate-800 dark:text-white text-base mb-1">
                             {getActivityName(stage.activityId)}
                           </Text>
                           <Text className="text-slate-400 text-sm font-semibold">
@@ -574,7 +610,7 @@ export default function Approvals() {
           <View className="absolute inset-0 bg-brandCharcoal/70 z-50 justify-end" style={{ elevation: 15 }}>
             <View className="bg-white rounded-t-3xl p-6 pb-10 border-t border-slate-100 shadow-lg">
               <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-brandCharcoal font-extrabold text-base">
+                <Text className="text-slate-800 dark:text-white font-extrabold text-base">
                   QA Compliance Checklist
                 </Text>
                 <Pressable
@@ -600,7 +636,7 @@ export default function Approvals() {
                       {checklist[item.key] && <Ionicons name="checkmark" size={12} color="#1A1D24" />}
                     </View>
                     <View className="flex-1">
-                      <Text className="text-brandCharcoal font-extrabold text-sm">{item.label}</Text>
+                      <Text className="text-slate-800 dark:text-white font-extrabold text-sm">{item.label}</Text>
                       {item.description ? (
                         <Text className="text-slate-400 text-[11px] font-semibold mt-0.5">{item.description}</Text>
                       ) : null}
@@ -632,13 +668,13 @@ export default function Approvals() {
     );
 
     return (
-      <View className="flex-1 relative bg-offWhite">
+      <View className="flex-1 relative bg-[#F8FAFC] dark:bg-[#101218]">
         <ScrollView className="flex-grow" contentContainerStyle={{ flexGrow: 1 }}>
-          <Screen>
+          <Screen scroll>
             <Title icon="checkmark-done-outline" eyebrow="Stage Workflow">Approvals</Title>
             {actionError ? (
               <View className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
-                <Text className="text-alertRed font-bold text-sm">{actionError}</Text>
+                <Text className="text-[#EF4444] font-bold text-sm">{actionError}</Text>
               </View>
             ) : null}
             <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
@@ -661,7 +697,7 @@ export default function Approvals() {
                       <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">
                         {getActivityName(stage.activityId)}
                       </Text>
-                      <Text className="font-extrabold text-brandCharcoal text-sm">
+                      <Text className="font-extrabold text-slate-800 dark:text-white text-sm">
                         Due: {new Date(stage.dueAt).toLocaleDateString()}
                       </Text>
                       <TatBadge stage={stage} />
@@ -670,7 +706,7 @@ export default function Approvals() {
                       <Text className="text-sm text-slate-400 font-bold text-right mb-0.5">
                         AMOUNT DUE
                       </Text>
-                      <Text className="font-extrabold text-xl text-successGreen text-right">
+                      <Text className="font-extrabold text-xl text-[#22C55E] text-right">
                         ₹{stage.amountDue?.toLocaleString("en-IN") ?? "0"}
                       </Text>
                     </View>
@@ -696,7 +732,7 @@ export default function Approvals() {
           <View className="absolute inset-0 bg-brandCharcoal/70 z-50 justify-end" style={{ elevation: 15 }}>
             <View className="bg-white rounded-t-3xl p-6 pb-10 border-t border-slate-100 shadow-lg">
               <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-brandCharcoal font-extrabold text-base">
+                <Text className="text-slate-800 dark:text-white font-extrabold text-base">
                   Upload Payment Proof
                 </Text>
                 <Pressable
@@ -725,7 +761,7 @@ export default function Approvals() {
                   onChangeText={setPaymentRefText}
                   placeholder="e.g. Cheque #482931 or IMPS reference ID"
                   placeholderTextColor="#94A3B8"
-                  className="h-12 border border-slate-200 bg-white rounded-xl px-4 text-brandCharcoal text-sm font-semibold"
+                  className="h-12 border border-slate-200 bg-white rounded-xl px-4 text-slate-800 dark:text-white text-sm font-semibold"
                 />
               </View>
 
@@ -737,18 +773,16 @@ export default function Approvals() {
                   <View className="flex-row items-center" style={{ gap: 10 }}>
                     <Image source={{ uri: paymentProofPhoto.uri }} className="w-16 h-16 rounded-lg bg-slate-100" resizeMode="cover" />
                     <Pressable onPress={() => setPaymentProofPhoto(null)}>
-                      <Text className="text-alertRed text-sm font-bold">Remove</Text>
+                      <Text className="text-[#EF4444] text-sm font-bold">Remove</Text>
                     </Pressable>
                   </View>
-                ) : showPaymentCamera ? (
-                  <CameraCapture onCapture={(c) => { setPaymentProofPhoto({ uri: c.uri }); setShowPaymentCamera(false); }} />
                 ) : (
-                  <Button label="Capture photo" variant="secondary" onPress={() => setShowPaymentCamera(true)} />
+                  <CameraCapture onCapture={(c) => setPaymentProofPhoto({ uri: c.uri })} />
                 )}
               </View>
 
               {paymentProofError ? (
-                <Text className="text-alertRed text-xs font-semibold mb-3">{paymentProofError}</Text>
+                <Text className="text-[#EF4444] text-xs font-semibold mb-3">{paymentProofError}</Text>
               ) : null}
 
               <Button
@@ -814,12 +848,12 @@ export default function Approvals() {
     : stages.filter((s: any) => s.state === role);
 
   return (
-    <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      <Screen>
+    <ScrollView className="flex-1 bg-[#F8FAFC] dark:bg-[#101218]" contentContainerStyle={{ flexGrow: 1 }}>
+      <Screen scroll>
         <Title icon="checkmark-done-outline" eyebrow="Stage Workflow">Approvals</Title>
         {actionError ? (
           <View className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
-            <Text className="text-alertRed font-bold text-sm">{actionError}</Text>
+            <Text className="text-[#EF4444] font-bold text-sm">{actionError}</Text>
           </View>
         ) : null}
         <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
@@ -841,7 +875,7 @@ export default function Approvals() {
               <Card key={stage.id}>
                 <View className="flex-row justify-between items-start mb-4">
                   <View className="flex-1 pr-2">
-                    <Text className="font-bold text-brandCharcoal text-base mb-1">
+                    <Text className="font-bold text-slate-800 dark:text-white text-base mb-1">
                       {getActivityName(stage.activityId)}
                     </Text>
                     <Text className="text-slate-400 text-sm font-semibold">
@@ -900,7 +934,7 @@ export default function Approvals() {
       >
         <View className="flex-1 justify-end bg-brandCharcoal/50">
           <View className="bg-white rounded-t-3xl p-6 min-h-[300px]">
-            <Text className="text-brandCharcoal font-extrabold text-lg mb-2">
+            <Text className="text-slate-800 dark:text-white font-extrabold text-lg mb-2">
               Reason for Return
             </Text>
             <Text className="text-slate-500 text-sm font-semibold mb-4 leading-relaxed">
@@ -913,7 +947,7 @@ export default function Approvals() {
               placeholder="Describe what needs to be fixed..."
               placeholderTextColor="#94A3B8"
               multiline
-              className="border border-slate-200 rounded-xl p-4 mb-6 min-h-[100px] text-brandCharcoal text-sm font-medium focus:border-brandAmber"
+              className="border border-slate-200 rounded-xl p-4 mb-6 min-h-[100px] text-slate-800 dark:text-white text-sm font-medium focus:border-brandAmber"
               style={{ textAlignVertical: "top" }}
             />
 

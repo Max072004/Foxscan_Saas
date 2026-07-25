@@ -10,18 +10,18 @@ import { Ionicons } from "@expo/vector-icons";
 const DLP_COLOR: Record<string, { bg: string; text: string }> = {
   ACTIVE: { bg: "bg-sky-50 border-sky-100", text: "text-sky-700" },
   INSPECTION_DUE: { bg: "bg-amber-50 border-amber-100", text: "text-amber-700" },
-  OVERDUE: { bg: "bg-red-50 border-red-100", text: "text-alertRed" },
-  CLOSED: { bg: "bg-emerald-50 border-emerald-100", text: "text-successGreen" },
+  OVERDUE: { bg: "bg-red-50 border-red-100", text: "text-[#EF4444]" },
+  CLOSED: { bg: "bg-emerald-50 border-emerald-100", text: "text-[#22C55E]" },
 };
 const WARRANTY_COLOR: Record<string, { bg: string; text: string }> = {
-  ACTIVE: { bg: "bg-emerald-50 border-emerald-100", text: "text-successGreen" },
+  ACTIVE: { bg: "bg-emerald-50 border-emerald-100", text: "text-[#22C55E]" },
   EXPIRING: { bg: "bg-amber-50 border-amber-100", text: "text-amber-700" },
-  EXPIRED: { bg: "bg-red-50 border-red-100", text: "text-alertRed" },
+  EXPIRED: { bg: "bg-red-50 border-red-100", text: "text-[#EF4444]" },
 };
 const DISPUTE_COLOR: Record<string, { bg: string; text: string }> = {
-  OPEN: { bg: "bg-red-50 border-red-100", text: "text-alertRed" },
+  OPEN: { bg: "bg-red-50 border-red-100", text: "text-[#EF4444]" },
   UNDER_REVIEW: { bg: "bg-amber-50 border-amber-100", text: "text-amber-700" },
-  RESOLVED: { bg: "bg-emerald-50 border-emerald-100", text: "text-successGreen" },
+  RESOLVED: { bg: "bg-emerald-50 border-emerald-100", text: "text-[#22C55E]" },
   CLOSED: { bg: "bg-slate-100 border-slate-200", text: "text-slate-600" },
 };
 const DISPUTE_CATEGORIES = ["QUALITY", "PAYMENT", "SCOPE", "DELAY", "SAFETY", "OTHER"] as const;
@@ -168,8 +168,8 @@ export default function Assurance() {
   ];
 
   return (
-    <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      <Screen>
+    <ScrollView className="flex-1 bg-[#F8FAFC] dark:bg-[#101218]" contentContainerStyle={{ flexGrow: 1 }}>
+      <Screen scroll>
         <Title icon="shield-checkmark-outline" eyebrow="Risk & Assurance" subtitle="Defect liability, warranties, and formal disputes">
           Assurance
         </Title>
@@ -205,7 +205,7 @@ export default function Assurance() {
         )}
 
         {error ? (
-          <Text className="text-alertRed text-sm font-semibold mb-3">{error}</Text>
+          <Text className="text-[#EF4444] text-sm font-semibold mb-3">{error}</Text>
         ) : null}
 
         {/* --- DLP --- */}
@@ -214,12 +214,12 @@ export default function Assurance() {
             <SectionLabel>Start DLP Case</SectionLabel>
             <Card>
               <View className="flex-row" style={{ gap: 8 }}>
-                <TextInput value={dlpStartsOn} onChangeText={setDlpStartsOn} placeholder="Starts (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal" />
-                <TextInput value={dlpEndsOn} onChangeText={setDlpEndsOn} placeholder="Ends (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal" />
+                <TextInput value={dlpStartsOn} onChangeText={setDlpStartsOn} placeholder="Starts (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-slate-800 dark:text-white" />
+                <TextInput value={dlpEndsOn} onChangeText={setDlpEndsOn} placeholder="Ends (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-slate-800 dark:text-white" />
               </View>
               <View className="h-2.5" />
-              <TextInput value={dlpInspectionDue} onChangeText={setDlpInspectionDue} placeholder="Inspection due (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5" />
-              <TextInput value={dlpRetention} onChangeText={setDlpRetention} placeholder="Retention amount held (₹)" placeholderTextColor="#94A3B8" keyboardType="number-pad" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-3" />
+              <TextInput value={dlpInspectionDue} onChangeText={setDlpInspectionDue} placeholder="Inspection due (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-slate-800 dark:text-white mb-2.5" />
+              <TextInput value={dlpRetention} onChangeText={setDlpRetention} placeholder="Retention amount held (₹)" placeholderTextColor="#94A3B8" keyboardType="number-pad" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-slate-800 dark:text-white mb-3" />
               <Button label={dlpSubmitting ? "Starting…" : "Start DLP Case"} onPress={submitDlp} disabled={!token || dlpSubmitting} />
             </Card>
 
@@ -232,7 +232,7 @@ export default function Assurance() {
                 return (
                   <Card key={c.id}>
                     <View className="flex-row justify-between items-center mb-1.5">
-                      <Text className="font-extrabold text-brandCharcoal text-sm">₹{c.retentionAmount.toLocaleString("en-IN")} retention</Text>
+                      <Text className="font-extrabold text-slate-800 dark:text-white text-sm">₹{c.retentionAmount.toLocaleString("en-IN")} retention</Text>
                       <View className={`px-2 py-0.5 rounded-full border ${sc.bg}`}>
                         <Text className={`text-[11px] font-extrabold ${sc.text}`}>{c.status.replace("_", " ")}</Text>
                       </View>
@@ -255,21 +255,21 @@ export default function Assurance() {
           <>
             <SectionLabel>Register Warranty</SectionLabel>
             <Card>
-              <TextInput value={wProvider} onChangeText={setWProvider} placeholder="Provider (e.g. Asian Paints)" placeholderTextColor="#94A3B8" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5" />
+              <TextInput value={wProvider} onChangeText={setWProvider} placeholder="Provider (e.g. Asian Paints)" placeholderTextColor="#94A3B8" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-slate-800 dark:text-white mb-2.5" />
               <View className="flex-row mb-2.5" style={{ gap: 8 }}>
                 <Pressable onPress={() => setWType("MANUFACTURER")} className={`flex-1 h-11 rounded-xl border items-center justify-center ${wType === "MANUFACTURER" ? "bg-brandAmber border-brandAmber" : "bg-white border-slate-200"}`}>
-                  <Text className={`text-[12px] font-bold ${wType === "MANUFACTURER" ? "text-brandCharcoal" : "text-slate-500"}`}>Manufacturer</Text>
+                  <Text className={`text-[12px] font-bold ${wType === "MANUFACTURER" ? "text-slate-800 dark:text-white" : "text-slate-500"}`}>Manufacturer</Text>
                 </Pressable>
                 <Pressable onPress={() => setWType("WORKMANSHIP")} className={`flex-1 h-11 rounded-xl border items-center justify-center ${wType === "WORKMANSHIP" ? "bg-brandAmber border-brandAmber" : "bg-white border-slate-200"}`}>
-                  <Text className={`text-[12px] font-bold ${wType === "WORKMANSHIP" ? "text-brandCharcoal" : "text-slate-500"}`}>Workmanship</Text>
+                  <Text className={`text-[12px] font-bold ${wType === "WORKMANSHIP" ? "text-slate-800 dark:text-white" : "text-slate-500"}`}>Workmanship</Text>
                 </Pressable>
               </View>
-              <TextInput value={wReference} onChangeText={setWReference} placeholder="Reference no." placeholderTextColor="#94A3B8" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5" />
+              <TextInput value={wReference} onChangeText={setWReference} placeholder="Reference no." placeholderTextColor="#94A3B8" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-slate-800 dark:text-white mb-2.5" />
               <View className="flex-row mb-2.5" style={{ gap: 8 }}>
-                <TextInput value={wStartsOn} onChangeText={setWStartsOn} placeholder="Starts (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal" />
-                <TextInput value={wEndsOn} onChangeText={setWEndsOn} placeholder="Ends (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal" />
+                <TextInput value={wStartsOn} onChangeText={setWStartsOn} placeholder="Starts (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-slate-800 dark:text-white" />
+                <TextInput value={wEndsOn} onChangeText={setWEndsOn} placeholder="Ends (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-slate-800 dark:text-white" />
               </View>
-              <TextInput value={wCoverage} onChangeText={setWCoverage} placeholder="Coverage details…" placeholderTextColor="#94A3B8" multiline className="border border-slate-200 rounded-xl px-3 py-3 text-sm font-semibold text-brandCharcoal mb-3 min-h-[60px]" style={{ textAlignVertical: "top" }} />
+              <TextInput value={wCoverage} onChangeText={setWCoverage} placeholder="Coverage details…" placeholderTextColor="#94A3B8" multiline className="border border-slate-200 rounded-xl px-3 py-3 text-sm font-semibold text-slate-800 dark:text-white mb-3 min-h-[60px]" style={{ textAlignVertical: "top" }} />
               <Button label={wSubmitting ? "Registering…" : "Register Warranty"} onPress={submitWarranty} disabled={!token || wSubmitting} />
             </Card>
 
@@ -282,7 +282,7 @@ export default function Assurance() {
                 return (
                   <Card key={w.id}>
                     <View className="flex-row justify-between items-center mb-1">
-                      <Text className="font-extrabold text-brandCharcoal text-sm">{w.provider}</Text>
+                      <Text className="font-extrabold text-slate-800 dark:text-white text-sm">{w.provider}</Text>
                       <View className={`px-2 py-0.5 rounded-full border ${sc.bg}`}>
                         <Text className={`text-[11px] font-extrabold ${sc.text}`}>{w.status}</Text>
                       </View>
@@ -310,8 +310,8 @@ export default function Assurance() {
                   </Pressable>
                 ))}
               </ScrollView>
-              <TextInput value={dTitle} onChangeText={setDTitle} placeholder="Short summary" placeholderTextColor="#94A3B8" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5" />
-              <TextInput value={dDescription} onChangeText={setDDescription} placeholder="Describe the issue in detail…" placeholderTextColor="#94A3B8" multiline className="border border-slate-200 rounded-xl px-3 py-3 text-sm font-semibold text-brandCharcoal mb-3 min-h-[70px]" style={{ textAlignVertical: "top" }} />
+              <TextInput value={dTitle} onChangeText={setDTitle} placeholder="Short summary" placeholderTextColor="#94A3B8" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-slate-800 dark:text-white mb-2.5" />
+              <TextInput value={dDescription} onChangeText={setDDescription} placeholder="Describe the issue in detail…" placeholderTextColor="#94A3B8" multiline className="border border-slate-200 rounded-xl px-3 py-3 text-sm font-semibold text-slate-800 dark:text-white mb-3 min-h-[70px]" style={{ textAlignVertical: "top" }} />
               <Button label={dSubmitting ? "Raising…" : "Raise Dispute"} variant="danger" onPress={submitDispute} disabled={!token || dSubmitting} />
             </Card>
 
@@ -324,7 +324,7 @@ export default function Assurance() {
                 return (
                   <Card key={d.id}>
                     <View className="flex-row justify-between items-center mb-1">
-                      <Text className="font-extrabold text-brandCharcoal text-sm flex-1 pr-2">{d.title}</Text>
+                      <Text className="font-extrabold text-slate-800 dark:text-white text-sm flex-1 pr-2">{d.title}</Text>
                       <View className={`px-2 py-0.5 rounded-full border ${sc.bg}`}>
                         <Text className={`text-[11px] font-extrabold ${sc.text}`}>{d.status.replace("_", " ")}</Text>
                       </View>
@@ -332,7 +332,7 @@ export default function Assurance() {
                     <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wide mb-2">{d.category}</Text>
                     <Text className="text-slate-600 text-sm leading-relaxed mb-3">{d.description}</Text>
                     {d.resolution ? (
-                      <Text className="text-successGreen text-sm leading-relaxed mb-3">
+                      <Text className="text-[#22C55E] text-sm leading-relaxed mb-3">
                         <Text className="font-extrabold">Resolution: </Text>{d.resolution}
                       </Text>
                     ) : null}

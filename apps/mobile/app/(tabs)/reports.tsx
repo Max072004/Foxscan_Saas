@@ -17,7 +17,7 @@ function Bar({ label, value, color = "#EAAC1F" }: { label: string; value: number
     <View className="mb-3">
       <View className="flex-row justify-between mb-1">
         <Text className="text-sm font-semibold text-slate-500">{label}</Text>
-        <Text className="text-sm font-extrabold text-brandCharcoal">{value}%</Text>
+        <Text className="text-sm font-extrabold text-slate-800 dark:text-white">{value}%</Text>
       </View>
       <View className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
         <View className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, value))}%`, backgroundColor: color }} />
@@ -36,8 +36,8 @@ export default function Reports() {
 
   if (!token) {
     return (
-      <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-        <Screen>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+        <Screen scroll>
           <Title icon="bar-chart-outline" eyebrow="Executive Intelligence">Reports</Title>
           <EmptyState
             icon="lock-closed-outline"
@@ -51,8 +51,8 @@ export default function Reports() {
 
   if (!report) {
     return (
-      <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-        <Screen>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+        <Screen scroll>
           <Title icon="bar-chart-outline" eyebrow="Executive Intelligence">Reports</Title>
           <Card>
             <Text className="text-slate-400 font-semibold text-sm text-center py-6">Loading workspace insights…</Text>
@@ -68,8 +68,8 @@ export default function Reports() {
   const paidPct = contractVal > 0 ? Math.round((report.payments.paid / contractVal) * 100) : 0;
 
   return (
-    <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      <Screen>
+    <ScrollView className="flex-1 bg-[#F8FAFC] dark:bg-[#101218]" contentContainerStyle={{ flexGrow: 1 }}>
+      <Screen scroll>
         <Title icon="bar-chart-outline" eyebrow="Executive Intelligence" subtitle="Portfolio progress, financials, and SLA compliance">
           Reports
         </Title>
@@ -87,7 +87,7 @@ export default function Reports() {
                   <Ionicons name={k.icon as any} size={16} color={k.color} />
                 </View>
                 <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wide mb-0.5">{k.label}</Text>
-                <Text className="text-lg font-extrabold text-brandCharcoal">{k.value}</Text>
+                <Text className="text-lg font-extrabold text-slate-800 dark:text-white">{k.value}</Text>
               </Card>
             </View>
           ))}
@@ -144,10 +144,10 @@ export default function Reports() {
               <View className="flex-row justify-between items-center mb-1.5">
                 <View className="flex-row items-center flex-1" style={{ gap: 6 }}>
                   <Ionicons name="alert-circle" size={14} color="#D9383A" />
-                  <Text className="font-extrabold text-brandCharcoal text-sm">{d.reason}</Text>
+                  <Text className="font-extrabold text-slate-800 dark:text-white text-sm">{d.reason}</Text>
                 </View>
                 <View className="bg-red-50 border border-red-100 px-2 py-0.5 rounded-full">
-                  <Text className="text-[11px] font-extrabold text-alertRed">{d.impactDays}d delay</Text>
+                  <Text className="text-[11px] font-extrabold text-[#EF4444]">{d.impactDays}d delay</Text>
                 </View>
               </View>
               <Text className="text-slate-500 text-sm leading-relaxed mb-1.5">{d.mitigationPlan}</Text>

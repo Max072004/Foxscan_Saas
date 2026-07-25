@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Text, Pressable, View, ScrollView, TextInput } from "react-native";
+import { Text, Pressable, View, ScrollView, TextInput, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
-import { Screen, Title, Card, Button } from "@/components/ui";
+import { Screen, Title, Card, Button, useTheme } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import type { Project } from "@/lib/types";
@@ -15,6 +15,7 @@ const slugify = (label: string) =>
   label.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "item";
 
 export default function Projects() {
+  const t = useTheme();
   const { data = [], error, refetch } = useQuery({
     queryKey: ["projects"],
     queryFn: () => api<Project[]>("/api/projects"),
@@ -43,13 +44,13 @@ export default function Projects() {
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "ACTIVE":
-        return { bg: "bg-emerald-50 border border-emerald-100", text: "text-successGreen", label: "Active Workspace" };
+        return { bg: t.isDark ? "rgba(34,197,94,0.08)" : "rgba(34,197,94,0.08)", border: t.isDark ? "rgba(34,197,94,0.2)" : "rgba(34,197,94,0.2)", textColor: "#22C55E", label: "Active" };
       case "COMPLETED":
-        return { bg: "bg-blue-50 border border-blue-100", text: "text-blue-700", label: "Completed" };
+        return { bg: "rgba(59,130,246,0.08)", border: "rgba(59,130,246,0.2)", textColor: "#3B82F6", label: "Completed" };
       case "ON_HOLD":
-        return { bg: "bg-amber-50 border border-amber-100", text: "text-amber-700", label: "On Hold" };
+        return { bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.2)", textColor: "#F59E0B", label: "On Hold" };
       default:
-        return { bg: "bg-slate-50 border border-slate-100", text: "text-slate-600", label: status };
+        return { bg: t.isDark ? "#222733" : "#F1F5F9", border: t.cardBorder, textColor: t.textSecondary, label: status };
     }
   };
 
@@ -96,142 +97,160 @@ export default function Projects() {
     }
   };
 
+  const inputStyle = {
+    borderWidth: 2,
+    borderColor: t.inputBorder,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 56,
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: t.text,
+    marginBottom: 12,
+    backgroundColor: t.inputBg,
+  };
+
   return (
-    <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      <Screen>
-        <Title icon="business-outline" eyebrow="Your Workspace" subtitle="All societies and sites you're assigned to">
-          Projects
-        </Title>
-        {error ? (
-          <View className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl">
-            <Text className="text-alertRed font-bold text-sm">{error.message}</Text>
-          </View>
-        ) : null}
-
-        {canCreate && !showCreate && (
-          <View className="mb-4">
-            <Button label="+ New Project" onPress={() => setShowCreate(true)} />
-          </View>
-        )}
-
-        {showCreate && (
-          <Card>
-            <Text className="font-extrabold text-brandCharcoal text-base mb-3">Create a New Project</Text>
-            <TextInput value={name} onChangeText={setName} placeholder="Project name" placeholderTextColor="#94A3B8" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5" />
-            <TextInput value={address} onChangeText={setAddress} placeholder="Address" placeholderTextColor="#94A3B8" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5" />
-            <TextInput value={scope} onChangeText={setScope} placeholder="Scope of work" placeholderTextColor="#94A3B8" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5" />
-            <View className="flex-row" style={{ gap: 8 }}>
-              <TextInput value={buildings} onChangeText={setBuildings} placeholder="Buildings" placeholderTextColor="#94A3B8" keyboardType="number-pad" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5" />
-              <TextInput value={areaSqft} onChangeText={setAreaSqft} placeholder="Area (sq.ft)" placeholderTextColor="#94A3B8" keyboardType="number-pad" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5" />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1, backgroundColor: t.bg }}
+    >
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        <Screen scroll>
+          <Title icon="business-outline" eyebrow="Your Workspace" subtitle="All societies and construction sites you are assigned to">
+            Projects
+          </Title>
+          {error ? (
+            <View style={{ marginBottom: 16, padding: 16, backgroundColor: "rgba(239,68,68,0.08)", borderWidth: 1, borderColor: "rgba(239,68,68,0.2)", borderRadius: 16 }}>
+              <Text style={{ color: "#EF4444", fontWeight: "800", fontSize: 14 }}>{error.message}</Text>
             </View>
-            <TextInput value={contractValue} onChangeText={setContractValue} placeholder="Contract value (₹)" placeholderTextColor="#94A3B8" keyboardType="number-pad" className="border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-2.5" />
-            <View className="flex-row" style={{ gap: 8 }}>
-              <TextInput value={startDate} onChangeText={setStartDate} placeholder="Start (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-3" />
-              <TextInput value={endDate} onChangeText={setEndDate} placeholder="End (YYYY-MM-DD)" placeholderTextColor="#94A3B8" className="flex-1 border border-slate-200 rounded-xl px-3 h-11 text-sm font-semibold text-brandCharcoal mb-3" />
-            </View>
+          ) : null}
 
-            <Text className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-2">
-              QA Checklist Template
-            </Text>
-            <Text className="text-slate-400 text-[11px] font-medium mb-2 leading-relaxed">
-              These are the quality checks a contractor must confirm before raising any stage on this project.
-            </Text>
-            {checklistLabels.map((label, i) => (
-              <View key={i} className="flex-row items-center mb-2" style={{ gap: 8 }}>
+          {canCreate && !showCreate && (
+            <View style={{ marginBottom: 20 }}>
+              <Button label="+ New Project" onPress={() => setShowCreate(true)} />
+            </View>
+          )}
+
+          {showCreate && (
+            <Card>
+              <Text style={{ fontWeight: "900", color: t.text, fontSize: 18, marginBottom: 16 }}>Create a New Project</Text>
+              <TextInput value={name} onChangeText={setName} placeholder="Project name" placeholderTextColor={t.textMuted} style={inputStyle} />
+              <TextInput value={address} onChangeText={setAddress} placeholder="Address" placeholderTextColor={t.textMuted} style={inputStyle} />
+              <TextInput value={scope} onChangeText={setScope} placeholder="Scope of work" placeholderTextColor={t.textMuted} style={inputStyle} />
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <TextInput value={buildings} onChangeText={setBuildings} placeholder="Buildings" placeholderTextColor={t.textMuted} keyboardType="number-pad" style={[inputStyle, { flex: 1 }]} />
+                <TextInput value={areaSqft} onChangeText={setAreaSqft} placeholder="Area (sq.ft)" placeholderTextColor={t.textMuted} keyboardType="number-pad" style={[inputStyle, { flex: 1 }]} />
+              </View>
+              <TextInput value={contractValue} onChangeText={setContractValue} placeholder="Contract value (₹)" placeholderTextColor={t.textMuted} keyboardType="number-pad" style={inputStyle} />
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <TextInput value={startDate} onChangeText={setStartDate} placeholder="Start (YYYY-MM-DD)" placeholderTextColor={t.textMuted} style={[inputStyle, { flex: 1 }]} />
+                <TextInput value={endDate} onChangeText={setEndDate} placeholder="End (YYYY-MM-DD)" placeholderTextColor={t.textMuted} style={[inputStyle, { flex: 1 }]} />
+              </View>
+
+              <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+                QA Checklist Template
+              </Text>
+              <Text style={{ color: t.textSecondary, fontSize: 14, fontWeight: "600", marginBottom: 12, lineHeight: 20 }}>
+                These quality checks must be confirmed before raising any stage on this project.
+              </Text>
+              {checklistLabels.map((label, i) => (
+                <View key={i} style={{ flexDirection: "row", alignItems: "center", marginBottom: 12, gap: 10 }}>
+                  <TextInput
+                    value={label}
+                    onChangeText={(v) => setChecklistLabels((prev) => prev.map((l, idx) => (idx === i ? v : l)))}
+                    style={[inputStyle, { flex: 1, marginBottom: 0 }]}
+                  />
+                  <Pressable onPress={() => setChecklistLabels((prev) => prev.filter((_, idx) => idx !== i))}>
+                    <Ionicons name="close-circle" size={24} color="#EF4444" />
+                  </Pressable>
+                </View>
+              ))}
+              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16, gap: 10 }}>
                 <TextInput
-                  value={label}
-                  onChangeText={(v) => setChecklistLabels((prev) => prev.map((l, idx) => (idx === i ? v : l)))}
-                  className="flex-1 border border-slate-200 rounded-xl px-3 h-10 text-sm font-semibold text-brandCharcoal"
+                  value={newItemLabel}
+                  onChangeText={setNewItemLabel}
+                  placeholder="Add a custom check item…"
+                  placeholderTextColor={t.textMuted}
+                  style={[inputStyle, { flex: 1, marginBottom: 0 }]}
                 />
-                <Pressable onPress={() => setChecklistLabels((prev) => prev.filter((_, idx) => idx !== i))}>
-                  <Ionicons name="close-circle" size={20} color="#D9383A" />
+                <Pressable
+                  onPress={() => {
+                    if (!newItemLabel.trim()) return;
+                    setChecklistLabels((prev) => [...prev, newItemLabel.trim()]);
+                    setNewItemLabel("");
+                  }}
+                >
+                  <Ionicons name="add-circle" size={28} color="#F5B81F" />
                 </Pressable>
               </View>
-            ))}
-            <View className="flex-row items-center mb-3" style={{ gap: 8 }}>
-              <TextInput
-                value={newItemLabel}
-                onChangeText={setNewItemLabel}
-                placeholder="Add a checklist item…"
-                placeholderTextColor="#94A3B8"
-                className="flex-1 border border-slate-200 rounded-xl px-3 h-10 text-sm font-semibold text-brandCharcoal"
-              />
-              <Pressable
-                onPress={() => {
-                  if (!newItemLabel.trim()) return;
-                  setChecklistLabels((prev) => [...prev, newItemLabel.trim()]);
-                  setNewItemLabel("");
-                }}
-              >
-                <Ionicons name="add-circle" size={22} color="#EAAC1F" />
-              </Pressable>
-            </View>
 
-            {createError ? <Text className="text-alertRed text-xs font-semibold mb-2">{createError}</Text> : null}
-            <View className="flex-row" style={{ gap: 8 }}>
-              <View className="flex-1">
-                <Button label="Cancel" variant="secondary" onPress={() => { setShowCreate(false); resetForm(); }} />
+              {createError ? <Text style={{ color: "#EF4444", fontSize: 14, fontWeight: "800", marginBottom: 12 }}>{createError}</Text> : null}
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <Button label="Cancel" variant="secondary" onPress={() => { setShowCreate(false); resetForm(); }} disabled={creating} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Button label="Create Project" onPress={createProject} loading={creating} disabled={creating} />
+                </View>
               </View>
-              <View className="flex-1">
-                <Button label={creating ? "Creating…" : "Create Project"} onPress={createProject} disabled={creating} />
-              </View>
-            </View>
-          </Card>
-        )}
+            </Card>
+          )}
 
-        <View className="space-y-4 gap-2">
-          {data.map((project) => {
-            const status = getStatusStyle(project.status);
-            const activeId = selectedProjectId || data[0]?.id;
-            const isActive = project.id === activeId;
-            return (
-              <Card key={project.id}>
-                <View className="flex-col justify-between">
-                  <View className="flex-row justify-between items-start mb-2">
-                    <Text className="font-extrabold text-brandCharcoal text-lg flex-1 pr-2">
-                      {project.name}
-                    </Text>
-                    <View className={`${status.bg} px-2.5 py-1 rounded-full`}>
-                      <Text className={`text-[11px] font-extrabold uppercase ${status.text}`}>
-                        {status.label}
+          <View style={{ gap: 12 }}>
+            {data.map((project) => {
+              const status = getStatusStyle(project.status);
+              const activeId = selectedProjectId || data[0]?.id;
+              const isActive = project.id === activeId;
+              return (
+                <Card key={project.id}>
+                  <View style={{ flexDirection: "column", justifyContent: "space-between" }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                      <Text style={{ fontWeight: "900", color: t.text, fontSize: 20, flex: 1, paddingRight: 8 }}>
+                        {project.name}
+                      </Text>
+                      <View style={{ backgroundColor: status.bg, borderWidth: 1, borderColor: status.border, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20 }}>
+                        <Text style={{ fontSize: 11, fontWeight: "800", textTransform: "uppercase", color: status.textColor }}>
+                          {status.label}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
+                      <Ionicons name="location-outline" size={16} color={t.textSecondary} />
+                      <Text style={{ color: t.textSecondary, fontSize: 15, fontWeight: "600", marginLeft: 4 }}>
+                        {project.address}
                       </Text>
                     </View>
-                  </View>
 
-                  <View className="flex-row items-center space-x-1 mb-3">
-                    <Ionicons name="location-outline" size={14} color="#64748B" />
-                    <Text className="text-slate-500 text-sm font-semibold ml-1">
-                      {project.address}
-                    </Text>
-                  </View>
-
-                  <View className="border-t border-slate-100 pt-3 flex-row justify-between items-center">
-                    {isActive ? (
-                      <View className="flex-row items-center" style={{ gap: 4 }}>
-                        <Ionicons name="checkmark-circle" size={14} color="#1B8755" />
-                        <Text className="text-successGreen text-sm font-extrabold">Active workspace</Text>
-                      </View>
-                    ) : (
-                      <Pressable onPress={() => setSelectedProjectId(project.id)}>
-                        <Text className="text-brandAmber text-sm font-extrabold">Make active</Text>
+                    <View style={{ borderTopWidth: 1, borderTopColor: t.cardBorder, paddingTop: 12, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                      {isActive ? (
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                          <Ionicons name="checkmark-circle" size={18} color="#22C55E" />
+                          <Text style={{ color: "#22C55E", fontSize: 15, fontWeight: "900" }}>Active workspace</Text>
+                        </View>
+                      ) : (
+                        <Pressable onPress={() => setSelectedProjectId(project.id)}>
+                          <Text style={{ color: "#F5B81F", fontSize: 15, fontWeight: "900" }}>Make active</Text>
+                        </Pressable>
+                      )}
+                      <Pressable
+                        onPress={() => router.push(`/project/${project.id}`)}
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <Text style={{ color: "#F5B81F", fontSize: 15, fontWeight: "900", marginRight: 4 }}>
+                          View details
+                        </Text>
+                        <Ionicons name="arrow-forward" size={16} color="#F5B81F" />
                       </Pressable>
-                    )}
-                    <Pressable
-                      onPress={() => router.push(`/project/${project.id}`)}
-                      className="flex-row items-center"
-                    >
-                      <Text className="text-brandAmber text-sm font-extrabold mr-1">
-                        View details
-                      </Text>
-                      <Ionicons name="arrow-forward" size={14} color="#EAAC1F" />
-                    </Pressable>
+                    </View>
                   </View>
-                </View>
-              </Card>
-            );
-          })}
-        </View>
-      </Screen>
-    </ScrollView>
+                </Card>
+              );
+            })}
+          </View>
+        </Screen>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

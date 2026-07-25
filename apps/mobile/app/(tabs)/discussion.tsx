@@ -60,8 +60,8 @@ export default function Discussion() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      <Screen>
+    <ScrollView className="flex-1 bg-[#F8FAFC] dark:bg-[#101218]" contentContainerStyle={{ flexGrow: 1 }}>
+      <Screen scroll>
         <Title icon="chatbubbles-outline" eyebrow="Keep it on record" subtitle="Per-activity discussion instead of WhatsApp. Use @Name to mention someone.">
           Discussion
         </Title>
@@ -86,7 +86,7 @@ export default function Discussion() {
                     className={`px-4 py-2 rounded-full mr-2 border ${active ? "bg-brandAmber border-brandAmber" : "bg-white border-slate-200"}`}
                     style={{ alignSelf: "flex-start" }}
                   >
-                    <Text className={`text-sm font-bold ${active ? "text-brandCharcoal" : "text-slate-500"}`}>
+                    <Text className={`text-sm font-bold ${active ? "text-slate-800 dark:text-white" : "text-slate-500"}`}>
                       {a.name} {commentCount(a.id) > 0 ? `(${commentCount(a.id)})` : ""}
                     </Text>
                   </Pressable>
@@ -100,7 +100,7 @@ export default function Discussion() {
               comments.map((c: any) => (
                 <Card key={c.id}>
                   <View className="flex-row justify-between items-center mb-1">
-                    <Text className="font-extrabold text-brandCharcoal text-sm">{getUserName(c.authorId)}</Text>
+                    <Text className="font-extrabold text-slate-800 dark:text-white text-sm">{getUserName(c.authorId)}</Text>
                     <Text className="text-slate-400 text-[11px] font-semibold">{timeAgo(c.createdAt)}</Text>
                   </View>
                   <Text className="text-slate-700 text-sm leading-relaxed">{c.text}</Text>
@@ -124,7 +124,7 @@ export default function Discussion() {
                 placeholder="Add a comment… use @Name to mention"
                 placeholderTextColor="#94A3B8"
                 multiline
-                className="flex-1 border border-slate-200 bg-white rounded-xl px-4 py-3 text-brandCharcoal text-sm font-medium min-h-[48px]"
+                className="flex-1 border border-slate-200 bg-white rounded-xl px-4 py-3 text-slate-800 dark:text-white text-sm font-medium min-h-[48px]"
               />
               <Pressable
                 onPress={submit}

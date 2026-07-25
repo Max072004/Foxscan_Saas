@@ -1,18 +1,18 @@
 import { Text, View, ScrollView } from "react-native";
 import { useQuery } from "@tanstack/react-query";
-import { Screen, Title, Card, SectionLabel, EmptyState } from "@/components/ui";
+import { Screen, Title, Card, SectionLabel, EmptyState, useTheme } from "@/components/ui";
 import { api } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
 
-const EVENT_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; color: string; bg: string }> = {
-  STAGE_RAISED: { icon: "arrow-up-circle-outline", color: "#3B82F6", bg: "bg-sky-50 border-sky-100" },
-  STAGE_APPROVED: { icon: "checkmark-circle-outline", color: "#1B8755", bg: "bg-emerald-50 border-emerald-100" },
-  STAGE_RETURNED: { icon: "alert-circle-outline", color: "#D9383A", bg: "bg-red-50 border-red-100" },
-  PAYMENT_PROOF_UPLOADED: { icon: "receipt-outline", color: "#EAAC1F", bg: "bg-amber-50 border-amber-100" },
-  PAYMENT_RELEASED: { icon: "cash-outline", color: "#1B8755", bg: "bg-emerald-50 border-emerald-100" },
-  ACTIVITY_MENTION: { icon: "at-outline", color: "#8B5CF6", bg: "bg-violet-50 border-violet-100" },
+const EVENT_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; color: string }> = {
+  STAGE_RAISED: { icon: "arrow-up-circle-outline", color: "#3B82F6" },
+  STAGE_APPROVED: { icon: "checkmark-circle-outline", color: "#22C55E" },
+  STAGE_RETURNED: { icon: "alert-circle-outline", color: "#EF4444" },
+  PAYMENT_PROOF_UPLOADED: { icon: "receipt-outline", color: "#F5B81F" },
+  PAYMENT_RELEASED: { icon: "cash-outline", color: "#22C55E" },
+  ACTIVITY_MENTION: { icon: "at-outline", color: "#8B5CF6" },
 };
-const DEFAULT_META = { icon: "notifications-outline" as const, color: "#64748B", bg: "bg-slate-100 border-slate-200" };
+const DEFAULT_META = { icon: "notifications-outline" as const, color: "#64748B" };
 
 function timeAgo(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -27,6 +27,7 @@ function timeAgo(iso: string) {
 }
 
 export default function Notifications() {
+  const t = useTheme();
   const { data } = useQuery({
     queryKey: ["data"],
     queryFn: () => api<any>("/api/data"),
@@ -38,8 +39,8 @@ export default function Notifications() {
   const unreadCount = notifications.filter((n: any) => !n.readAt).length;
 
   return (
-    <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      <Screen>
+    <ScrollView style={{ flex: 1, backgroundColor: t.bg }} contentContainerStyle={{ flexGrow: 1 }}>
+      <Screen scroll>
         <Title icon="notifications-outline" eyebrow="Activity Feed" subtitle="Approvals, returns, mentions, and payment updates">
           Notifications
         </Title>
@@ -62,21 +63,21 @@ export default function Notifications() {
             const unread = !n.readAt;
             return (
               <Card key={n.id}>
-                <View className="flex-row items-start" style={{ gap: 12 }}>
-                  <View className={`w-11 h-11 rounded-xl border items-center justify-center ${meta.bg}`}>
+                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}>
+                  <View style={{ width: 44, height: 44, borderRadius: 14, borderWidth: 1, borderColor: `${meta.color}30`, backgroundColor: `${meta.color}12`, alignItems: "center", justifyContent: "center" }}>
                     <Ionicons name={meta.icon} size={20} color={meta.color} />
                   </View>
-                  <View className="flex-1">
-                    <View className="flex-row items-start justify-between mb-1">
-                      <Text className={`text-sm flex-1 pr-2 ${unread ? "font-extrabold text-brandCharcoal" : "font-bold text-slate-500"}`}>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
+                      <Text style={{ fontSize: 14, flex: 1, paddingRight: 8, fontWeight: unread ? "800" : "600", color: unread ? t.text : t.textSecondary }}>
                         {n.title}
                       </Text>
-                      {unread ? <View className="w-2 h-2 rounded-full bg-brandAmber mt-1.5" /> : null}
+                      {unread ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#F5B81F", marginTop: 6 }} /> : null}
                     </View>
-                    <Text className="text-slate-600 text-sm font-medium leading-relaxed mb-2">
+                    <Text style={{ color: t.textSecondary, fontSize: 14, fontWeight: "500", lineHeight: 20, marginBottom: 8 }}>
                       {n.body}
                     </Text>
-                    <Text className="text-slate-300 text-[11px] font-bold uppercase tracking-wide">
+                    <Text style={{ color: t.textMuted, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5 }}>
                       {timeAgo(n.createdAt)}
                     </Text>
                   </View>

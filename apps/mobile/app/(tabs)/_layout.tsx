@@ -1,10 +1,11 @@
 import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, View } from "react-native";
+import { Pressable, View, useColorScheme } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
 export default function TabsLayout() {
+  const isDark = useColorScheme() === "dark";
   const router = useRouter();
   const { data } = useQuery({
     queryKey: ["data"],
@@ -14,48 +15,66 @@ export default function TabsLayout() {
   
   const unreadCount = data?.notifications?.filter((n: any) => !n.readAt).length || 0;
 
+  const headerBg = isDark ? "#101218" : "#FFFFFF";
+  const tabBarBg = isDark ? "#101218" : "#FFFFFF";
+  const borderColor = isDark ? "#272C38" : "#E2E8F0";
+  const titleColor = isDark ? "#FFFFFF" : "#0F172A";
+  const bellColor = isDark ? "#FFFFFF" : "#0F172A";
+  const bellBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.06)";
+
   return (
     <Tabs
       screenOptions={({ route }) => ({
         headerStyle: {
-          backgroundColor: "#1A1D24",
+          backgroundColor: headerBg,
           borderBottomWidth: 1,
-          borderBottomColor: "#2A2E39",
+          borderBottomColor: borderColor,
           shadowOpacity: 0,
           elevation: 0,
         },
         headerTitleStyle: {
           fontWeight: "900",
-          fontSize: 18,
+          fontSize: 19,
           letterSpacing: -0.5,
-          color: "#FFFFFF",
+          color: titleColor,
         },
-        headerTintColor: "#FFFFFF",
+        headerTintColor: titleColor,
         headerRight: () => (
           <Pressable
             onPress={() => router.push("/notifications")}
-            className="mr-4 w-10 h-10 items-center justify-center rounded-xl bg-slate-800/60 active:scale-95 transition-all"
-            style={({ pressed }) => pressed ? { transform: [{ scale: 0.95 }], opacity: 0.85 } : {}}
+            style={({ pressed }) => ({
+              marginRight: 16,
+              width: 44,
+              height: 44,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 16,
+              backgroundColor: bellBg,
+              borderWidth: 1,
+              borderColor: borderColor,
+              transform: [{ scale: pressed ? 0.95 : 1 }],
+              opacity: pressed ? 0.85 : 1,
+            })}
           >
-            <Ionicons name="notifications-outline" size={20} color="#FFFFFF" />
+            <Ionicons name="notifications-outline" size={21} color={bellColor} />
             {unreadCount > 0 && (
-              <View className="absolute top-2 right-2 w-3 h-3 bg-alertRed rounded-full border-2 border-brandCharcoal" />
+              <View style={{ position: "absolute", top: 8, right: 8, width: 10, height: 10, backgroundColor: "#EF4444", borderRadius: 5, borderWidth: 2, borderColor: headerBg }} />
             )}
           </Pressable>
         ),
-        tabBarActiveTintColor: "#EAAC1F",
-        tabBarInactiveTintColor: "#64748B",
+        tabBarActiveTintColor: "#F5B81F",
+        tabBarInactiveTintColor: isDark ? "#64748B" : "#94A3B8",
         tabBarStyle: {
-          backgroundColor: "#1A1D24",
-          borderTopColor: "#2A2E39",
+          backgroundColor: tabBarBg,
+          borderTopColor: borderColor,
           borderTopWidth: 1,
-          height: 64,
-          paddingBottom: 8,
+          height: 66,
+          paddingBottom: 10,
           paddingTop: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: "700",
+          fontSize: 11,
+          fontWeight: "800",
           marginTop: 2,
         },
         tabBarIcon: ({ color, focused }) => {
@@ -73,7 +92,7 @@ export default function TabsLayout() {
             iconName = focused ? "person" : "person-outline";
           }
 
-          return <Ionicons name={iconName} size={20} color={color} />;
+          return <Ionicons name={iconName} size={22} color={color} />;
         },
       })}
     >
@@ -83,7 +102,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="site-updates" options={{ title: "Updates" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
 
-      {/* Hidden Routes (registered but not displayed on bottom tab bar) */}
+      {/* Hidden Routes */}
       <Tabs.Screen name="activities" options={{ href: null, title: "Timeline" }} />
       <Tabs.Screen name="documents" options={{ href: null, title: "Documents" }} />
       <Tabs.Screen name="notifications" options={{ href: null, title: "Notifications" }} />

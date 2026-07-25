@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { Text, View, ScrollView } from "react-native";
-import { Screen, Title, Card } from "@/components/ui";
+import { Screen, Title, Card, useTheme } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Activity } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function Activities() {
+  const t = useTheme();
   const { data } = useQuery({
     queryKey: ["data"],
     queryFn: () => api<{ activities: Activity[] }>("/api/data"),
@@ -14,25 +15,25 @@ export default function Activities() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "NOT_STARTED":
-        return { bg: "bg-slate-100 border border-slate-200", text: "text-slate-600", label: "Not Started" };
+        return { bg: t.isDark ? "#222733" : "#F1F5F9", border: t.cardBorder, textColor: t.textSecondary, label: "Not Started" };
       case "IN_PROGRESS":
-        return { bg: "bg-sky-50 border border-sky-100", text: "text-sky-700", label: "In Progress" };
+        return { bg: "rgba(14,165,233,0.08)", border: "rgba(14,165,233,0.2)", textColor: "#0EA5E9", label: "In Progress" };
       case "SUBMITTED":
-        return { bg: "bg-amber-50 border border-amber-100", text: "text-amber-700", label: "Submitted" };
+        return { bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.2)", textColor: "#F59E0B", label: "Submitted" };
       case "APPROVED":
-        return { bg: "bg-indigo-50 border border-indigo-100", text: "text-indigo-700", label: "Approved" };
+        return { bg: "rgba(99,102,241,0.08)", border: "rgba(99,102,241,0.2)", textColor: "#6366F1", label: "Approved" };
       case "PAID":
-        return { bg: "bg-green-50 border border-green-100", text: "text-successGreen", label: "Paid" };
+        return { bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.2)", textColor: "#22C55E", label: "Paid" };
       case "ON_HOLD":
-        return { bg: "bg-red-50 border border-red-100", text: "text-alertRed", label: "On Hold" };
+        return { bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.2)", textColor: "#EF4444", label: "On Hold" };
       default:
-        return { bg: "bg-slate-50 border border-slate-200", text: "text-slate-600", label: status };
+        return { bg: t.isDark ? "#222733" : "#F1F5F9", border: t.cardBorder, textColor: t.textSecondary, label: status };
     }
   };
 
   return (
-    <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      <Screen>
+    <ScrollView style={{ flex: 1, backgroundColor: t.bg }} contentContainerStyle={{ flexGrow: 1 }}>
+      <Screen scroll>
         <Title icon="calendar-outline" eyebrow="Project Timeline" subtitle="Sequenced work with planned dates and live progress">
           Activities
         </Title>
@@ -42,39 +43,38 @@ export default function Activities() {
             const badge = getStatusBadge(a.status);
             return (
               <Card key={a.id}>
-                <View className="flex-row justify-between items-start mb-3">
-                  <Text className="font-extrabold text-brandCharcoal text-base flex-1 pr-2">
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                  <Text style={{ fontWeight: "900", color: t.text, fontSize: 18, flex: 1, paddingRight: 8 }}>
                     {a.name}
                   </Text>
-                  <View className={`${badge.bg} px-2.5 py-1 rounded-full`}>
-                    <Text className={`text-[11px] font-bold uppercase ${badge.text}`}>
+                  <View style={{ backgroundColor: badge.bg, borderWidth: 1, borderColor: badge.border, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
+                    <Text style={{ fontSize: 11, fontWeight: "700", textTransform: "uppercase", color: badge.textColor }}>
                       {badge.label}
                     </Text>
                   </View>
                 </View>
 
                 {/* Timeline info row */}
-                <View className="flex-row items-center space-x-1.5 mb-4">
-                  <Ionicons name="calendar-outline" size={14} color="#64748B" />
-                  <Text className="text-slate-500 text-sm font-semibold ml-1">
+                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+                  <Ionicons name="calendar-outline" size={14} color={t.textMuted} />
+                  <Text style={{ color: t.textSecondary, fontSize: 14, fontWeight: "600", marginLeft: 4 }}>
                     {a.plannedStart} — {a.plannedEnd}
                   </Text>
                 </View>
 
                 {/* Progress bar container */}
-                <View className="space-y-1 mt-1">
-                  <View className="flex-row justify-between items-center mb-1">
-                    <Text className="text-slate-400 text-[12px] font-bold uppercase tracking-wider">
+                <View style={{ marginTop: 4 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                    <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 1 }}>
                       Completion Progress
                     </Text>
-                    <Text className="text-brandCharcoal font-extrabold text-sm">
+                    <Text style={{ color: t.text, fontWeight: "800", fontSize: 14 }}>
                       {a.progress}%
                     </Text>
                   </View>
-                  <View className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <View style={{ height: 8, width: "100%", backgroundColor: t.isDark ? "#222733" : "#E2E8F0", borderRadius: 8, overflow: "hidden" }}>
                     <View
-                      className="h-full bg-brandAmber rounded-full"
-                      style={{ width: `${a.progress}%` }}
+                      style={{ height: "100%", backgroundColor: "#F5B81F", borderRadius: 8, width: `${a.progress}%` }}
                     />
                   </View>
                 </View>
@@ -82,8 +82,8 @@ export default function Activities() {
             );
           })
         ) : (
-          <View className="flex-1 items-center justify-center py-12">
-            <Text className="text-slate-400 font-semibold">No activities configured.</Text>
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 48 }}>
+            <Text style={{ color: t.textSecondary, fontWeight: "600" }}>No activities configured.</Text>
           </View>
         )}
       </Screen>

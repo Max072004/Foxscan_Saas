@@ -33,7 +33,7 @@ export default function ProjectDetails() {
 
   const { data: documents = [], refetch: refetchDocs } = useQuery({
     queryKey: ["project-documents", id, searchQuery],
-    queryFn: () => api<any[]>(`/api/documents?q=${encodeURIComponent(searchQuery)}`),
+    queryFn: () => api<any[]>(`/api/documents?projectId=${id}&q=${encodeURIComponent(searchQuery)}`),
   });
 
   const getStatusBadge = (status: string) => {

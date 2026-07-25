@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Text } from "react-native";
+import { Text, Alert } from "react-native";
 import { useAudioRecorder, AudioModule, RecordingPresets } from "expo-audio";
 import { Button } from "@/components/ui";
 
@@ -19,7 +19,10 @@ export function VoiceNote({ onRecorded }: { onRecorded: (uri: string) => void })
     try {
       // 1. Request mic permission first — must be fully resolved before anything else.
       const permission = await AudioModule.requestRecordingPermissionsAsync();
-      if (permission.status !== "granted") return;
+      if (permission.status !== "granted") {
+        Alert.alert("Microphone Permission", "Microphone access is required to record voice notes.");
+        return;
+      }
 
       // 2. Switch the iOS audio session category to .playAndRecord.
       //    `allowsRecording: true` is what actually unlocks recording on iOS —
@@ -38,6 +41,9 @@ export function VoiceNote({ onRecorded }: { onRecorded: (uri: string) => void })
       //    no need to await, but we keep it consistent with the stop flow.
       recorder.record();
       setIsRecording(true);
+    } catch (err) {
+      console.error("Failed to start recorder:", err);
+      Alert.alert("Recording Error", err instanceof Error ? err.message : "Failed to start recording voice note.");
     } finally {
       isStarting.current = false;
     }

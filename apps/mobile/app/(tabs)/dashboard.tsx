@@ -1,19 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import { Text, View, ScrollView, Pressable } from "react-native";
-import { Screen, Title, Card } from "@/components/ui";
+import { Text, View, ScrollView, Pressable, useColorScheme } from "react-native";
+import { Screen, Title, Card, Skeleton, useTheme } from "@/components/ui";
 import { api } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "@/stores/auth";
 import { useProjectStore } from "@/stores/project";
-
 import { calculateProjectSlippage } from "@/lib/scheduling";
 
 export default function Dashboard() {
+  const t = useTheme();
   const router = useRouter();
   const { role, userId } = useAuthStore();
   const { selectedProjectId } = useProjectStore();
-  const { data, error } = useQuery({
+  const { data, error, isLoading } = useQuery({
     queryKey: ["reports"],
     queryFn: () => api<any>("/api/reports"),
   });
@@ -25,7 +25,6 @@ export default function Dashboard() {
 
   const progress = data ? Math.round(data.portfolio.progress) : 0;
 
-  // Role-based visibility, mirroring app/components/Dashboard.tsx on web
   const isAdmin = role === "ADMIN";
   const isContractor = role === "CONTRACTOR";
   const isManufacturer = role === "MANUFACTURER";
@@ -38,7 +37,6 @@ export default function Dashboard() {
   const activeProjStages = activeProject ? (globalData?.stages?.filter((s: any) => activeProjActs.some((a: any) => a.id === s.activityId)) || []) : [];
   const activeSlippage = activeProject ? calculateProjectSlippage(activeProject, activeProjActs, activeProjStages) : null;
 
-  // Same role-filtered "what's pending for me" logic as the web dashboard
   const pendingStages = (activeProjStages || []).filter((s: any) => {
     if (s.state === "PAID") return false;
     if (isAdmin || isConsultant) return true;
@@ -49,89 +47,77 @@ export default function Dashboard() {
   });
   const overdueCount = pendingStages.filter((s: any) => new Date(s.dueAt) < new Date()).length;
 
-  return (
-    <ScrollView className="flex-grow bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
-      {/* Industrial Safety Accent Bar */}
-      <View className="h-2 w-full flex-row overflow-hidden bg-brandAmber">
-        {Array.from({ length: 15 }).map((_, i) => (
-          <View
-            key={i}
-            className="w-6 h-6 bg-brandCharcoal mr-4"
-            style={{ transform: [{ rotate: "45deg" }], marginTop: -6 }}
-          />
-        ))}
-      </View>
+  const tileBg = t.isDark ? "#181B22" : "#F8FAFC";
+  const tileBorder = t.isDark ? "#272C38" : "#E2E8F0";
 
-      <Screen>
-        <Title icon="speedometer-outline" eyebrow="Workspace Overview" subtitle="Live project health, financials, and today's priorities">
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: t.bg }} contentContainerStyle={{ flexGrow: 1 }}>
+      {/* Industrial Safety Accent Bar */}
+      <View style={{ height: 6, width: "100%", backgroundColor: "#F5B81F" }} />
+
+      <Screen scroll>
+        <Title icon="speedometer-outline" eyebrow="Workspace Overview" subtitle="Live project health, disbursements, and stage compliance">
           Dashboard
         </Title>
-        <View className="flex-row items-center mb-4" style={{ gap: 6 }}>
-          <View className="bg-brandCharcoal px-2.5 py-1 rounded-full">
-            <Text className="text-brandAmber text-[11px] font-extrabold uppercase tracking-wider">
-              Viewing as {role || "Unknown role"}
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, gap: 8 }}>
+          <View style={{ backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 }}>
+            <Text style={{ color: "#F5B81F", fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1 }}>
+              Viewing as {role || "Member"}
             </Text>
           </View>
         </View>
 
         {error ? (
-          <View className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl">
-            <Text className="text-alertRed font-bold text-sm">{error.message}</Text>
+          <View style={{ marginBottom: 20, padding: 16, backgroundColor: "rgba(239,68,68,0.08)", borderWidth: 1, borderColor: "rgba(239,68,68,0.2)", borderRadius: 16 }}>
+            <Text style={{ color: "#EF4444", fontWeight: "800", fontSize: 14 }}>{error.message}</Text>
           </View>
         ) : null}
 
-        {data ? (
-          <View className="space-y-4 gap-4">
+        {isLoading ? (
+          <View style={{ gap: 12 }}>
+            <Skeleton height={140} />
+            <Skeleton height={100} />
+            <Skeleton height={120} />
+          </View>
+        ) : data ? (
+          <View style={{ gap: 16 }}>
             {/* HERO CARD: Overall Project Progress */}
             <Card>
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1 pr-4">
-                  <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">
-                    Overall Project Health
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                <View style={{ flex: 1, paddingRight: 16 }}>
+                  <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
+                    Active Workspace Health
                   </Text>
-                  <Text className="text-xl font-extrabold text-brandCharcoal leading-tight">
+                  <Text style={{ fontSize: 22, fontWeight: "900", color: t.text, lineHeight: 28 }}>
                     {activeProject?.name || "No project assigned"}
                   </Text>
                   {activeSlippage ? (
-                    <Text className={`text-sm font-bold mt-1.5 ${
-                      activeSlippage.status === "BEHIND" 
-                        ? "text-alertRed" 
-                        : activeSlippage.status === "AHEAD" 
-                        ? "text-successGreen" 
-                        : "text-slate-500"
-                    }`}>
+                    <Text style={{ fontSize: 15, fontWeight: "900", marginTop: 8, color: activeSlippage.status === "BEHIND" ? "#EF4444" : activeSlippage.status === "AHEAD" ? "#22C55E" : t.textSecondary }}>
                       {activeSlippage.status === "BEHIND"
-                        ? `${activeSlippage.slippageDays}d behind schedule`
+                        ? `⚠️ ${activeSlippage.slippageDays}d behind schedule`
                         : activeSlippage.status === "AHEAD"
-                        ? `${Math.abs(activeSlippage.slippageDays)}d ahead of schedule`
-                        : "On track (no slippage)"}
+                        ? `🚀 ${Math.abs(activeSlippage.slippageDays)}d ahead of schedule`
+                        : "✓ On track (no slippage)"}
                     </Text>
                   ) : (
-                    <Text className="text-slate-500 text-sm font-semibold mt-1">
-                      Scaffolding and coatings active
+                    <Text style={{ color: t.textSecondary, fontSize: 14, fontWeight: "600", marginTop: 4 }}>
+                      Scaffolding & coatings active
                     </Text>
                   )}
                 </View>
 
-                {/* Progress Ring using pure CSS overlay borders */}
-                <View className="w-20 h-20 items-center justify-center relative">
-                  {/* Background Track Circle */}
-                  <View className="absolute w-20 h-20 rounded-full border-[6px] border-slate-100" />
-                  
-                  {/* Visual Progress Indicator Slices */}
+                {/* Progress Circle Ring */}
+                <View style={{ width: 80, height: 80, alignItems: "center", justifyContent: "center" }}>
+                  <View style={{ position: "absolute", width: 80, height: 80, borderRadius: 40, borderWidth: 6, borderColor: t.isDark ? "#272C38" : "#E2E8F0" }} />
                   <View
-                    className="absolute w-20 h-20 rounded-full border-[6px] border-brandAmber border-t-transparent border-l-transparent"
-                    style={{ transform: [{ rotate: "45deg" }] }}
+                    style={{ position: "absolute", width: 80, height: 80, borderRadius: 40, borderWidth: 6, borderColor: "#F5B81F", borderTopColor: "transparent", borderLeftColor: "transparent", transform: [{ rotate: "45deg" }] }}
                   />
                   {progress > 50 && (
                     <View
-                      className="absolute w-20 h-20 rounded-full border-[6px] border-brandAmber border-b-transparent border-r-transparent"
-                      style={{ transform: [{ rotate: "45deg" }] }}
+                      style={{ position: "absolute", width: 80, height: 80, borderRadius: 40, borderWidth: 6, borderColor: "#F5B81F", borderBottomColor: "transparent", borderRightColor: "transparent", transform: [{ rotate: "45deg" }] }}
                     />
                   )}
-                  
-                  {/* Percent Label */}
-                  <Text className="text-base font-extrabold text-brandCharcoal">
+                  <Text style={{ fontSize: 18, fontWeight: "900", color: t.text }}>
                     {progress}%
                   </Text>
                 </View>
@@ -139,34 +125,33 @@ export default function Dashboard() {
             </Card>
 
             {/* ASYMMETRIC GRID */}
-            <View className="flex-row justify-between">
-              {/* Large Disbursements Tile — financial figures only for roles that see money on web (Admin/Client/Consultant) */}
-              <View className="w-[58%]">
+            <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
+              <View style={{ width: "56%" }}>
                 <Card>
-                  <View className="min-h-[110px] justify-between flex-col">
-                    <View className="flex-row justify-between items-center">
-                      <View className={`w-8 h-8 rounded-xl items-center justify-center border ${showFinancial ? "bg-emerald-50 border-emerald-100" : "bg-sky-50 border-sky-100"}`}>
-                        <Ionicons name={showFinancial ? "cash-outline" : "layers-outline"} size={18} color={showFinancial ? "#1B8755" : "#0284C7"} />
+                  <View style={{ minHeight: 110, justifyContent: "space-between", flexDirection: "column" }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                      <View style={{ width: 36, height: 36, borderRadius: 16, alignItems: "center", justifyContent: "center", borderWidth: 1, backgroundColor: showFinancial ? "rgba(34,197,94,0.08)" : "rgba(14,165,233,0.08)", borderColor: showFinancial ? "rgba(34,197,94,0.2)" : "rgba(14,165,233,0.2)" }}>
+                        <Ionicons name={showFinancial ? "cash-outline" : "layers-outline"} size={20} color={showFinancial ? "#22C55E" : "#0EA5E9"} />
                       </View>
-                      <Text className={`text-[11px] font-bold uppercase ${showFinancial ? "text-successGreen" : "text-sky-700"}`}>
+                      <Text style={{ fontSize: 11, fontWeight: "900", textTransform: "uppercase", color: showFinancial ? "#22C55E" : "#0EA5E9" }}>
                         {showFinancial ? "Cleared" : "In Pipeline"}
                       </Text>
                     </View>
                     {showFinancial ? (
-                      <View className="mt-4">
-                        <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">
+                      <View style={{ marginTop: 16 }}>
+                        <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
                           Disbursed
                         </Text>
-                        <Text className="text-2xl font-extrabold text-successGreen leading-none">
+                        <Text style={{ fontSize: 22, fontWeight: "900", color: "#22C55E" }}>
                           ₹{(data.payments.paid / 100000).toFixed(1)}L
                         </Text>
                       </View>
                     ) : (
-                      <View className="mt-4">
-                        <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">
-                          Your Active Stages
+                      <View style={{ marginTop: 16 }}>
+                        <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
+                          Active Stages
                         </Text>
-                        <Text className="text-2xl font-extrabold text-sky-700 leading-none">
+                        <Text style={{ fontSize: 22, fontWeight: "900", color: "#0EA5E9" }}>
                           {pendingStages.length}
                         </Text>
                       </View>
@@ -175,257 +160,83 @@ export default function Dashboard() {
                 </Card>
               </View>
 
-              {/* Smaller High-Density Tiles stack */}
-              <View className="w-[38%] justify-between gap-1 flex-col">
+              <View style={{ width: "41%", justifyContent: "space-between", gap: 4, flexDirection: "column" }}>
                 <Card>
-                  <View className="min-h-[46px] justify-between flex-row items-center">
-                    <View className="flex-1">
-                      <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
+                  <View style={{ minHeight: 46, justifyContent: "space-between", flexDirection: "row", alignItems: "center" }}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: t.textSecondary, fontSize: 10, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>
                         Overdue
                       </Text>
-                      <Text className={`text-base font-extrabold ${overdueCount > 0 ? "text-alertRed" : "text-brandCharcoal"}`}>
+                      <Text style={{ fontSize: 18, fontWeight: "900", color: overdueCount > 0 ? "#EF4444" : t.text }}>
                         {overdueCount}
                       </Text>
                     </View>
-                    <View className={`w-6 h-6 rounded-lg ${overdueCount > 0 ? "bg-red-50" : "bg-slate-100"} items-center justify-center`}>
-                      <Ionicons name="alert-circle-outline" size={14} color={overdueCount > 0 ? "#D9383A" : "#64748B"} />
+                    <View style={{ width: 28, height: 28, borderRadius: 12, backgroundColor: overdueCount > 0 ? "rgba(239,68,68,0.08)" : (t.isDark ? "#222733" : "#F1F5F9"), alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: overdueCount > 0 ? "rgba(239,68,68,0.2)" : t.cardBorder }}>
+                      <Ionicons name="alert-circle-outline" size={16} color={overdueCount > 0 ? "#EF4444" : "#94A3B8"} />
                     </View>
                   </View>
                 </Card>
 
                 <Card>
-                  <View className="min-h-[46px] justify-between flex-row items-center">
-                    <View className="flex-1">
-                      <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
+                  <View style={{ minHeight: 46, justifyContent: "space-between", flexDirection: "row", alignItems: "center" }}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: t.textSecondary, fontSize: 10, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>
                         Projects
                       </Text>
-                      <Text className="text-base font-extrabold text-brandCharcoal">
+                      <Text style={{ fontSize: 18, fontWeight: "900", color: t.text }}>
                         {data.portfolio.projects}
                       </Text>
                     </View>
-                    <View className="w-6 h-6 rounded-lg bg-slate-100 items-center justify-center">
-                      <Ionicons name="business-outline" size={14} color="#1A1D24" />
+                    <View style={{ width: 28, height: 28, borderRadius: 12, backgroundColor: t.isDark ? "#222733" : "#F1F5F9", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: t.cardBorder }}>
+                      <Ionicons name="business-outline" size={16} color="#94A3B8" />
                     </View>
                   </View>
                 </Card>
               </View>
             </View>
 
-            {/* ACTION CENTER */}
-            <View className="mt-2">
-              <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
-                Action Center
+            {/* QUICK ACCESSIBILITY LAUNCHER LIST */}
+            <Card>
+              <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1, marginBottom: 16 }}>
+                Quick Command Hub
               </Text>
-              
-              <Pressable
-                onPress={() => router.push("/approvals")}
-                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
-              >
-                <Card>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center flex-1">
-                      <View className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 items-center justify-center mr-3">
-                        <Ionicons name="checkbox-outline" size={20} color="#EAAC1F" />
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-brandCharcoal font-extrabold text-sm">
-                          Review Stage Approvals
-                        </Text>
-                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
-                          Pending workflow stages requiring clearance
-                        </Text>
-                      </View>
+              <View style={{ flexDirection: "column" }}>
+                {[
+                  { label: "Timeline", desc: "View sequenced work & progress", route: "/activities", icon: "calendar-outline", color: "#F5B81F" },
+                  { label: "Vault", desc: "Access project documents & drawings", route: "/documents", icon: "folder-outline", color: "#3B82F6" },
+                  { label: "Payments", desc: "Track GST, retentions & billing", route: "/payments", icon: "receipt-outline", color: "#22C55E" },
+                  { label: "Delays", desc: "Report & review project bottlenecks", route: "/delays", icon: "warning-outline", color: "#EF4444" },
+                  { label: "Discussions", desc: "Chat with client, contractor & admin", route: "/discussion", icon: "chatbubbles-outline", color: "#8B5CF6" },
+                  { label: "Quotes", desc: "Manage budget & estimate sheets", route: "/quotations", icon: "pricetags-outline", color: "#EC4899" },
+                  { label: "Assurance", desc: "View check sheets & quality logs", route: "/assurance", icon: "shield-checkmark-outline", color: "#0EA5E9" },
+                  { label: "Reports", desc: "Generate overall site reports", route: "/reports", icon: "bar-chart-outline", color: "#F59E0B" },
+                ].map((item, index, arr) => (
+                  <Pressable
+                    key={item.label}
+                    onPress={() => router.push(item.route as any)}
+                    style={({ pressed }) => ({
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingVertical: 14,
+                      borderBottomWidth: index === arr.length - 1 ? 0 : 1,
+                      borderBottomColor: t.cardBorder,
+                      opacity: pressed ? 0.7 : 1,
+                    })}
+                  >
+                    <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: `${item.color}15`, alignItems: "center", justifyContent: "center", marginRight: 14, borderWidth: 1, borderColor: `${item.color}25` }}>
+                      <Ionicons name={item.icon as any} size={20} color={item.color} />
                     </View>
-                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
-                  </View>
-                </Card>
-              </Pressable>
-
-              {(isAdmin || isContractor) && (
-                <Pressable
-                  onPress={() => router.push("/site-updates")}
-                  style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
-                  className="mt-1"
-                >
-                  <Card>
-                    <View className="flex-row items-center justify-between">
-                      <View className="flex-row items-center flex-1">
-                        <View className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 items-center justify-center mr-3">
-                          <Ionicons name="camera-outline" size={20} color="#0284C7" />
-                        </View>
-                        <View className="flex-1">
-                          <Text className="text-brandCharcoal font-extrabold text-sm">
-                            Submit Daily Site Log
-                          </Text>
-                          <Text className="text-slate-400 text-sm font-semibold mt-0.5">
-                            Record geotagged photos and audio logs
-                          </Text>
-                        </View>
-                      </View>
-                      <Ionicons name="chevron-forward" size={18} color="#64748B" />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 16, fontWeight: "700", color: t.text }}>{item.label}</Text>
+                      <Text style={{ fontSize: 13, color: t.textSecondary, marginTop: 2 }}>{item.desc}</Text>
                     </View>
-                  </Card>
-                </Pressable>
-              )}
-
-              {showFinancial && (
-                <Pressable
-                  onPress={() => router.push("/payments")}
-                  style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
-                  className="mt-1"
-                >
-                  <Card>
-                    <View className="flex-row items-center justify-between">
-                      <View className="flex-row items-center flex-1">
-                        <View className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 items-center justify-center mr-3">
-                          <Ionicons name="cash-outline" size={20} color="#1B8755" />
-                        </View>
-                        <View className="flex-1">
-                          <Text className="text-brandCharcoal font-extrabold text-sm">
-                            View Payments &amp; GST Breakdown
-                          </Text>
-                          <Text className="text-slate-400 text-sm font-semibold mt-0.5">
-                            Contract value, retention, and dues per activity
-                          </Text>
-                        </View>
-                      </View>
-                      <Ionicons name="chevron-forward" size={18} color="#64748B" />
-                    </View>
-                  </Card>
-                </Pressable>
-              )}
-
-              <Pressable
-                onPress={() => router.push("/delays")}
-                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
-                className="mt-1"
-              >
-                <Card>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center flex-1">
-                      <View className="w-10 h-10 rounded-xl bg-red-50 border border-red-100 items-center justify-center mr-3">
-                        <Ionicons name="alert-circle-outline" size={20} color="#D9383A" />
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-brandCharcoal font-extrabold text-sm">
-                          Track Delays
-                        </Text>
-                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
-                          Log causes and mitigation plans
-                        </Text>
-                      </View>
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
-                  </View>
-                </Card>
-              </Pressable>
-
-              <Pressable
-                onPress={() => router.push("/assurance")}
-                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
-                className="mt-1"
-              >
-                <Card>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center flex-1">
-                      <View className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 items-center justify-center mr-3">
-                        <Ionicons name="shield-checkmark-outline" size={20} color="#8B5CF6" />
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-brandCharcoal font-extrabold text-sm">
-                          DLP, Warranty &amp; Disputes
-                        </Text>
-                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
-                          Defect liability, warranty register, and disputes
-                        </Text>
-                      </View>
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
-                  </View>
-                </Card>
-              </Pressable>
-
-              <Pressable
-                onPress={() => router.push("/discussion")}
-                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
-                className="mt-1"
-              >
-                <Card>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center flex-1">
-                      <View className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 items-center justify-center mr-3">
-                        <Ionicons name="chatbubbles-outline" size={20} color="#0284C7" />
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-brandCharcoal font-extrabold text-sm">
-                          Discussion
-                        </Text>
-                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
-                          Per-activity comments, off WhatsApp and on record
-                        </Text>
-                      </View>
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
-                  </View>
-                </Card>
-              </Pressable>
-
-              <Pressable
-                onPress={() => router.push("/reports")}
-                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
-                className="mt-1"
-              >
-                <Card>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center flex-1">
-                      <View className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 items-center justify-center mr-3">
-                        <Ionicons name="bar-chart-outline" size={20} color="#1A1D24" />
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-brandCharcoal font-extrabold text-sm">
-                          Reports
-                        </Text>
-                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
-                          Portfolio analytics and SLA compliance
-                        </Text>
-                      </View>
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
-                  </View>
-                </Card>
-              </Pressable>
-
-              <Pressable
-                onPress={() => router.push("/quotations")}
-                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
-                className="mt-1"
-              >
-                <Card>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center flex-1">
-                      <View className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 items-center justify-center mr-3">
-                        <Ionicons name="document-text-outline" size={20} color="#6366F1" />
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-brandCharcoal font-extrabold text-sm">
-                          Quotations &amp; Award
-                        </Text>
-                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
-                          Compare vendor quotes and award the contract
-                        </Text>
-                      </View>
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
-                  </View>
-                </Card>
-              </Pressable>
-            </View>
+                    <Ionicons name="chevron-forward" size={18} color={t.textMuted} />
+                  </Pressable>
+                ))}
+              </View>
+            </Card>
           </View>
-        ) : (
-          <View className="flex-1 items-center justify-center py-20">
-            <Text className="text-slate-400 font-semibold">Loading Command Center...</Text>
-          </View>
-        )}
+        ) : null}
       </Screen>
     </ScrollView>
   );
