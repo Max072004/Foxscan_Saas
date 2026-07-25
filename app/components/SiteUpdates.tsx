@@ -13,25 +13,62 @@ interface SiteUpdatesProps {
 
 export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUpdatesProps) {
   const [workDone, setWorkDone] = useState("");
+  const [selectedActivityId, setSelectedActivityId] = useState("");
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!workDone) return;
-    await fetch("/api/site-updates", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        projectId,
-        authorId: actorId,
-        workDone,
-        weather: "Clear",
-        manpower: 0,
-        equipment: "",
-        important: false,
-      }),
-    });
-    setWorkDone("");
-    reload();
+    setIsUploading(true);
+
+    try {
+      let attachmentUrls: string[] = [];
+
+      for (const file of photoFiles) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("projectId", projectId);
+        formData.append("activityId", selectedActivityId || "general");
+        formData.append("filename", file.name);
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (!response.ok) throw new Error(`Photo ${file.name} upload failed`);
+        const resJson = await response.json();
+        if (resJson.url) {
+          attachmentUrls.push(resJson.url);
+        }
+      }
+
+      await fetch("/api/site-updates", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          projectId,
+          authorId: actorId,
+          workDone,
+          activityId: selectedActivityId || undefined,
+          weather: "Clear",
+          manpower: 0,
+          equipment: "",
+          important: false,
+          attachments: attachmentUrls,
+          voiceNote: undefined,
+        }),
+      });
+
+      setWorkDone("");
+      setSelectedActivityId("");
+      setPhotoFiles([]);
+      reload();
+    } catch (err: any) {
+      alert("Upload failed: " + err.message);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const updates = data.siteUpdates.filter((s) => s.projectId === projectId);
@@ -46,6 +83,33 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
         {/* Post Form */}
         <form className="card" onSubmit={submit}>
           <h3>New Site Log</h3>
+          <div style={{ marginBottom: "var(--sp-3)" }}>
+            <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--muted)", marginBottom: "var(--sp-1)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              Link to Activity (Optional)
+            </label>
+            <select
+              value={selectedActivityId}
+              onChange={(e) => setSelectedActivityId(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "var(--sp-2)",
+                borderRadius: "var(--radius)",
+                border: "1px solid var(--line)",
+                background: "var(--bg)",
+                fontSize: "var(--text-sm)",
+                fontFamily: "var(--font)",
+                color: "var(--ink)",
+                outline: "none"
+              }}
+            >
+              <option value="">General Log / None</option>
+              {data.activities.filter(a => a.projectId === projectId).sort((a, b) => a.sequence - b.sequence).map((a) => (
+                <option key={a.id} value={a.id}>
+                  Stage {a.sequence}: {a.name} ({a.status.replace("_", " ")})
+                </option>
+              ))}
+            </select>
+          </div>
           <textarea
             value={workDone}
             onChange={(e) => setWorkDone(e.target.value)}
@@ -65,11 +129,46 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
             onFocus={(e) => { e.currentTarget.style.borderColor = "var(--brand-yellow)"; e.currentTarget.style.boxShadow = "0 0 0 3px var(--brand-yellow-light)"; }}
             onBlur={(e) => { e.currentTarget.style.borderColor = "var(--line)"; e.currentTarget.style.boxShadow = "none"; }}
           />
-          <div className="row" style={{ justifyContent: "space-between" }}>
+          
+          {/* File input selectors */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "var(--muted)", cursor: "pointer", padding: "6px 12px", border: "1px dashed var(--line)", borderRadius: "6px", background: "var(--bg)" }}>
+                <Paperclip size={14} />
+                <span>{photoFiles.length > 0 ? `${photoFiles.length} Photos Selected` : "Attach Photo(s)"}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      setPhotoFiles(Array.from(e.target.files));
+                    }
+                  }}
+                  style={{ display: "none" }}
+                />
+              </label>
+              {photoFiles.length > 0 && (
+                <button type="button" onClick={() => setPhotoFiles([])} style={{ fontSize: "11px", color: "var(--error)", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
+                  Clear All
+                </button>
+              )}
+            </div>
+
+            {photoFiles.length > 0 && (
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", width: "100%" }}>
+                {photoFiles.map((file, idx) => (
+                  <div key={idx} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "var(--ink)", background: "var(--bg)", border: "1px solid var(--line)", padding: "4px 8px", borderRadius: "4px" }}>
+                    <span>{file.name} ({Math.round(file.size / 1024)} KB)</span>
+                    <button type="button" onClick={() => setPhotoFiles(prev => prev.filter((_, i) => i !== idx))} style={{ border: "none", background: "none", color: "var(--error)", cursor: "pointer", fontWeight: "bold", fontSize: "12px", padding: 0 }}>×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="row" style={{ justifyContent: "space-between", marginTop: "15px" }}>
             <div style={{ display: "flex", gap: "var(--sp-2)" }}>
-              <button type="button" className="btn-ghost" style={{ color: "var(--muted)" }} title="Attach photo">
-                <Paperclip size={16} />
-              </button>
               <button type="button" className="btn-ghost" style={{ color: "var(--muted)" }} title="Weather">
                 <Cloud size={16} />
               </button>
@@ -77,13 +176,13 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
                 <Star size={16} />
               </button>
             </div>
-            <button className="btn-primary" type="submit">
+            <button className="btn-primary" type="submit" disabled={isUploading || !workDone.trim()}>
               <Send size={14} />
-              Post Update
+              {isUploading ? "Uploading & Posting..." : "Post Update"}
             </button>
           </div>
           <small className="muted">
-            Camera, geolocation and voice-note fields are supported by the API model and mobile clients.
+            Camera, geolocation and voice-note fields are fully supported and uploaded to Supabase Storage.
           </small>
         </form>
 
@@ -121,6 +220,11 @@ export default function SiteUpdates({ projectId, actorId, data, reload }: SiteUp
                     </div>
                     <div className="feed-body">{s.workDone}</div>
                     <div className="feed-tags">
+                      {s.activityId && (
+                        <span className="feed-tag" style={{ background: "rgba(234, 172, 31, 0.08)", color: "#c68d0e", fontWeight: 700 }}>
+                          {data.activities.find(a => a.id === s.activityId)?.name || "Linked Activity"}
+                        </span>
+                      )}
                       {s.weather && s.weather !== "Clear" && (
                         <span className="feed-tag">
                           <Cloud size={10} style={{ marginRight: 4 }} />

@@ -4,3 +4,9 @@
 
 expo-env.d.ts
 # @end expo-cli
+
+# Local environment overrides — contains machine-specific LAN IPs.
+# Each developer keeps their own copy; never commit this.
+.env.local
+/ios
+/android

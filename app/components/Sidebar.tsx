@@ -12,6 +12,10 @@ import {
   Shield,
   ChevronDown,
   PanelLeftClose,
+  AlertTriangle,
+  ShieldCheck,
+  MessageSquare,
+  FileSpreadsheet,
 } from "lucide-react";
 
 export type Tab =
@@ -20,6 +24,10 @@ export type Tab =
   | "Timeline"
   | "Payments"
   | "Site updates"
+  | "Delays"
+  | "Assurance"
+  | "Discussion"
+  | "Quotations"
   | "Setup"
   | "Documents"
   | "Reports"
@@ -28,10 +36,14 @@ export type Tab =
 const navItems: { tab: Tab; label: string; icon: React.ElementType; section?: string }[] = [
   { tab: "Overview", label: "Dashboard", icon: LayoutDashboard, section: "Main" },
   { tab: "Setup", label: "Projects", icon: FolderKanban },
+  { tab: "Quotations", label: "Quotations", icon: FileSpreadsheet },
   { tab: "Workflow", label: "Workflow", icon: GitBranch, section: "Operations" },
   { tab: "Timeline", label: "Timeline", icon: CalendarRange },
   { tab: "Payments", label: "Payments", icon: CreditCard },
   { tab: "Site updates", label: "Site Updates", icon: HardHat },
+  { tab: "Delays", label: "Delays", icon: AlertTriangle },
+  { tab: "Assurance", label: "DLP & Warranty", icon: ShieldCheck },
+  { tab: "Discussion", label: "Discussion", icon: MessageSquare },
   { tab: "Documents", label: "Documents", icon: FileText, section: "Intelligence" },
   { tab: "Reports", label: "Reports", icon: BarChart3 },
   { tab: "Admin", label: "Admin", icon: Shield, section: "System" },
@@ -60,6 +72,9 @@ interface SidebarProps {
   onClose: () => void;
   collapsed: boolean;
   onToggleCollapse: () => void;
+  projects?: { id: string; name: string }[];
+  selectedProjectId?: string;
+  onSelectProject?: (id: string) => void;
 }
 
 export default function Sidebar({
@@ -74,6 +89,9 @@ export default function Sidebar({
   onClose,
   collapsed,
   onToggleCollapse,
+  projects,
+  selectedProjectId,
+  onSelectProject,
 }: SidebarProps) {
   const handleNav = (tab: Tab) => {
     onTabChange(tab);
@@ -103,13 +121,36 @@ export default function Sidebar({
         </div>
 
         {/* Project Switcher */}
-        <div className="sidebar-project-switcher">
+        <div className="sidebar-project-switcher" style={{ position: "relative" }}>
           <span
             className="project-dot"
             style={{ background: projectStatus === "ACTIVE" ? "var(--success)" : "var(--warning)" }}
           />
-          <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{projectName}</span>
-          <ChevronDown size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
+          {projects && projects.length > 1 && onSelectProject ? (
+            <select
+              value={selectedProjectId}
+              onChange={(e) => onSelectProject(e.target.value)}
+              style={{
+                flex: 1,
+                background: "transparent",
+                border: "none",
+                color: "inherit",
+                font: "inherit",
+                cursor: "pointer",
+                appearance: "none",
+                WebkitAppearance: "none",
+                padding: 0,
+              }}
+              title="Switch project"
+            >
+              {projects.map((p) => (
+                <option key={p.id} value={p.id} style={{ color: "#000" }}>{p.name}</option>
+              ))}
+            </select>
+          ) : (
+            <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{projectName}</span>
+          )}
+          <ChevronDown size={12} style={{ opacity: 0.5, flexShrink: 0, pointerEvents: "none" }} />
         </div>
 
         {/* Navigation */}

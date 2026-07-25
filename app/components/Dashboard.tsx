@@ -16,16 +16,26 @@ import {
   ArrowDownRight,
   Image as ImageIcon,
 } from "lucide-react";
+import type { Role } from "@/lib/domain";
 import { FoxscanLogo } from "./Sidebar";
+import { calculateProjectSlippage, tatStatus } from "@/lib/scheduling";
+
+const TAT_TIER_COLOR: Record<string, string> = {
+  WARNING: "var(--warning)",
+  OVERDUE: "var(--error)",
+  ESCALATED: "#7F1D1D",
+};
 
 interface DashboardProps {
   data: AppData;
   activities: any[];
   stages: any[];
+  role: Role;
 }
 
-export default function Dashboard({ data, activities, stages }: DashboardProps) {
+export default function Dashboard({ data, activities, stages, role }: DashboardProps) {
   const project = data.projects[0];
+  const slippageInfo = calculateProjectSlippage(project, activities, stages);
   const paid = activities.filter((a) => a.status === "PAID").length;
   const completed = activities.filter((a) => a.progress === 100).length;
   const inProgress = activities.filter((a) => a.progress > 0 && a.progress < 100).length;
@@ -58,6 +68,35 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
     (d) => d.type === "PHOTO" || d.tags.includes("photo") || d.tags.includes("image")
   );
 
+  // Role-based visibility flags
+  const isAdmin = role === "ADMIN";
+  const isContractor = role === "CONTRACTOR";
+  const isManufacturer = role === "MANUFACTURER";
+  const isConsultant = role === "CONSULTANT";
+  const isClient = role === "CLIENT";
+
+  const showBanner = true; // all roles see the project banner
+  const showKpis = isAdmin || isConsultant;
+  const showProgress = isAdmin || isContractor || isConsultant;
+  const showFinancial = isAdmin || isClient || isConsultant;
+  const showPipeline = isAdmin || isContractor || isConsultant;
+  const showPending = true; // all roles see pending operations (filtered below)
+  const showTeam = isAdmin || isConsultant;
+  const showMilestones = isAdmin || isContractor || isConsultant;
+  const showAuditLog = isAdmin;
+  const showPhotos = isAdmin || isConsultant || isContractor;
+  const showSiteUpdates = isAdmin || isConsultant || isContractor;
+
+  // Filter pending stages based on role
+  const pendingStages = stages.filter((s) => {
+    if (s.state === "PAID") return false;
+    if (isAdmin || isConsultant) return true;
+    if (isContractor) return s.state === "REWORK" || s.submittedBy === data.users.find(u => u.role === "CONTRACTOR")?.id;
+    if (isManufacturer) return s.state === "MANUFACTURER";
+    if (isClient) return s.state === "CLIENT";
+    return true;
+  });
+
   return (
     <div className="animate-fade" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       {/* Top Project Banner */}
@@ -87,7 +126,14 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
           <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
             <MiniStat label="Progress" value={`${progress}%`} />
             <MiniStat label="Budget Utilization" value={`${budgetPct}%`} />
-            <MiniStat label="Remaining Days" value={String(daysRemaining)} />
+            <MiniStat label="Schedule Status" value={
+              slippageInfo.status === "BEHIND" 
+                ? `${slippageInfo.slippageDays}d behind` 
+                : slippageInfo.status === "AHEAD" 
+                ? `${Math.abs(slippageInfo.slippageDays)}d ahead` 
+                : "On track"
+            } />
+            <MiniStat label="Projected End" value={slippageInfo.projectedEndDate || project.endDate} />
             <MiniStat label="Completed Steps" value={`${completed}/${activities.length}`} />
           </div>
         </div>
@@ -96,7 +142,44 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
         </div>
       </div>
 
+      {/* Escalated Delays Alert Box */}
+      {(() => {
+        const today = new Date();
+        const escalated = stages.filter((s) => {
+          return s.state !== "PAID" && s.state !== "REWORK" && new Date(s.dueAt) < today;
+        });
+        if (escalated.length === 0) return null;
+        return (
+          <div className="card" style={{ border: "1px solid var(--error)", background: "rgba(217, 56, 58, 0.04)", padding: "16px 20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--error)", fontWeight: 700, fontSize: "14px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              <AlertTriangle size={18} />
+              <span>Escalated Delays (Overdue Approvals)</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px", marginTop: "12px" }}>
+              {escalated.map((s) => {
+                const act = activities.find((a) => a.id === s.activityId);
+                const overdueHours = Math.max(0, Math.floor((today.getTime() - new Date(s.dueAt).getTime()) / 3600000));
+                const overdueDays = Math.floor(overdueHours / 24);
+                const displayOverdue = overdueDays > 0 
+                  ? `${overdueDays}d ${overdueHours % 24}h` 
+                  : `${overdueHours}h`;
+                return (
+                  <div key={s.id} style={{ background: "white", padding: "12px 14px", borderRadius: "6px", border: "1px solid rgba(217, 56, 58, 0.15)" }}>
+                    <div style={{ fontWeight: 700, fontSize: "13px", color: "var(--ink)" }}>{act?.name || "Stage Ticket"}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px", fontSize: "11px" }}>
+                      <span className="muted">Stuck with: <strong style={{ color: "var(--ink)" }}>{s.state}</strong></span>
+                      <span style={{ color: "var(--error)", background: "rgba(217, 56, 58, 0.08)", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>Overdue by {displayOverdue}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* KPI Cards Section */}
+      {showKpis && (
       <div className="kpi-grid">
         <KpiCard icon={TrendingUp} iconClass="yellow" label="Project Progress" value={`${progress}%`} trend={progress > 0 ? "up" : undefined} trendText={progress > 0 ? `${completed} done` : undefined} />
         <KpiCard icon={Wallet} iconClass="green" label="Budget Utilization" value={`${budgetPct}%`} trend={budgetPct <= progress ? "up" : "down"} trendText={budgetPct <= progress ? "On track" : "Over budget"} />
@@ -105,10 +188,13 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
         <KpiCard icon={IndianRupee} iconClass="green" label="Contract Value" value={`₹${(contractValue / 100000).toFixed(1)}L`} />
         <KpiCard icon={CalendarClock} iconClass="red" label="Days Remaining" value={String(daysRemaining)} trend={daysRemaining < 30 ? "down" : undefined} trendText={daysRemaining < 30 ? "Closeout phase" : undefined} />
       </div>
+      )}
 
       {/* Primary Analytics Row */}
+      {(showProgress || showFinancial) && (
       <div className="grid two">
         {/* Progress Metrics & Overall Health */}
+        {showProgress && (
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h3 style={{ margin: 0 }}>Progress Analysis</h3>
@@ -133,13 +219,19 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
               <span style={{ width: `${timeProgress}%`, background: timeProgress > progress ? "var(--error)" : "var(--success)" }} />
             </div>
             <div className="row" style={{ marginTop: "6px" }}>
-              <span style={{ fontSize: "10px", color: "var(--muted)" }}>{startDate.toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}</span>
-              <span style={{ fontSize: "10px", color: "var(--muted)" }}>{endDate.toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}</span>
+              <span style={{ fontSize: "10px", color: "var(--muted)" }}>Planned: {startDate.toLocaleDateString("en-IN", { month: "short", day: "numeric" })} — {endDate.toLocaleDateString("en-IN", { month: "short", day: "numeric" })}</span>
+            </div>
+            <div className="row" style={{ marginTop: "4px" }}>
+              <span style={{ fontSize: "10px", fontWeight: 600, color: slippageInfo.status === "BEHIND" ? "var(--error)" : slippageInfo.status === "AHEAD" ? "var(--success)" : "var(--muted)" }}>
+                Projected: {slippageInfo.projectedEndDate} ({slippageInfo.status === "BEHIND" ? `${slippageInfo.slippageDays}d behind` : slippageInfo.status === "AHEAD" ? `${Math.abs(slippageInfo.slippageDays)}d ahead` : "on track"})
+              </span>
             </div>
           </div>
         </div>
+        )}
 
         {/* Finance and Billing Health */}
+        {showFinancial && (
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h3 style={{ margin: 0 }}>Financial Status</h3>
@@ -181,11 +273,15 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
             </div>
           </div>
         </div>
+        )}
       </div>
+      )}
 
       {/* Secondary Chart and Critical Alerts */}
+      {(showPipeline || showPending) && (
       <div className="grid two">
         {/* Activity Completion Chart */}
+        {showPipeline && (
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <h3 style={{ margin: 0 }}>Activity Pipeline Progress</h3>
           <div className="bar-chart" style={{ height: "140px", paddingTop: "0" }}>
@@ -211,22 +307,29 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
               ))}
           </div>
         </div>
+        )}
 
         {/* Critical Alerts panel */}
+        {showPending && (
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <h3 style={{ margin: 0 }}>Pending Operations</h3>
-          {stages.filter((s) => s.state !== "PAID").length > 0 ? (
+          {pendingStages.length > 0 ? (
             <div className="list" style={{ gap: "10px" }}>
-              {stages
-                .filter((s) => s.state !== "PAID")
+              {pendingStages
                 .map((s) => {
                   const a = activities.find((x: any) => x.id === s.activityId);
-                  const isOverdue = new Date(s.dueAt) < new Date();
+                  const tat = tatStatus(s);
+                  const tierColor = TAT_TIER_COLOR[tat.tier];
                   return (
-                    <div className={`alert${isOverdue ? " alert-error" : ""}`} key={s.id} style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "10px 12px" }}>
+                    <div className={`alert${tierColor ? " alert-error" : ""}`} key={s.id} style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "10px 12px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        {isOverdue ? <Clock size={13} /> : <AlertTriangle size={13} />}
+                        {tierColor ? <Clock size={13} style={{ color: tierColor }} /> : <AlertTriangle size={13} />}
                         <span style={{ fontSize: "13px", fontWeight: 700 }}>{a?.name || "Activity"}</span>
+                        {tierColor && (
+                          <span style={{ fontSize: "9px", fontWeight: 800, color: tierColor, marginLeft: "auto" }}>
+                            {tat.tier} · {tat.pct}%
+                          </span>
+                        )}
                       </div>
                       <div style={{ fontSize: "11px", color: "var(--muted)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span>Awaiting: <span className={`badge ${s.state}`} style={{ padding: "1px 6px" }}>{s.state}</span></span>
@@ -243,11 +346,15 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
             </div>
           )}
         </div>
+        )}
       </div>
+      )}
 
       {/* Team + Milestones + Activity Feed Grid */}
+      {(showTeam || showMilestones || showAuditLog) && (
       <div className="grid three">
         {/* Project Team Widget */}
+        {showTeam && (
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700 }}>Project Partners</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -269,8 +376,10 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
             ))}
           </div>
         </div>
+        )}
 
         {/* Upcoming Milestones Widget */}
+        {showMilestones && (
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700 }}>Upcoming Milestones</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -317,8 +426,10 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
             )}
           </div>
         </div>
+        )}
 
         {/* Audit Log / Recent Activity Widget */}
+        {showAuditLog && (
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700 }}>System Log Trail</h3>
           {data.audits.length > 0 ? (
@@ -353,10 +464,12 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
             </div>
           )}
         </div>
+        )}
       </div>
+      )}
 
       {/* Project Photos Gallery Widget */}
-      {photos.length > 0 && (
+      {showPhotos && photos.length > 0 && (
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h3 style={{ margin: 0 }}>Project Document Photos</h3>
@@ -400,7 +513,7 @@ export default function Dashboard({ data, activities, stages }: DashboardProps) 
       )}
 
       {/* Latest Site Updates */}
-      {data.siteUpdates.length > 0 && (
+      {showSiteUpdates && data.siteUpdates.length > 0 && (
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <h3>Latest Site Logs</h3>
           <div style={{ display: "grid", gap: "10px" }}>

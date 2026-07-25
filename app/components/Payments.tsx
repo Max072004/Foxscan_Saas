@@ -12,17 +12,15 @@ export default function Payments({ data, activities }: PaymentsProps) {
   const project = data.projects[0];
   const contractValue = project?.contractValue || 0;
 
+  const netDue = (a: any) => Math.max(0, a.paymentValue + a.paymentValue * a.gstPct / 100 - a.paymentValue * a.retentionPct / 100);
+
   const totalGross = activities.reduce((s, a) => s + a.paymentValue, 0);
   const totalGst = activities.reduce((s, a) => s + a.paymentValue * a.gstPct / 100, 0);
   const totalRetention = activities.reduce((s, a) => s + a.paymentValue * a.retentionPct / 100, 0);
-  const totalNet = activities.reduce((s, a) => {
-    return s + a.paymentValue * (1 + a.gstPct / 100) * (1 - a.retentionPct / 100);
-  }, 0);
+  const totalNet = activities.reduce((s, a) => s + netDue(a), 0);
 
   const paidActivities = activities.filter((a) => a.status === "PAID");
-  const paidAmount = paidActivities.reduce((s, a) => {
-    return s + a.paymentValue * (1 + a.gstPct / 100) * (1 - a.retentionPct / 100);
-  }, 0);
+  const paidAmount = paidActivities.reduce((s, a) => s + netDue(a), 0);
   const pendingAmount = totalNet - paidAmount;
 
   return (
@@ -104,7 +102,7 @@ export default function Payments({ data, activities }: PaymentsProps) {
             </thead>
             <tbody>
               {activities.map((a) => {
-                const net = a.paymentValue * (1 + a.gstPct / 100) * (1 - a.retentionPct / 100);
+                const net = netDue(a);
                 return (
                   <tr key={a.id}>
                     <td style={{ fontWeight: 500 }}>{a.name}</td>
@@ -140,7 +138,7 @@ export default function Payments({ data, activities }: PaymentsProps) {
           </table>
         </div>
         <p className="muted" style={{ marginTop: "var(--sp-3)" }}>
-          Razorpay is activated automatically when keys are configured; otherwise payment releases are recorded internally with an audit trail.
+          Payments are settled outside the app (bank transfer, cheque, or cash). The client submits proof of payment on the Workflow screen, and the contractor confirms receipt before a stage closes.
         </p>
       </div>
     </div>

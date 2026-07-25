@@ -1,0 +1,2064 @@
+{
+  "tenants": [
+    {
+      "id": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "name": "Greenview CHS",
+      "type": "SOCIETY",
+      "gstin": "27AABCG1234A1Z5"
+    }
+  ],
+  "users": [
+    {
+      "id": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "name": "Foxscan Admin",
+      "email": "admin@foxscan.local",
+      "role": "ADMIN",
+      "active": true
+    },
+    {
+      "id": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "name": "Apex Coatings",
+      "email": "contractor@foxscan.local",
+      "role": "CONTRACTOR",
+      "active": true
+    },
+    {
+      "id": "20def9ff-f761-4612-9816-35f9b24ffa36",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "name": "Asian Paints Rep",
+      "email": "manufacturer@foxscan.local",
+      "role": "MANUFACTURER",
+      "active": true
+    },
+    {
+      "id": "6cfd5ede-d593-409c-baa6-753f24cff734",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "name": "Foxscan PMC",
+      "email": "consultant@foxscan.local",
+      "role": "CONSULTANT",
+      "active": true
+    },
+    {
+      "id": "05e570bb-18ff-43c4-b73a-49a854a593da",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "name": "Greenview Secretary",
+      "email": "client@foxscan.local",
+      "role": "CLIENT",
+      "active": true
+    }
+  ],
+  "sessions": [
+    {
+      "token": "fs_78ac7466f83909d9bd2c176257768eea467beff7c9724cad1f56afcb89d0909d",
+      "userId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "expiresAt": "2026-07-19T08:09:06.221Z"
+    },
+    {
+      "token": "fs_1566890b2c374ab46e568dcca08a0f5dd526d55fdff94dcdccc7ab0f3e5b2088",
+      "userId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "expiresAt": "2026-07-19T16:41:03.201Z"
+    },
+    {
+      "token": "fs_7e8145842959bebbe99f067dedb1f5f47a1bc94ed443d75791f9b97b6da0b29d",
+      "userId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "expiresAt": "2026-07-19T16:50:37.055Z"
+    },
+    {
+      "token": "fs_77d1436c3d8b7a073f45aae99c951a430faf0ced80d68ad97e3622506b714302",
+      "userId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "expiresAt": "2026-07-19T16:55:49.166Z"
+    },
+    {
+      "token": "fs_df9169c858050722707889cf0ba151f8ff66e93e2bb671601ba0a9847c9440a4",
+      "userId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "expiresAt": "2026-07-19T16:57:42.925Z"
+    },
+    {
+      "token": "fs_4ef371c4361fc2ddbc07ca0da23f40f15a1243271dc89dd6687757279618d942",
+      "userId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "expiresAt": "2026-07-19T17:19:48.424Z"
+    },
+    {
+      "token": "fs_31d508782f989bbfd7eb796ec81f76fd3353465a2d12750d80c109ef52c421a8",
+      "userId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "expiresAt": "2026-07-21T04:33:54.515Z"
+    },
+    {
+      "token": "fs_9fb50a234ffc6f0f2c075924a7083b10c69014efbf43aa78727073cc90fcfc77",
+      "userId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "expiresAt": "2026-07-21T05:09:08.085Z"
+    },
+    {
+      "token": "fs_60522990e5bb049839f8a47d77533b243f7518d85ba719ea1e92fbd953f637f9",
+      "userId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+      "expiresAt": "2026-07-21T05:14:05.911Z"
+    },
+    {
+      "token": "fs_b5a5dbc86a706df1604e58ac5c4c26b0de5d91508a919902b5a2a1145e4486a6",
+      "userId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+      "expiresAt": "2026-07-21T05:15:00.808Z"
+    },
+    {
+      "token": "fs_092828c45c847d725390c818532a2354aa49b448fb88fbbaffda37a5b7d6672d",
+      "userId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+      "expiresAt": "2026-07-21T05:15:18.980Z"
+    },
+    {
+      "token": "fs_d48e8e31d361d868461614c9d971b448ba2c4f063d0d3057475996e378a8553e",
+      "userId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "expiresAt": "2026-07-21T05:24:21.252Z"
+    },
+    {
+      "token": "fs_d304437b69feae40188c3041577e14d1f89a045f301bd94e2fc8f99879f3780e",
+      "userId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "expiresAt": "2026-07-21T05:26:25.329Z"
+    },
+    {
+      "token": "fs_7fdc2cb2d592f058ec434b74326cdb793a6da67a5bb5db23272ebf611b4a964e",
+      "userId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+      "expiresAt": "2026-07-21T05:26:39.543Z"
+    }
+  ],
+  "invitations": [],
+  "buildings": [
+    {
+      "id": "383634d5-dd35-4a3d-8bb8-d28e579944ba",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Tower A (Elysia)",
+      "wings": 2,
+      "floors": 14,
+      "areaSqft": 38000
+    },
+    {
+      "id": "00ab50f4-8dd6-4f50-9c08-9c792ddb1fdd",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Tower B (Belvedere)",
+      "wings": 2,
+      "floors": 14,
+      "areaSqft": 38000
+    },
+    {
+      "id": "d1b0b780-27a3-4636-b5f9-a2054768c3ca",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Clubhouse & Amenities Block",
+      "wings": 1,
+      "floors": 3,
+      "areaSqft": 20000
+    }
+  ],
+  "boqItems": [],
+  "projects": [
+    {
+      "id": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "name": "Greenview External Repainting",
+      "address": "Pune, Maharashtra",
+      "scope": "External painting and crack repair",
+      "buildings": 3,
+      "areaSqft": 96000,
+      "contractValue": 3800000,
+      "startDate": "2026-07-01",
+      "endDate": "2026-11-30",
+      "status": "ACTIVE",
+      "contractorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "manufacturerId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+      "consultantId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+      "clientId": "05e570bb-18ff-43c4-b73a-49a854a593da"
+    }
+  ],
+  "activities": [
+    {
+      "id": "86e29ed6-2446-451c-9a86-e113acd46c7d",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Mobilization + scaffolding",
+      "sequence": 1,
+      "plannedStart": "2026-07-01",
+      "plannedEnd": "2026-08-01",
+      "progress": 100,
+      "status": "PAID",
+      "dependencyIds": [],
+      "paymentMode": "FIXED",
+      "paymentValue": 380000,
+      "retentionPct": 10,
+      "gstPct": 18
+    },
+    {
+      "id": "c23fe830-8307-4c9d-9ac7-9c5b43ab5da8",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Surface preparation & crack filling",
+      "sequence": 2,
+      "plannedStart": "2026-07-01",
+      "plannedEnd": "2026-08-01",
+      "progress": 100,
+      "status": "PAID",
+      "dependencyIds": [],
+      "paymentMode": "FIXED",
+      "paymentValue": 570000,
+      "retentionPct": 10,
+      "gstPct": 18
+    },
+    {
+      "id": "094f178b-badc-4719-9114-c8b07cce0c66",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Primer application",
+      "sequence": 3,
+      "plannedStart": "2026-07-01",
+      "plannedEnd": "2026-08-01",
+      "progress": 100,
+      "status": "PAID",
+      "dependencyIds": [],
+      "paymentMode": "FIXED",
+      "paymentValue": 380000,
+      "retentionPct": 10,
+      "gstPct": 18
+    },
+    {
+      "id": "1647125e-64b2-4570-9c33-97b03127f5a6",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Putty + first coat",
+      "sequence": 4,
+      "plannedStart": "2026-07-01",
+      "plannedEnd": "2026-08-01",
+      "progress": 100,
+      "status": "APPROVED",
+      "dependencyIds": [],
+      "paymentMode": "FIXED",
+      "paymentValue": 760000,
+      "retentionPct": 10,
+      "gstPct": 18
+    },
+    {
+      "id": "8b7dbe4a-8a5f-488c-968e-128bc32663dc",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Second & final coat",
+      "sequence": 5,
+      "plannedStart": "2026-07-01",
+      "plannedEnd": "2026-08-01",
+      "progress": 40,
+      "status": "IN_PROGRESS",
+      "dependencyIds": [],
+      "paymentMode": "FIXED",
+      "paymentValue": 760000,
+      "retentionPct": 10,
+      "gstPct": 18
+    },
+    {
+      "id": "80f77bf8-9e5c-418b-af7e-f523aa3dfe78",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Scaffolding removal & cleanup",
+      "sequence": 6,
+      "plannedStart": "2026-07-01",
+      "plannedEnd": "2026-08-01",
+      "progress": 0,
+      "status": "NOT_STARTED",
+      "dependencyIds": [],
+      "paymentMode": "FIXED",
+      "paymentValue": 570000,
+      "retentionPct": 10,
+      "gstPct": 18
+    },
+    {
+      "id": "fd8078bf-23db-4b8a-b7ce-fd69822b3f14",
+      "dependencyIds": [],
+      "progress": 0,
+      "status": "NOT_STARTED",
+      "retentionPct": 5,
+      "gstPct": 18,
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Bathroom Tap Fitting",
+      "sequence": 99,
+      "plannedStart": "2026-07-01",
+      "plannedEnd": "2026-11-30",
+      "paymentMode": "FIXED",
+      "paymentValue": 12000
+    }
+  ],
+  "stages": [
+    {
+      "id": "4f69191b-2582-4dc9-84aa-963a7dcef10d",
+      "activityId": "86e29ed6-2446-451c-9a86-e113acd46c7d",
+      "state": "PAID",
+      "raisedAt": "2026-07-05T09:00:00Z",
+      "dueAt": "2026-07-10T18:00:00Z",
+      "submittedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "evidence": [
+        "/files/Mobilization_Photo_South_Facade.jpg"
+      ],
+      "checklist": {
+        "site_cleared": true,
+        "scaffolding_secured": true
+      },
+      "comments": [
+        {
+          "id": "1e96fcfe-a9d2-467e-93f8-ec878d7342a6",
+          "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+          "text": "Verified scaffolding layout on towers.",
+          "createdAt": "2026-07-06T11:00:00Z",
+          "kind": "COMMENT"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "deb64e35-9f45-455e-bd66-72ce99ee87f3",
+          "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+          "role": "CONTRACTOR",
+          "decision": "RAISED",
+          "createdAt": "2026-07-05T09:00:00Z"
+        },
+        {
+          "id": "5e8b4887-90bf-4a04-915d-75b1980c419c",
+          "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+          "role": "CONSULTANT",
+          "decision": "APPROVED",
+          "createdAt": "2026-07-06T11:05:00Z"
+        },
+        {
+          "id": "e628a4ca-28c3-45d3-9fac-d5eab5847ea4",
+          "actorId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+          "role": "CLIENT",
+          "decision": "PAYMENT_RELEASED",
+          "createdAt": "2026-07-07T14:30:00Z"
+        }
+      ],
+      "amountDue": 380000,
+      "invoiceId": "40be5100-aeb5-408e-96a2-f41cbf61f5db"
+    },
+    {
+      "id": "4574f2bb-80da-44f2-8169-2926601bf655",
+      "activityId": "c23fe830-8307-4c9d-9ac7-9c5b43ab5da8",
+      "state": "PAID",
+      "raisedAt": "2026-07-08T10:00:00Z",
+      "dueAt": "2026-07-15T18:00:00Z",
+      "submittedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "evidence": [
+        "/files/Surface_Preparation_Crack_Detail.jpg"
+      ],
+      "checklist": {
+        "loose_plaster_removed": true,
+        "cracks_v_grooved": true
+      },
+      "comments": [
+        {
+          "id": "4ec01be3-f7d1-4500-9e18-806381f3f4ad",
+          "actorId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+          "text": "SmartCare Crack Seal approved for application.",
+          "createdAt": "2026-07-09T14:00:00Z",
+          "kind": "COMMENT"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "8902ccb6-d919-4364-b27f-59cb4ce7021b",
+          "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+          "role": "CONTRACTOR",
+          "decision": "RAISED",
+          "createdAt": "2026-07-08T10:00:00Z"
+        },
+        {
+          "id": "3682c7f1-eb94-478a-84d3-8d862551d848",
+          "actorId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+          "role": "MANUFACTURER",
+          "decision": "APPROVED",
+          "createdAt": "2026-07-09T14:10:00Z"
+        },
+        {
+          "id": "a6daddb2-57ea-47bd-8067-95caae913549",
+          "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+          "role": "CONSULTANT",
+          "decision": "APPROVED",
+          "createdAt": "2026-07-10T11:00:00Z"
+        },
+        {
+          "id": "7e315403-2e62-4979-ac3e-84556030472a",
+          "actorId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+          "role": "CLIENT",
+          "decision": "PAYMENT_RELEASED",
+          "createdAt": "2026-07-12T15:00:00Z"
+        }
+      ],
+      "amountDue": 570000,
+      "invoiceId": "b51b23fa-ea1e-4b3b-905d-e7339819a9fd"
+    },
+    {
+      "id": "dc470506-ffcf-4fb5-8af2-8659fda059f4",
+      "activityId": "094f178b-badc-4719-9114-c8b07cce0c66",
+      "state": "PAID",
+      "raisedAt": "2026-07-12T11:00:00Z",
+      "dueAt": "2026-07-20T18:00:00Z",
+      "submittedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "evidence": [
+        "/files/Primer_Coat_Tower_A_Complete.jpg"
+      ],
+      "checklist": {
+        "surface_dry": true,
+        "base_coat_even": true
+      },
+      "comments": [
+        {
+          "id": "4a504e31-0d6f-45b1-b8f1-716398f14461",
+          "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+          "text": "Excellent uniformity. Recommended for payment.",
+          "createdAt": "2026-07-14T10:00:00Z",
+          "kind": "COMMENT"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "2e9e7a3e-2405-4d88-8f91-3fb501997a3e",
+          "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+          "role": "CONTRACTOR",
+          "decision": "RAISED",
+          "createdAt": "2026-07-12T11:00:00Z"
+        },
+        {
+          "id": "bd4bc676-b941-4394-9e82-5f33139f6f8a",
+          "actorId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+          "role": "MANUFACTURER",
+          "decision": "APPROVED",
+          "createdAt": "2026-07-13T09:30:00Z"
+        },
+        {
+          "id": "8b8c277d-15a9-46ad-b55a-fb2cb5547f06",
+          "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+          "role": "CONSULTANT",
+          "decision": "APPROVED",
+          "createdAt": "2026-07-14T10:05:00Z"
+        },
+        {
+          "id": "80754412-3a60-4e5a-81e6-4e0c0d29f31b",
+          "actorId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+          "role": "CLIENT",
+          "decision": "PAYMENT_RELEASED",
+          "createdAt": "2026-07-20T05:15:23.399Z"
+        }
+      ],
+      "amountDue": 380000,
+      "invoiceId": "d956f328-ec07-4af7-a3b1-d2b7b4a3ac84"
+    },
+    {
+      "id": "6b9d8c44-5c7b-4264-8912-5c5b562afa3f",
+      "activityId": "1647125e-64b2-4570-9c33-97b03127f5a6",
+      "state": "CLIENT",
+      "raisedAt": "2026-07-14T09:00:00Z",
+      "dueAt": "2026-07-22T18:00:00Z",
+      "submittedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "evidence": [],
+      "checklist": {
+        "moisture_check_passed": true
+      },
+      "comments": [],
+      "decisions": [
+        {
+          "id": "8ba7b3de-c3d5-4143-8d4c-3b0912a8f516",
+          "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+          "role": "CONTRACTOR",
+          "decision": "RAISED",
+          "createdAt": "2026-07-14T09:00:00Z"
+        },
+        {
+          "id": "97adc1c6-dc62-4384-9fba-d0187dd2e5bc",
+          "actorId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+          "role": "MANUFACTURER",
+          "decision": "APPROVED",
+          "createdAt": "2026-07-15T11:00:00Z"
+        },
+        {
+          "id": "bc71dcfe-e09e-4d68-85f8-4bd2c1720edf",
+          "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+          "role": "CONSULTANT",
+          "decision": "APPROVED",
+          "createdAt": "2026-07-20T05:14:19.696Z"
+        }
+      ],
+      "amountDue": 760000,
+      "invoiceId": "42587d8d-616c-4146-9074-3fa62d7749f0"
+    },
+    {
+      "id": "581e2a72-b61d-4fef-8b84-fc266421f470",
+      "activityId": "8b7dbe4a-8a5f-488c-968e-128bc32663dc",
+      "state": "REWORK",
+      "raisedAt": "2026-07-15T14:00:00Z",
+      "dueAt": "2026-07-25T18:00:00Z",
+      "submittedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "evidence": [],
+      "checklist": {
+        "coat_thickness_verified": false
+      },
+      "comments": [
+        {
+          "id": "86da275e-d473-487e-a14c-7b6bd37d67fe",
+          "actorId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+          "text": "DFT thickness did not meet the 150 microns specification on East facade.",
+          "createdAt": "2026-07-16T10:30:00Z",
+          "kind": "RETURN_REASON"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "8ca21499-5b37-41f6-bb42-da3593b30951",
+          "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+          "role": "CONTRACTOR",
+          "decision": "RAISED",
+          "createdAt": "2026-07-15T14:00:00Z"
+        },
+        {
+          "id": "509883b5-220d-447a-bcd2-248351d240f7",
+          "actorId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+          "role": "MANUFACTURER",
+          "decision": "RETURNED",
+          "createdAt": "2026-07-16T10:35:00Z",
+          "note": "DFT thickness insufficient."
+        }
+      ],
+      "amountDue": 760000,
+      "invoiceId": "ac2c347e-4668-40f7-82ad-ffbd13a8dfe6"
+    },
+    {
+      "id": "b09a892a-5f56-4bae-8c24-6ce7e3e0b599",
+      "activityId": "86e29ed6-2446-451c-9a86-e113acd46c7d",
+      "state": "PAID",
+      "raisedAt": "2026-07-02T10:00:00Z",
+      "dueAt": "2026-07-05T18:00:00Z",
+      "submittedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "evidence": [],
+      "checklist": {
+        "safety_harness_checked": true
+      },
+      "comments": [],
+      "decisions": [
+        {
+          "id": "6ef481f2-73a9-4e30-a7ee-963231f1a7e4",
+          "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+          "role": "CONTRACTOR",
+          "decision": "RAISED",
+          "createdAt": "2026-07-02T10:00:00Z"
+        },
+        {
+          "id": "a89ff593-b3c3-46af-91e2-1c60bcb588c1",
+          "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+          "role": "CONSULTANT",
+          "decision": "APPROVED",
+          "createdAt": "2026-07-03T11:00:00Z"
+        },
+        {
+          "id": "feb2e5de-1096-4751-aac2-9fed7cd1ee13",
+          "actorId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+          "role": "CLIENT",
+          "decision": "PAYMENT_RELEASED",
+          "createdAt": "2026-07-04T12:00:00Z"
+        }
+      ],
+      "amountDue": 50000
+    },
+    {
+      "id": "f3a9d4df-cf84-45fe-a021-cf098494bb57",
+      "activityId": "c23fe830-8307-4c9d-9ac7-9c5b43ab5da8",
+      "state": "PAID",
+      "raisedAt": "2026-07-06T15:00:00Z",
+      "dueAt": "2026-07-10T18:00:00Z",
+      "submittedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "evidence": [],
+      "checklist": {
+        "plaster_bonding_agent_applied": true
+      },
+      "comments": [],
+      "decisions": [
+        {
+          "id": "cc61b930-6462-495f-bc6d-dd8c42599863",
+          "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+          "role": "CONTRACTOR",
+          "decision": "RAISED",
+          "createdAt": "2026-07-06T15:00:00Z"
+        },
+        {
+          "id": "a38db95a-410e-4386-919d-8b657762a632",
+          "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+          "role": "CONSULTANT",
+          "decision": "APPROVED",
+          "createdAt": "2026-07-07T10:00:00Z"
+        },
+        {
+          "id": "d508c769-523f-48ac-bcd0-4948bc8e9873",
+          "actorId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+          "role": "CLIENT",
+          "decision": "PAYMENT_RELEASED",
+          "createdAt": "2026-07-08T11:00:00Z"
+        }
+      ],
+      "amountDue": 120000
+    },
+    {
+      "id": "3a22acad-88ba-4e92-93f2-c79a9accea3c",
+      "activityId": "094f178b-badc-4719-9114-c8b07cce0c66",
+      "state": "CONSULTANT",
+      "raisedAt": "2026-07-17T09:00:00Z",
+      "dueAt": "2026-07-24T18:00:00Z",
+      "submittedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "evidence": [],
+      "checklist": {
+        "first_primer_coat_checked": true
+      },
+      "comments": [],
+      "decisions": [
+        {
+          "id": "5fea177b-529a-4158-a0cd-6f9d2515a6ec",
+          "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+          "role": "CONTRACTOR",
+          "decision": "RAISED",
+          "createdAt": "2026-07-17T09:00:00Z"
+        },
+        {
+          "id": "c0d7cb95-9e0c-445c-add6-140d9c49bf3f",
+          "actorId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+          "role": "MANUFACTURER",
+          "decision": "APPROVED",
+          "createdAt": "2026-07-20T05:15:03.338Z"
+        }
+      ],
+      "amountDue": 200000
+    }
+  ],
+  "invoices": [
+    {
+      "id": "40be5100-aeb5-408e-96a2-f41cbf61f5db",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "86e29ed6-2446-451c-9a86-e113acd46c7d",
+      "stageId": "4f69191b-2582-4dc9-84aa-963a7dcef10d",
+      "invoiceNumber": "INV-GV-2026-001",
+      "subtotal": 322033.9,
+      "cgst": 28983.05,
+      "sgst": 28983.05,
+      "igst": 0,
+      "retention": 38000,
+      "total": 342000,
+      "status": "PAID",
+      "documentId": "38ca3f80-72dd-44c0-aef9-73f7ab232272",
+      "paymentReference": "pay_RzpGV001Mobilization"
+    },
+    {
+      "id": "b51b23fa-ea1e-4b3b-905d-e7339819a9fd",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "c23fe830-8307-4c9d-9ac7-9c5b43ab5da8",
+      "stageId": "4574f2bb-80da-44f2-8169-2926601bf655",
+      "invoiceNumber": "INV-GV-2026-002",
+      "subtotal": 483050.85,
+      "cgst": 43474.57,
+      "sgst": 43474.57,
+      "igst": 0,
+      "retention": 57000,
+      "total": 513000,
+      "status": "PAID",
+      "documentId": "2b48d42f-8f44-41d3-8a5d-958d16cb3a4a",
+      "paymentReference": "pay_RzpGV002Preparation"
+    },
+    {
+      "id": "d956f328-ec07-4af7-a3b1-d2b7b4a3ac84",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "094f178b-badc-4719-9114-c8b07cce0c66",
+      "stageId": "dc470506-ffcf-4fb5-8af2-8659fda059f4",
+      "invoiceNumber": "INV-GV-2026-003",
+      "subtotal": 322033.9,
+      "cgst": 28983.05,
+      "sgst": 28983.05,
+      "igst": 0,
+      "retention": 38000,
+      "total": 342000,
+      "status": "APPROVED",
+      "documentId": "289fc1d2-f863-41dc-b9d3-8de593bdd9d3"
+    },
+    {
+      "id": "42587d8d-616c-4146-9074-3fa62d7749f0",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "1647125e-64b2-4570-9c33-97b03127f5a6",
+      "stageId": "6b9d8c44-5c7b-4264-8912-5c5b562afa3f",
+      "invoiceNumber": "INV-GV-2026-004",
+      "subtotal": 644067.8,
+      "cgst": 57966.1,
+      "sgst": 57966.1,
+      "igst": 0,
+      "retention": 76000,
+      "total": 684000,
+      "status": "UPLOADED"
+    },
+    {
+      "id": "ac2c347e-4668-40f7-82ad-ffbd13a8dfe6",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "8b7dbe4a-8a5f-488c-968e-128bc32663dc",
+      "stageId": "581e2a72-b61d-4fef-8b84-fc266421f470",
+      "invoiceNumber": "INV-GV-2026-005",
+      "subtotal": 644067.8,
+      "cgst": 57966.1,
+      "sgst": 57966.1,
+      "igst": 0,
+      "retention": 76000,
+      "total": 684000,
+      "status": "MATCHED"
+    }
+  ],
+  "payments": [
+    {
+      "id": "6927f367-515c-4325-97b0-045c173a363e",
+      "invoiceId": "40be5100-aeb5-408e-96a2-f41cbf61f5db",
+      "provider": "RAZORPAY",
+      "providerPaymentId": "pay_RzpGV001Mobilization",
+      "amount": 342000,
+      "currency": "INR",
+      "status": "CAPTURED",
+      "createdAt": "2026-07-07T14:35:00Z"
+    },
+    {
+      "id": "b6d578a1-f491-422d-be17-3786db4fdd98",
+      "invoiceId": "b51b23fa-ea1e-4b3b-905d-e7339819a9fd",
+      "provider": "RAZORPAY",
+      "providerPaymentId": "pay_RzpGV002Preparation",
+      "amount": 513000,
+      "currency": "INR",
+      "status": "CAPTURED",
+      "createdAt": "2026-07-12T15:05:00Z"
+    },
+    {
+      "id": "ae5cf481-d081-4ec0-973f-50b75a70b194",
+      "invoiceId": "d956f328-ec07-4af7-a3b1-d2b7b4a3ac84",
+      "provider": "INTERNAL",
+      "amount": 342000,
+      "currency": "INR",
+      "status": "PENDING",
+      "createdAt": "2026-07-14T10:10:00Z"
+    },
+    {
+      "id": "1ce39651-abcd-4440-a7c6-99d676c9b286",
+      "invoiceId": "42587d8d-616c-4146-9074-3fa62d7749f0",
+      "provider": "INTERNAL",
+      "amount": 684000,
+      "currency": "INR",
+      "status": "PENDING",
+      "createdAt": "2026-07-15T11:15:00Z"
+    },
+    {
+      "id": "a261a824-8be8-4383-bbb2-3dd6b8d057e7",
+      "invoiceId": "ac2c347e-4668-40f7-82ad-ffbd13a8dfe6",
+      "provider": "RAZORPAY",
+      "providerPaymentId": "pay_RzpGV005ReworkFailed",
+      "amount": 684000,
+      "currency": "INR",
+      "status": "FAILED",
+      "createdAt": "2026-07-16T12:00:00Z"
+    }
+  ],
+  "deviceRegistrations": [],
+  "dlpCases": [],
+  "warranties": [
+    {
+      "id": "2a8b664d-45c3-4716-b3ff-2eba3f0e56b0",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "provider": "Asian Paints Ltd",
+      "type": "MANUFACTURER",
+      "reference": "WAR-AP-2026-092",
+      "startsOn": "2026-12-01",
+      "endsOn": "2036-11-30",
+      "coverage": "10-year product performance warranty against peeling and color fading.",
+      "documentId": "6db70d96-75cf-4c3e-b179-073721ce107e",
+      "status": "ACTIVE",
+      "createdAt": "2026-07-03T10:00:00Z"
+    },
+    {
+      "id": "c5a32999-29df-48d1-90b4-046f81ad20e8",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "provider": "Apex Coatings",
+      "type": "WORKMANSHIP",
+      "reference": "WAR-AC-2026-012",
+      "startsOn": "2026-12-01",
+      "endsOn": "2031-11-30",
+      "coverage": "5-year waterproofing and application defect protection certificate.",
+      "status": "ACTIVE",
+      "createdAt": "2026-07-03T10:05:00Z"
+    }
+  ],
+  "disputes": [
+    {
+      "id": "c7de3a2e-cdf3-48a0-b898-3dd219fbf379",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "raisedBy": "05e570bb-18ff-43c4-b73a-49a854a593da",
+      "category": "SAFETY",
+      "title": "Tower B scaffolding safety harnesses missing",
+      "description": "Workers seen at 10th floor level on Tower B east side without wearing double safety harnesses. Society requests scaffolding audit.",
+      "evidenceIds": [
+        "aa09032d-cc17-48ce-b3e6-6598601c74db"
+      ],
+      "status": "UNDER_REVIEW",
+      "ownerId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+      "createdAt": "2026-07-13T12:00:00Z",
+      "updatedAt": "2026-07-14T11:00:00Z"
+    },
+    {
+      "id": "73409ec7-222b-4893-8efa-51c25ec22f0c",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "raisedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "category": "PAYMENT",
+      "title": "Disbursement delay on Invoice #002",
+      "description": "Apex Coatings submitted INV-GV-2026-002 on July 8. Verification took longer than the agreed 3-day turnaround time.",
+      "evidenceIds": [],
+      "status": "RESOLVED",
+      "ownerId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+      "resolution": "Resolved via manual payout processing on July 12. Future verification timeline shortened to 48 hours.",
+      "resolvedAt": "2026-07-12T15:00:00Z",
+      "createdAt": "2026-07-11T09:00:00Z",
+      "updatedAt": "2026-07-12T15:00:00Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "416fe758-792c-407d-ac6b-8ae5efe8bde9",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "recipientId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "event": "STAGE_RAISED",
+      "title": "Stage Approval Requested",
+      "body": "Contractor Apex Coatings raised stage for Surface preparation & crack filling.",
+      "channels": [
+        "IN_APP",
+        "EMAIL"
+      ],
+      "readAt": "2026-07-08T10:15:00Z",
+      "createdAt": "2026-07-08T10:00:00Z"
+    },
+    {
+      "id": "8f7fe99b-d887-49c2-a351-69d72514cf24",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "recipientId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+      "event": "STAGE_ASSIGNED",
+      "title": "Asian Paints Inspection Assigned",
+      "body": "New stage raised for Primer application requires manufacturer thickness clearance.",
+      "channels": [
+        "IN_APP",
+        "WHATSAPP"
+      ],
+      "readAt": "2026-07-12T11:05:00Z",
+      "createdAt": "2026-07-12T11:00:00Z"
+    },
+    {
+      "id": "434b57a0-ed00-4825-b948-6bddef924933",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "recipientId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+      "event": "INVOICE_APPROVED",
+      "title": "Payment Approval Pending",
+      "body": "PMC approved invoice INV-GV-2026-003. Society Secretary sign-off required.",
+      "channels": [
+        "IN_APP",
+        "EMAIL"
+      ],
+      "createdAt": "2026-07-14T10:10:00Z"
+    },
+    {
+      "id": "1c3ab64f-308b-4b01-9e37-584e8bf14d70",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "recipientId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "event": "REWORK_REQUIRED",
+      "title": "Stage Returned for Rework",
+      "body": "Asian Paints representative returned Activity: Second & final coat for DFT thickness correction.",
+      "channels": [
+        "IN_APP",
+        "WHATSAPP",
+        "PUSH"
+      ],
+      "createdAt": "2026-07-16T10:35:00Z"
+    },
+    {
+      "id": "58092832-928c-4e1b-8ca4-40881223de90",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "recipientId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+      "event": "DISPUTE_RAISED",
+      "title": "New Dispute Raised",
+      "body": "Client raised dispute regarding scaffolding safety on Tower B.",
+      "channels": [
+        "IN_APP",
+        "EMAIL",
+        "PUSH"
+      ],
+      "createdAt": "2026-07-13T12:05:00Z"
+    }
+  ],
+  "siteUpdates": [
+    {
+      "id": "f8a91899-a32f-498b-8f38-837b697b11a6",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "86e29ed6-2446-451c-9a86-e113acd46c7d",
+      "date": "2026-07-02T17:00:00Z",
+      "weather": "Clear & Sunny",
+      "manpower": 12,
+      "equipment": "Scaffolding pipes, safety nets, harness kits",
+      "workDone": "Mobilized scaffolding crew on Tower A east side. Secured double safety nets.",
+      "important": false,
+      "attachments": [
+        "38ca3f80-72dd-44c0-aef9-73f7ab232272"
+      ],
+      "authorId": "1cf875e5-d69e-4aca-812d-5655164859e6"
+    },
+    {
+      "id": "b9135fa7-03ee-47e5-9446-75247d5d20bb",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "86e29ed6-2446-451c-9a86-e113acd46c7d",
+      "date": "2026-07-04T17:00:00Z",
+      "weather": "Overcast",
+      "manpower": 15,
+      "equipment": "Scaffolding pipes, hoist lift",
+      "workDone": "Scaffolding installation completed on Tower A. Commenced scaffolding erection on Tower B.",
+      "important": true,
+      "attachments": [],
+      "authorId": "1cf875e5-d69e-4aca-812d-5655164859e6"
+    },
+    {
+      "id": "12d0eefe-03bc-4ccd-a125-86e8c47bc3c0",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "c23fe830-8307-4c9d-9ac7-9c5b43ab5da8",
+      "date": "2026-07-06T17:00:00Z",
+      "weather": "Light Drizzle",
+      "manpower": 18,
+      "equipment": "Chipping hammers, wire brushes, putty knives",
+      "workDone": "Initiated loose plaster chipping and wire brushing on Tower A balconies.",
+      "important": false,
+      "attachments": [
+        "2b48d42f-8f44-41d3-8a5d-958d16cb3a4a"
+      ],
+      "authorId": "1cf875e5-d69e-4aca-812d-5655164859e6"
+    },
+    {
+      "id": "fe1c6692-ec47-4987-980b-4361dba9ff2d",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "c23fe830-8307-4c9d-9ac7-9c5b43ab5da8",
+      "date": "2026-07-09T17:00:00Z",
+      "weather": "Sunny",
+      "manpower": 20,
+      "equipment": "Pressure washers, polymer additives",
+      "workDone": "Completed pressure washing on Tower A facade. Filled vertical cracks using SmartCare Crack Seal.",
+      "important": true,
+      "attachments": [],
+      "authorId": "1cf875e5-d69e-4aca-812d-5655164859e6"
+    },
+    {
+      "id": "ef8a1b5b-8433-4da0-abff-4d997100dd58",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "094f178b-badc-4719-9114-c8b07cce0c66",
+      "date": "2026-07-11T17:00:00Z",
+      "weather": "Humid",
+      "manpower": 10,
+      "equipment": "Paint rollers, brushes, extension poles",
+      "workDone": "Began base primer coat application on Tower A west facade.",
+      "important": false,
+      "attachments": [
+        "289fc1d2-f863-41dc-b9d3-8de593bdd9d3"
+      ],
+      "authorId": "1cf875e5-d69e-4aca-812d-5655164859e6"
+    },
+    {
+      "id": "36c53aa3-8354-44f2-ab72-54c312c867e5",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "094f178b-badc-4719-9114-c8b07cce0c66",
+      "date": "2026-07-13T17:00:00Z",
+      "weather": "Clear",
+      "manpower": 14,
+      "equipment": "Paint rollers, spray guns",
+      "workDone": "Tower A primer coat 100% complete. Inspected and approved by PMC. Moved to Tower B primer application.",
+      "important": false,
+      "attachments": [],
+      "authorId": "1cf875e5-d69e-4aca-812d-5655164859e6"
+    },
+    {
+      "id": "68c2d9d9-a719-4958-a2f4-738de43ddd9e",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "1647125e-64b2-4570-9c33-97b03127f5a6",
+      "date": "2026-07-15T17:00:00Z",
+      "weather": "Heavy Rain",
+      "manpower": 6,
+      "equipment": "None",
+      "workDone": "Exterior putty application suspended on Tower B due to heavy monsoon rain in Pune. Moved crew to covered lobby walls.",
+      "issues": "Rain delay on external facade work.",
+      "important": true,
+      "attachments": [],
+      "authorId": "1cf875e5-d69e-4aca-812d-5655164859e6"
+    },
+    {
+      "id": "e5724c58-dea6-4d74-b903-857f27c41f31",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "activityId": "8b7dbe4a-8a5f-488c-968e-128bc32663dc",
+      "date": "2026-07-17T17:00:00Z",
+      "weather": "Clear",
+      "manpower": 16,
+      "equipment": "Paint rollers",
+      "workDone": "Applied first coat of paint on Tower A south side. Awaiting dry film thickness inspection.",
+      "important": false,
+      "attachments": [],
+      "authorId": "1cf875e5-d69e-4aca-812d-5655164859e6"
+    },
+    {
+      "id": "60788adc-2556-46a7-b30b-7bb6ab033203",
+      "attachments": [],
+      "date": "2026-07-18T09:38:58.316Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "workDone": "Hey this is test",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false
+    },
+    {
+      "id": "a4d39ca4-8456-429b-8590-bcb6bbbbebb5",
+      "attachments": [],
+      "date": "2026-07-18T16:43:21.336Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false
+    },
+    {
+      "id": "73711815-94c0-4987-8a0f-64b6b6a653c3",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/8196ACE2-F411-4796-B05D-FAAD1890BA70.jpg"
+      ],
+      "date": "2026-07-18T16:43:53.357Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "latitude": 18.496289463190003,
+      "longitude": 73.74700101417784
+    },
+    {
+      "id": "a85f3f96-e979-4478-b7f8-572a42a34bf9",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/8196ACE2-F411-4796-B05D-FAAD1890BA70.jpg"
+      ],
+      "date": "2026-07-18T16:43:53.892Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "latitude": 18.496289463190003,
+      "longitude": 73.74700101417784
+    },
+    {
+      "id": "1f242989-e66a-40f5-902c-0ad361b53176",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/8196ACE2-F411-4796-B05D-FAAD1890BA70.jpg"
+      ],
+      "date": "2026-07-18T16:43:54.034Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "latitude": 18.496289463190003,
+      "longitude": 73.74700101417784
+    },
+    {
+      "id": "58d6ffb5-9e8f-4857-bfb8-7f60ff6f6fff",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+      ],
+      "date": "2026-07-18T16:51:30.112Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+      "latitude": 18.49627825278091,
+      "longitude": 73.74692081491452
+    },
+    {
+      "id": "c649bb2e-11b7-4ec0-9fd3-948848485104",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+      ],
+      "date": "2026-07-18T16:51:31.299Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+      "latitude": 18.49627825278091,
+      "longitude": 73.74692081491452
+    },
+    {
+      "id": "029f049b-7a14-455b-8ce0-cdb663414b55",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+      ],
+      "date": "2026-07-18T16:51:32.753Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+      "latitude": 18.49627825278091,
+      "longitude": 73.74692081491452
+    },
+    {
+      "id": "3787de34-e638-4c24-a194-034cbd08c13c",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+      ],
+      "date": "2026-07-18T16:51:42.683Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+      "latitude": 18.49627825278091,
+      "longitude": 73.74692081491452
+    },
+    {
+      "id": "ff6765a4-5875-4092-8a43-58b72d414604",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+      ],
+      "date": "2026-07-18T16:51:42.943Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+      "latitude": 18.49627825278091,
+      "longitude": 73.74692081491452
+    },
+    {
+      "id": "4b619bd9-63b4-46db-8af7-91aeeba424d8",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+      ],
+      "date": "2026-07-18T16:51:43.008Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+      "latitude": 18.49627825278091,
+      "longitude": 73.74692081491452
+    },
+    {
+      "id": "5164e322-501b-4fd0-bf88-25f69f76c900",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+      ],
+      "date": "2026-07-18T16:51:43.152Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+      "latitude": 18.49627825278091,
+      "longitude": 73.74692081491452
+    },
+    {
+      "id": "0c281e4c-4368-437a-846f-a0fabcbd39ca",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/BBB42717-31D8-4727-8485-D1B2867CD910.jpg"
+      ],
+      "date": "2026-07-18T16:58:33.633Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "Done\n\n",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-F60E29D6-E7A8-4152-8906-009310953954.m4a",
+      "latitude": 18.49627825278091,
+      "longitude": 73.74692081491452
+    },
+    {
+      "id": "beddad34-33c6-40be-bcd5-189f27104e16",
+      "attachments": [
+        "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/2E7EA6F9-F8BE-4815-B29E-EAF17A5D22B2.jpg"
+      ],
+      "date": "2026-07-18T17:20:18.962Z",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "authorId": "mobile",
+      "workDone": "Done",
+      "weather": "Clear",
+      "manpower": 0,
+      "equipment": "",
+      "important": false,
+      "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-3BD7DFE8-2BFC-49FE-8824-59940D68A324.m4a",
+      "latitude": 18.49628914985112,
+      "longitude": 73.74699719416307
+    }
+  ],
+  "delays": [
+    {
+      "id": "b0da52fc-61c3-4c2b-8eb5-a2631fa9533b",
+      "activityId": "c23fe830-8307-4c9d-9ac7-9c5b43ab5da8",
+      "reason": "WEATHER",
+      "impactDays": 4,
+      "ownerId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "mitigationPlan": "De-water balconies using mechanical pumps and deploy high-velocity blowers.",
+      "targetClose": "2026-07-14",
+      "resolvedAt": "2026-07-14"
+    },
+    {
+      "id": "72e12989-7487-46c8-93ba-639772cf6da1",
+      "activityId": "1647125e-64b2-4570-9c33-97b03127f5a6",
+      "reason": "MATERIAL_SHORTAGE",
+      "impactDays": 6,
+      "ownerId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+      "mitigationPlan": "Expedite base coat batch shipment from Asian Paints Mumbai warehouse.",
+      "targetClose": "2026-07-22"
+    },
+    {
+      "id": "39583526-8a0f-443f-a18f-7e746764a035",
+      "activityId": "8b7dbe4a-8a5f-488c-968e-128bc32663dc",
+      "reason": "SOCIETY_ACCESS",
+      "impactDays": 3,
+      "ownerId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+      "mitigationPlan": "Society committee to coordinate resident car parking shifts away from Tower A scaffolding zones.",
+      "targetClose": "2026-07-25"
+    }
+  ],
+  "documents": [
+    {
+      "id": "b7b32180-a1f6-46bb-a262-d8a08aac291d",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Greenview_Signed_Contract.pdf",
+      "type": "CONTRACT",
+      "version": 1,
+      "tags": [
+        "legal",
+        "contract",
+        "executed"
+      ],
+      "visibility": [
+        "ADMIN",
+        "CLIENT",
+        "CONSULTANT"
+      ],
+      "url": "/files/Greenview_Signed_Contract.pdf",
+      "uploadedBy": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "createdAt": "2026-07-01T10:00:00Z"
+    },
+    {
+      "id": "785bb8ea-8617-4056-b3e4-bef418cabf43",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Apex_BOQ_Final_v2.xlsx",
+      "type": "BOQ",
+      "version": 2,
+      "tags": [
+        "boq",
+        "budget",
+        "finance"
+      ],
+      "visibility": [
+        "ADMIN",
+        "CLIENT",
+        "CONSULTANT",
+        "CONTRACTOR"
+      ],
+      "url": "/files/Apex_BOQ_Final_v2.xlsx",
+      "uploadedBy": "6cfd5ede-d593-409c-baa6-753f24cff734",
+      "createdAt": "2026-07-02T11:30:00Z"
+    },
+    {
+      "id": "6db70d96-75cf-4c3e-b179-073721ce107e",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Asian_Paints_Technical_Drawing.pdf",
+      "type": "DRAWING",
+      "version": 1,
+      "tags": [
+        "design",
+        "specification",
+        "technical"
+      ],
+      "visibility": [
+        "ADMIN",
+        "CONSULTANT",
+        "MANUFACTURER",
+        "CONTRACTOR"
+      ],
+      "url": "/files/Asian_Paints_Technical_Drawing.pdf",
+      "uploadedBy": "20def9ff-f761-4612-9816-35f9b24ffa36",
+      "createdAt": "2026-07-03T09:15:00Z"
+    },
+    {
+      "id": "d36838a8-fa1d-49f8-97f9-21a12ea7ab4e",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Site_Survey_Report_Pune.pdf",
+      "type": "REPORT",
+      "version": 1,
+      "tags": [
+        "survey",
+        "pre-requisite",
+        "report"
+      ],
+      "visibility": [
+        "ADMIN",
+        "CLIENT",
+        "CONSULTANT"
+      ],
+      "url": "/files/Site_Survey_Report_Pune.pdf",
+      "uploadedBy": "6cfd5ede-d593-409c-baa6-753f24cff734",
+      "createdAt": "2026-07-03T16:00:00Z"
+    },
+    {
+      "id": "99e96d76-3965-4b1b-82b5-4fb7b00a90d2",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Scaffolding_Safety_Certificate.pdf",
+      "type": "REPORT",
+      "version": 1,
+      "tags": [
+        "safety",
+        "audit",
+        "scaffolding"
+      ],
+      "visibility": [
+        "ADMIN",
+        "CLIENT",
+        "CONSULTANT",
+        "CONTRACTOR"
+      ],
+      "url": "/files/Scaffolding_Safety_Certificate.pdf",
+      "uploadedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "createdAt": "2026-07-10T14:20:00Z"
+    },
+    {
+      "id": "38ca3f80-72dd-44c0-aef9-73f7ab232272",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Mobilization_Photo_South_Facade.jpg",
+      "type": "PHOTO",
+      "version": 1,
+      "tags": [
+        "photo",
+        "mobilization",
+        "evidence"
+      ],
+      "visibility": [
+        "ADMIN",
+        "CLIENT",
+        "CONSULTANT",
+        "MANUFACTURER",
+        "CONTRACTOR"
+      ],
+      "url": "/files/Mobilization_Photo_South_Facade.jpg",
+      "uploadedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "createdAt": "2026-07-08T09:30:00Z"
+    },
+    {
+      "id": "2b48d42f-8f44-41d3-8a5d-958d16cb3a4a",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Surface_Preparation_Crack_Detail.jpg",
+      "type": "PHOTO",
+      "version": 1,
+      "tags": [
+        "photo",
+        "preparation",
+        "evidence"
+      ],
+      "visibility": [
+        "ADMIN",
+        "CLIENT",
+        "CONSULTANT",
+        "MANUFACTURER",
+        "CONTRACTOR"
+      ],
+      "url": "/files/Surface_Preparation_Crack_Detail.jpg",
+      "uploadedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "createdAt": "2026-07-12T11:00:00Z"
+    },
+    {
+      "id": "289fc1d2-f863-41dc-b9d3-8de593bdd9d3",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Primer_Coat_Tower_A_Complete.jpg",
+      "type": "PHOTO",
+      "version": 1,
+      "tags": [
+        "photo",
+        "primer",
+        "tower-a"
+      ],
+      "visibility": [
+        "ADMIN",
+        "CLIENT",
+        "CONSULTANT",
+        "MANUFACTURER",
+        "CONTRACTOR"
+      ],
+      "url": "/files/Primer_Coat_Tower_A_Complete.jpg",
+      "uploadedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "createdAt": "2026-07-15T10:45:00Z"
+    },
+    {
+      "id": "4fd8789f-7f06-432f-aec0-17dae26bfd16",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Quality_Inspection_Report_Prep.pdf",
+      "type": "REPORT",
+      "version": 1,
+      "tags": [
+        "quality",
+        "inspection",
+        "compliance"
+      ],
+      "visibility": [
+        "ADMIN",
+        "CONSULTANT",
+        "MANUFACTURER"
+      ],
+      "url": "/files/Quality_Inspection_Report_Prep.pdf",
+      "uploadedBy": "20def9ff-f761-4612-9816-35f9b24ffa36",
+      "createdAt": "2026-07-14T15:30:00Z"
+    },
+    {
+      "id": "aa09032d-cc17-48ce-b3e6-6598601c74db",
+      "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "name": "Greenview_Dispute_Safety_Record.pdf",
+      "type": "OTHER",
+      "version": 1,
+      "tags": [
+        "dispute",
+        "safety",
+        "record"
+      ],
+      "visibility": [
+        "ADMIN",
+        "CLIENT",
+        "CONSULTANT"
+      ],
+      "url": "/files/Greenview_Dispute_Safety_Record.pdf",
+      "uploadedBy": "6cfd5ede-d593-409c-baa6-753f24cff734",
+      "createdAt": "2026-07-13T12:00:00Z"
+    }
+  ],
+  "audits": [
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "action": "BOOTSTRAP",
+      "entity": "project",
+      "entityId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+      "after": {
+        "id": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+        "name": "Greenview External Repainting",
+        "address": "Pune, Maharashtra",
+        "scope": "External painting and crack repair",
+        "buildings": 3,
+        "areaSqft": 96000,
+        "contractValue": 3800000,
+        "startDate": "2026-07-01",
+        "endDate": "2026-11-30",
+        "status": "ACTIVE",
+        "contractorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+        "manufacturerId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+        "consultantId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+        "clientId": "05e570bb-18ff-43c4-b73a-49a854a593da"
+      },
+      "id": "60f14612-f956-44c8-a013-275d1f391387",
+      "createdAt": "2026-07-18T06:26:36.935Z",
+      "hash": "21cbd60b6238503be4f8d63cedeb7dd4111436e614c914a6d7751adc4fce8cb7"
+    },
+    {
+      "id": "e79e49e6-f037-4644-bc61-f688336a7bca",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "action": "UPLOAD",
+      "entity": "document",
+      "entityId": "b7b32180-a1f6-46bb-a262-d8a08aac291d",
+      "createdAt": "2026-07-01T10:00:00Z",
+      "hash": "6de6eec02ef4131541326050ddecb9d367f45593156a5e475aff3bc3dea7c323"
+    },
+    {
+      "id": "42fc63e7-9093-47ab-b7b6-f520d8c08254",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+      "action": "APPROVE",
+      "entity": "stage",
+      "entityId": "4f69191b-2582-4dc9-84aa-963a7dcef10d",
+      "createdAt": "2026-07-06T11:05:00Z",
+      "hash": "0c03f0598b6ff6a469e5ff7409d49ecbe7ecc4738b45cf990b2798edaa409098"
+    },
+    {
+      "id": "05d3a90c-d18c-4ffc-94be-5501d8d443bf",
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+      "action": "DISBURSE",
+      "entity": "payment",
+      "entityId": "4f69191b-2582-4dc9-84aa-963a7dcef10d",
+      "createdAt": "2026-07-07T14:35:00Z",
+      "hash": "58066a7b3d9cf751d879198637657e4ed3792ea99ddb82df0290982c123dcd21"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "60788adc-2556-46a7-b30b-7bb6ab033203",
+      "after": {
+        "id": "60788adc-2556-46a7-b30b-7bb6ab033203",
+        "attachments": [],
+        "date": "2026-07-18T09:38:58.316Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+        "workDone": "Hey this is test",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false
+      },
+      "id": "30e6ba18-5b97-4d74-a5cb-cd1a042da42a",
+      "createdAt": "2026-07-18T09:38:58.316Z",
+      "hash": "1df7736b800c1b6fbd104de8927246f2f5a7ec12d4de33d9ca3be590b459e144"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "a4d39ca4-8456-429b-8590-bcb6bbbbebb5",
+      "after": {
+        "id": "a4d39ca4-8456-429b-8590-bcb6bbbbebb5",
+        "attachments": [],
+        "date": "2026-07-18T16:43:21.336Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false
+      },
+      "id": "e86f7d1e-6344-4261-9362-1c401346e260",
+      "createdAt": "2026-07-18T16:43:21.337Z",
+      "hash": "813649a82c9237b0e37d122f77c1603ff77ef78954ed75760c6ab1def68ab2bf"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "73711815-94c0-4987-8a0f-64b6b6a653c3",
+      "after": {
+        "id": "73711815-94c0-4987-8a0f-64b6b6a653c3",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/8196ACE2-F411-4796-B05D-FAAD1890BA70.jpg"
+        ],
+        "date": "2026-07-18T16:43:53.357Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "latitude": 18.496289463190003,
+        "longitude": 73.74700101417784
+      },
+      "id": "a9618772-b39e-4e77-b882-3d52837d1838",
+      "createdAt": "2026-07-18T16:43:53.357Z",
+      "hash": "756c56eda59019fbc76b05e15068a97ace6eccc8d9502fd80b7aef6f98a59a63"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "a85f3f96-e979-4478-b7f8-572a42a34bf9",
+      "after": {
+        "id": "a85f3f96-e979-4478-b7f8-572a42a34bf9",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/8196ACE2-F411-4796-B05D-FAAD1890BA70.jpg"
+        ],
+        "date": "2026-07-18T16:43:53.892Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "latitude": 18.496289463190003,
+        "longitude": 73.74700101417784
+      },
+      "id": "de8ca5bf-6509-415b-94ee-5acde47bb68e",
+      "createdAt": "2026-07-18T16:43:53.892Z",
+      "hash": "96c658dc59eb8d3a16f2df8aa3e87ae4baca3f4b0c8a2c10bcb7945ddfc774e5"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "1f242989-e66a-40f5-902c-0ad361b53176",
+      "after": {
+        "id": "1f242989-e66a-40f5-902c-0ad361b53176",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/8196ACE2-F411-4796-B05D-FAAD1890BA70.jpg"
+        ],
+        "date": "2026-07-18T16:43:54.034Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "latitude": 18.496289463190003,
+        "longitude": 73.74700101417784
+      },
+      "id": "af62c007-fe0d-49cc-b68e-c35d158815a9",
+      "createdAt": "2026-07-18T16:43:54.034Z",
+      "hash": "844193e0ee3327d9938351bf8fc4c16317348c085cf65f7bb72cdfd60b8b701b"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "58d6ffb5-9e8f-4857-bfb8-7f60ff6f6fff",
+      "after": {
+        "id": "58d6ffb5-9e8f-4857-bfb8-7f60ff6f6fff",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+        ],
+        "date": "2026-07-18T16:51:30.112Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+        "latitude": 18.49627825278091,
+        "longitude": 73.74692081491452
+      },
+      "id": "51f0f64f-a5aa-4bf7-bcde-201361a11431",
+      "createdAt": "2026-07-18T16:51:30.113Z",
+      "hash": "8cc26332f7a8c27d63c944852650a90c393ed566d6649b6764c8777313c00a75"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "c649bb2e-11b7-4ec0-9fd3-948848485104",
+      "after": {
+        "id": "c649bb2e-11b7-4ec0-9fd3-948848485104",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+        ],
+        "date": "2026-07-18T16:51:31.299Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+        "latitude": 18.49627825278091,
+        "longitude": 73.74692081491452
+      },
+      "id": "e4ae5cac-02a9-476a-a371-f62d3d98fbd7",
+      "createdAt": "2026-07-18T16:51:31.299Z",
+      "hash": "02e6d238bd23227482dd8c5a0d86680ab737d15ba05850f21f351adf388b58d6"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "029f049b-7a14-455b-8ce0-cdb663414b55",
+      "after": {
+        "id": "029f049b-7a14-455b-8ce0-cdb663414b55",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+        ],
+        "date": "2026-07-18T16:51:32.753Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+        "latitude": 18.49627825278091,
+        "longitude": 73.74692081491452
+      },
+      "id": "e40c0196-1467-48bc-a9ad-5aa2fe00ee8b",
+      "createdAt": "2026-07-18T16:51:32.753Z",
+      "hash": "ef5a9388fc14e0291736fd2c8c94552b4c8dabac9ac431edc5bd6adef6fad62b"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "3787de34-e638-4c24-a194-034cbd08c13c",
+      "after": {
+        "id": "3787de34-e638-4c24-a194-034cbd08c13c",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+        ],
+        "date": "2026-07-18T16:51:42.683Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+        "latitude": 18.49627825278091,
+        "longitude": 73.74692081491452
+      },
+      "id": "e48990e2-00be-4f45-8106-e4890755f801",
+      "createdAt": "2026-07-18T16:51:42.683Z",
+      "hash": "508ee1b1083f4aab8e7a13f55c13ec7a9c397137aaa3b408185ab0a79d029790"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "ff6765a4-5875-4092-8a43-58b72d414604",
+      "after": {
+        "id": "ff6765a4-5875-4092-8a43-58b72d414604",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+        ],
+        "date": "2026-07-18T16:51:42.943Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+        "latitude": 18.49627825278091,
+        "longitude": 73.74692081491452
+      },
+      "id": "bc437578-ede8-402f-b4af-5dbde5524c29",
+      "createdAt": "2026-07-18T16:51:42.943Z",
+      "hash": "3aff12d1865335ecdb33d8b050d1918db691066754f4893292fdca71879e3955"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "4b619bd9-63b4-46db-8af7-91aeeba424d8",
+      "after": {
+        "id": "4b619bd9-63b4-46db-8af7-91aeeba424d8",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+        ],
+        "date": "2026-07-18T16:51:43.008Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+        "latitude": 18.49627825278091,
+        "longitude": 73.74692081491452
+      },
+      "id": "39bf54f8-cc63-4453-86c6-0bcbaa64bbfa",
+      "createdAt": "2026-07-18T16:51:43.008Z",
+      "hash": "4ec768c81f540d71514e87aaa30fc5ff555d603d798561445e90d2dd8fc69d18"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "5164e322-501b-4fd0-bf88-25f69f76c900",
+      "after": {
+        "id": "5164e322-501b-4fd0-bf88-25f69f76c900",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/A5562A33-4B66-45DC-896E-58FBD06B64B2.jpg"
+        ],
+        "date": "2026-07-18T16:51:43.152Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-DBAF1659-4C65-4DBB-BC87-2D6293322901.m4a",
+        "latitude": 18.49627825278091,
+        "longitude": 73.74692081491452
+      },
+      "id": "c109457c-c178-49c1-a6d0-46ce0d8866a7",
+      "createdAt": "2026-07-18T16:51:43.152Z",
+      "hash": "895ff905064fdb98cb2b1a4f3f381ee9731052b9a217c7a9738a31468a8ecb54"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "0c281e4c-4368-437a-846f-a0fabcbd39ca",
+      "after": {
+        "id": "0c281e4c-4368-437a-846f-a0fabcbd39ca",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/BBB42717-31D8-4727-8485-D1B2867CD910.jpg"
+        ],
+        "date": "2026-07-18T16:58:33.633Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "Done\n\n",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-F60E29D6-E7A8-4152-8906-009310953954.m4a",
+        "latitude": 18.49627825278091,
+        "longitude": 73.74692081491452
+      },
+      "id": "f54afaa1-4f92-4d76-81a0-d73c369d710f",
+      "createdAt": "2026-07-18T16:58:33.635Z",
+      "hash": "06386d4cf552dc612f91c9735cbb020a4e513d3755041b9db5e166ee7e718812"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "mobile",
+      "action": "CREATE",
+      "entity": "site_update",
+      "entityId": "beddad34-33c6-40be-bcd5-189f27104e16",
+      "after": {
+        "id": "beddad34-33c6-40be-bcd5-189f27104e16",
+        "attachments": [
+          "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ImageManipulator/2E7EA6F9-F8BE-4815-B29E-EAF17A5D22B2.jpg"
+        ],
+        "date": "2026-07-18T17:20:18.962Z",
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "authorId": "mobile",
+        "workDone": "Done",
+        "weather": "Clear",
+        "manpower": 0,
+        "equipment": "",
+        "important": false,
+        "voiceNote": "file:///var/mobile/Containers/Data/Application/AA61A7BA-967C-48BA-8E5D-C8AEF088D07F/Library/Caches/ExpoAudio/recording-3BD7DFE8-2BFC-49FE-8824-59940D68A324.m4a",
+        "latitude": 18.49628914985112,
+        "longitude": 73.74699719416307
+      },
+      "id": "c84beabb-3912-4f9e-a1fd-bd7efd7d8dcc",
+      "createdAt": "2026-07-18T17:20:18.963Z",
+      "hash": "38fade1225d0669e1a76a8b66eba22fbdf03150cafa36717da9f05d6de44a325"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+      "action": "APPROVE",
+      "entity": "stage",
+      "entityId": "6b9d8c44-5c7b-4264-8912-5c5b562afa3f",
+      "after": {
+        "id": "6b9d8c44-5c7b-4264-8912-5c5b562afa3f",
+        "activityId": "1647125e-64b2-4570-9c33-97b03127f5a6",
+        "state": "CLIENT",
+        "raisedAt": "2026-07-14T09:00:00Z",
+        "dueAt": "2026-07-22T18:00:00Z",
+        "submittedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+        "evidence": [],
+        "checklist": {
+          "moisture_check_passed": true
+        },
+        "comments": [],
+        "decisions": [
+          {
+            "id": "8ba7b3de-c3d5-4143-8d4c-3b0912a8f516",
+            "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+            "role": "CONTRACTOR",
+            "decision": "RAISED",
+            "createdAt": "2026-07-14T09:00:00Z"
+          },
+          {
+            "id": "97adc1c6-dc62-4384-9fba-d0187dd2e5bc",
+            "actorId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+            "role": "MANUFACTURER",
+            "decision": "APPROVED",
+            "createdAt": "2026-07-15T11:00:00Z"
+          },
+          {
+            "id": "bc71dcfe-e09e-4d68-85f8-4bd2c1720edf",
+            "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+            "role": "CONSULTANT",
+            "decision": "APPROVED",
+            "createdAt": "2026-07-20T05:14:19.696Z"
+          }
+        ],
+        "amountDue": 760000,
+        "invoiceId": "42587d8d-616c-4146-9074-3fa62d7749f0"
+      },
+      "id": "f1a62846-fc58-4536-be76-eec659a0508b",
+      "createdAt": "2026-07-20T05:14:19.697Z",
+      "hash": "e8a87b22bb982d28041979d9696cae81ebcd43e200ef7b93323166c4998615bd"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+      "action": "APPROVE",
+      "entity": "stage",
+      "entityId": "3a22acad-88ba-4e92-93f2-c79a9accea3c",
+      "after": {
+        "id": "3a22acad-88ba-4e92-93f2-c79a9accea3c",
+        "activityId": "094f178b-badc-4719-9114-c8b07cce0c66",
+        "state": "CONSULTANT",
+        "raisedAt": "2026-07-17T09:00:00Z",
+        "dueAt": "2026-07-24T18:00:00Z",
+        "submittedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+        "evidence": [],
+        "checklist": {
+          "first_primer_coat_checked": true
+        },
+        "comments": [],
+        "decisions": [
+          {
+            "id": "5fea177b-529a-4158-a0cd-6f9d2515a6ec",
+            "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+            "role": "CONTRACTOR",
+            "decision": "RAISED",
+            "createdAt": "2026-07-17T09:00:00Z"
+          },
+          {
+            "id": "c0d7cb95-9e0c-445c-add6-140d9c49bf3f",
+            "actorId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+            "role": "MANUFACTURER",
+            "decision": "APPROVED",
+            "createdAt": "2026-07-20T05:15:03.338Z"
+          }
+        ],
+        "amountDue": 200000
+      },
+      "id": "b4061033-fbae-493f-99b5-368bef769584",
+      "createdAt": "2026-07-20T05:15:03.338Z",
+      "hash": "9ce111dfd18c4feb16c5385ad2728fdb4e8a9f3cd888ba6f3a5719d14c34bb95"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+      "action": "APPROVE",
+      "entity": "stage",
+      "entityId": "dc470506-ffcf-4fb5-8af2-8659fda059f4",
+      "after": {
+        "id": "dc470506-ffcf-4fb5-8af2-8659fda059f4",
+        "activityId": "094f178b-badc-4719-9114-c8b07cce0c66",
+        "state": "PAID",
+        "raisedAt": "2026-07-12T11:00:00Z",
+        "dueAt": "2026-07-20T18:00:00Z",
+        "submittedBy": "1cf875e5-d69e-4aca-812d-5655164859e6",
+        "evidence": [
+          "/files/Primer_Coat_Tower_A_Complete.jpg"
+        ],
+        "checklist": {
+          "surface_dry": true,
+          "base_coat_even": true
+        },
+        "comments": [
+          {
+            "id": "4a504e31-0d6f-45b1-b8f1-716398f14461",
+            "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+            "text": "Excellent uniformity. Recommended for payment.",
+            "createdAt": "2026-07-14T10:00:00Z",
+            "kind": "COMMENT"
+          }
+        ],
+        "decisions": [
+          {
+            "id": "2e9e7a3e-2405-4d88-8f91-3fb501997a3e",
+            "actorId": "1cf875e5-d69e-4aca-812d-5655164859e6",
+            "role": "CONTRACTOR",
+            "decision": "RAISED",
+            "createdAt": "2026-07-12T11:00:00Z"
+          },
+          {
+            "id": "bd4bc676-b941-4394-9e82-5f33139f6f8a",
+            "actorId": "20def9ff-f761-4612-9816-35f9b24ffa36",
+            "role": "MANUFACTURER",
+            "decision": "APPROVED",
+            "createdAt": "2026-07-13T09:30:00Z"
+          },
+          {
+            "id": "8b8c277d-15a9-46ad-b55a-fb2cb5547f06",
+            "actorId": "6cfd5ede-d593-409c-baa6-753f24cff734",
+            "role": "CONSULTANT",
+            "decision": "APPROVED",
+            "createdAt": "2026-07-14T10:05:00Z"
+          },
+          {
+            "id": "80754412-3a60-4e5a-81e6-4e0c0d29f31b",
+            "actorId": "05e570bb-18ff-43c4-b73a-49a854a593da",
+            "role": "CLIENT",
+            "decision": "PAYMENT_RELEASED",
+            "createdAt": "2026-07-20T05:15:23.399Z"
+          }
+        ],
+        "amountDue": 380000,
+        "invoiceId": "d956f328-ec07-4af7-a3b1-d2b7b4a3ac84"
+      },
+      "id": "8aaae255-2f64-44cd-983d-3e5b08e355a8",
+      "createdAt": "2026-07-20T05:15:23.399Z",
+      "hash": "f84c6690b3534470d5c70d7af247aee93fa4b8377819c36a4612dcdf071cc4fd"
+    },
+    {
+      "tenantId": "e8de4496-f5b0-4652-aceb-a06e3dc45344",
+      "actorId": "04708496-d1a3-40b5-ab5b-e163681ea766",
+      "action": "CREATE",
+      "entity": "activity",
+      "entityId": "fd8078bf-23db-4b8a-b7ce-fd69822b3f14",
+      "after": {
+        "id": "fd8078bf-23db-4b8a-b7ce-fd69822b3f14",
+        "dependencyIds": [],
+        "progress": 0,
+        "status": "NOT_STARTED",
+        "retentionPct": 5,
+        "gstPct": 18,
+        "projectId": "f60f66e7-d705-4276-9851-f5d532f8c211",
+        "name": "Bathroom Tap Fitting",
+        "sequence": 99,
+        "plannedStart": "2026-07-01",
+        "plannedEnd": "2026-11-30",
+        "paymentMode": "FIXED",
+        "paymentValue": 12000
+      },
+      "id": "0b7458ab-d1b2-4372-a004-4587376d9a7a",
+      "createdAt": "2026-07-20T05:24:36.207Z",
+      "hash": "f8c241395a03136dd2bfbc45ce934a47c7edfdef1ab1e3afe0345a36c4c0c835"
+    }
+  ]
+}
