@@ -32,8 +32,12 @@ const PROVIDER_ICONS: Record<string, React.ElementType> = {
 
 export default function Admin({ data, token }: AdminProps) {
   const [items, setItems] = useState<any[]>([]);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("CONSULTANT");
+  const [projectId, setProjectId] = useState("");
   const [inviteStatus, setInviteStatus] = useState("");
+  const [inviteOk, setInviteOk] = useState(false);
 
   useEffect(() => {
     fetch("/api/integrations")
@@ -48,11 +52,12 @@ export default function Admin({ data, token }: AdminProps) {
         "content-type": "application/json",
         authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ email, role: "CONSULTANT" }),
+      body: JSON.stringify({ name, email, role, projectId: projectId || undefined }),
     });
-    setInviteStatus(
-      r.ok ? "Invitation created and dispatched." : (await r.json()).error
-    );
+    const d = await r.json();
+    setInviteOk(r.ok);
+    setInviteStatus(r.ok ? `${d.user.name} added as ${d.user.role}. They can sign in with ${d.user.email} now.` : d.error);
+    if (r.ok) { setName(""); setEmail(""); }
   };
 
   return (
@@ -102,25 +107,48 @@ export default function Admin({ data, token }: AdminProps) {
                 Invite User
               </span>
             </h3>
-            <div className="row" style={{ gap: "var(--sp-2)" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-2)" }}>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Full name"
+                style={{ border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "var(--sp-2) var(--sp-3)", fontSize: "var(--text-sm)" }}
+              />
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                style={{
-                  flex: 1,
-                  border: "1px solid var(--line)",
-                  borderRadius: "var(--radius)",
-                  padding: "var(--sp-2) var(--sp-3)",
-                  fontSize: "var(--text-sm)",
-                }}
+                style={{ border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "var(--sp-2) var(--sp-3)", fontSize: "var(--text-sm)" }}
               />
-              <button className="btn-primary" onClick={invite} disabled={!token || !email}>
-                Invite Consultant
+              <div className="row" style={{ gap: "var(--sp-2)" }}>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  style={{ flex: 1, border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "var(--sp-2) var(--sp-3)", fontSize: "var(--text-sm)" }}
+                >
+                  <option value="ADMIN">Admin</option>
+                  <option value="CONTRACTOR">Contractor</option>
+                  <option value="MANUFACTURER">Manufacturer</option>
+                  <option value="CONSULTANT">Consultant</option>
+                  <option value="CLIENT">Client</option>
+                </select>
+                <select
+                  value={projectId}
+                  onChange={(e) => setProjectId(e.target.value)}
+                  style={{ flex: 1, border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "var(--sp-2) var(--sp-3)", fontSize: "var(--text-sm)" }}
+                >
+                  <option value="">No specific project</option>
+                  {data.projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+              <button className="btn-primary" onClick={invite} disabled={!token || !email || !name}>
+                Add User
               </button>
             </div>
             {inviteStatus && (
-              <small className={inviteStatus.includes("created") ? "muted" : ""} style={{ marginTop: "var(--sp-2)", display: "block", color: inviteStatus.includes("created") ? "var(--success)" : "var(--error)" }}>
+              <small style={{ marginTop: "var(--sp-2)", display: "block", color: inviteOk ? "var(--success)" : "var(--error)" }}>
                 {inviteStatus}
               </small>
             )}

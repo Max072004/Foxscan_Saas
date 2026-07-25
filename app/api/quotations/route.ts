@@ -17,6 +17,7 @@ const updateSchema = z.object({
   amount: z.number().nonnegative().optional(),
   notes: z.string().max(2000).optional(),
   status: z.enum(["INVITED", "SUBMITTED", "AWARDED", "REJECTED"]).optional(),
+  documentId: z.string().uuid().optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -68,6 +69,10 @@ export async function PATCH(req: NextRequest) {
     const quotation = data.quotations.find((q) => q.id === input.id);
     if (!quotation) throw new Error("Quotation not found");
 
+    if (input.documentId && !data.documents.some((d) => d.id === input.documentId && d.projectId === quotation.projectId)) {
+      throw new Error("Document not found");
+    }
+
     if (input.status === "AWARDED") {
       // Awarding one quotation rejects the other open quotations for the same project.
       for (const q of data.quotations) {
@@ -82,6 +87,7 @@ export async function PATCH(req: NextRequest) {
       amount: input.amount ?? quotation.amount,
       notes: input.notes ?? quotation.notes,
       status: input.status ?? quotation.status,
+      documentId: input.documentId ?? quotation.documentId,
       updatedAt: new Date().toISOString(),
     });
 

@@ -3,6 +3,7 @@ import { Text, View, ScrollView } from "react-native";
 import { Screen, Title, Card } from "@/components/ui";
 import { api } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
+import { useProjectStore } from "@/stores/project";
 
 export default function Payments() {
   const { data } = useQuery({
@@ -10,21 +11,18 @@ export default function Payments() {
     queryFn: () => api<any>("/api/data"),
   });
 
-  const project = data?.projects?.[0];
+  const { selectedProjectId } = useProjectStore();
+  const project = data?.projects?.find((p: any) => p.id === selectedProjectId) ?? data?.projects?.[0];
   const activities = (data?.activities ?? []).filter((a: any) => a.projectId === project?.id);
   const contractValue = project?.contractValue || 0;
 
+  const netDue = (a: any) => Math.max(0, a.paymentValue + (a.paymentValue * a.gstPct) / 100 - (a.paymentValue * a.retentionPct) / 100);
+
   const totalGst = activities.reduce((s: number, a: any) => s + (a.paymentValue * a.gstPct) / 100, 0);
   const totalRetention = activities.reduce((s: number, a: any) => s + (a.paymentValue * a.retentionPct) / 100, 0);
-  const totalNet = activities.reduce(
-    (s: number, a: any) => s + a.paymentValue * (1 + a.gstPct / 100) * (1 - a.retentionPct / 100),
-    0
-  );
+  const totalNet = activities.reduce((s: number, a: any) => s + netDue(a), 0);
   const paidActivities = activities.filter((a: any) => a.status === "PAID");
-  const paidAmount = paidActivities.reduce(
-    (s: number, a: any) => s + a.paymentValue * (1 + a.gstPct / 100) * (1 - a.retentionPct / 100),
-    0
-  );
+  const paidAmount = paidActivities.reduce((s: number, a: any) => s + netDue(a), 0);
   const pendingAmount = totalNet - paidAmount;
 
   return (
@@ -75,13 +73,13 @@ export default function Payments() {
           </Card>
         ) : (
           activities.map((a: any) => {
-            const net = a.paymentValue * (1 + a.gstPct / 100) * (1 - a.retentionPct / 100);
+            const net = netDue(a);
             return (
               <Card key={a.id}>
                 <View className="flex-row justify-between items-start mb-2">
                   <Text className="font-bold text-brandCharcoal text-sm flex-1 pr-2">{a.name}</Text>
                   <View className={`px-2 py-0.5 rounded-full ${a.status === "PAID" ? "bg-emerald-50 border border-emerald-200" : "bg-slate-100 border border-slate-200"}`}>
-                    <Text className={`text-[10px] font-bold uppercase ${a.status === "PAID" ? "text-successGreen" : "text-slate-500"}`}>
+                    <Text className={`text-[11px] font-bold uppercase ${a.status === "PAID" ? "text-successGreen" : "text-slate-500"}`}>
                       {a.status.replace("_", " ")}
                     </Text>
                   </View>
@@ -108,7 +106,7 @@ export default function Payments() {
         )}
 
         <Text className="text-[11px] text-slate-400 font-medium mt-1 mb-6 leading-relaxed">
-          Razorpay is activated automatically when keys are configured; otherwise payment releases are recorded internally with an audit trail.
+          Payments are settled outside the app (bank transfer, cheque, or cash). The client submits proof of payment on the Approvals screen, and the contractor confirms receipt before a stage closes.
         </Text>
       </Screen>
     </ScrollView>

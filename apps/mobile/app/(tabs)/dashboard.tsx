@@ -4,11 +4,15 @@ import { Screen, Title, Card } from "@/components/ui";
 import { api } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useAuthStore } from "@/stores/auth";
+import { useProjectStore } from "@/stores/project";
 
 import { calculateProjectSlippage } from "@/lib/scheduling";
 
 export default function Dashboard() {
   const router = useRouter();
+  const { role, userId } = useAuthStore();
+  const { selectedProjectId } = useProjectStore();
   const { data, error } = useQuery({
     queryKey: ["reports"],
     queryFn: () => api<any>("/api/reports"),
@@ -20,13 +24,30 @@ export default function Dashboard() {
   });
 
   const progress = data ? Math.round(data.portfolio.progress) : 0;
-  const overdueCount = data?.tat?.overdue || 0;
 
-  // Calculate slippage for showcase project (first project in workspace)
-  const firstProject = globalData?.projects?.[0];
-  const activeProjActs = firstProject ? (globalData?.activities?.filter((a: any) => a.projectId === firstProject.id) || []) : [];
-  const activeProjStages = firstProject ? (globalData?.stages?.filter((s: any) => activeProjActs.some((a: any) => a.id === s.activityId)) || []) : [];
-  const activeSlippage = firstProject ? calculateProjectSlippage(firstProject, activeProjActs, activeProjStages) : null;
+  // Role-based visibility, mirroring app/components/Dashboard.tsx on web
+  const isAdmin = role === "ADMIN";
+  const isContractor = role === "CONTRACTOR";
+  const isManufacturer = role === "MANUFACTURER";
+  const isConsultant = role === "CONSULTANT";
+  const isClient = role === "CLIENT";
+  const showFinancial = isAdmin || isClient || isConsultant;
+
+  const activeProject = globalData?.projects?.find((p: any) => p.id === selectedProjectId) ?? globalData?.projects?.[0];
+  const activeProjActs = activeProject ? (globalData?.activities?.filter((a: any) => a.projectId === activeProject.id) || []) : [];
+  const activeProjStages = activeProject ? (globalData?.stages?.filter((s: any) => activeProjActs.some((a: any) => a.id === s.activityId)) || []) : [];
+  const activeSlippage = activeProject ? calculateProjectSlippage(activeProject, activeProjActs, activeProjStages) : null;
+
+  // Same role-filtered "what's pending for me" logic as the web dashboard
+  const pendingStages = (activeProjStages || []).filter((s: any) => {
+    if (s.state === "PAID") return false;
+    if (isAdmin || isConsultant) return true;
+    if (isContractor) return s.state === "REWORK" || s.submittedBy === userId;
+    if (isManufacturer) return s.state === "MANUFACTURER";
+    if (isClient) return s.state === "CLIENT";
+    return true;
+  });
+  const overdueCount = pendingStages.filter((s: any) => new Date(s.dueAt) < new Date()).length;
 
   return (
     <ScrollView className="flex-grow bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
@@ -42,21 +63,16 @@ export default function Dashboard() {
       </View>
 
       <Screen>
-        {/* Brand Header */}
-        <View className="flex-row items-center justify-between mb-4">
-          <View className="flex-row items-center">
-            <View className="w-8 h-8 rounded-full bg-brandAmber items-center justify-center mr-2 border border-brandCharcoal/10">
-              <Text className="text-brandCharcoal font-extrabold text-[11px] tracking-tighter">
-                FS
-              </Text>
-            </View>
-            <Text className="text-brandCharcoal font-extrabold text-lg tracking-tight">
-              FOXSCAN
+        <Title icon="speedometer-outline" eyebrow="Workspace Overview" subtitle="Live project health, financials, and today's priorities">
+          Dashboard
+        </Title>
+        <View className="flex-row items-center mb-4" style={{ gap: 6 }}>
+          <View className="bg-brandCharcoal px-2.5 py-1 rounded-full">
+            <Text className="text-brandAmber text-[11px] font-extrabold uppercase tracking-wider">
+              Viewing as {role || "Unknown role"}
             </Text>
           </View>
         </View>
-
-        <Title>Workspace Status</Title>
 
         {error ? (
           <View className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl">
@@ -74,7 +90,7 @@ export default function Dashboard() {
                     Overall Project Health
                   </Text>
                   <Text className="text-xl font-extrabold text-brandCharcoal leading-tight">
-                    {firstProject?.name || "Greenview External Repainting"}
+                    {activeProject?.name || "No project assigned"}
                   </Text>
                   {activeSlippage ? (
                     <Text className={`text-sm font-bold mt-1.5 ${
@@ -124,26 +140,37 @@ export default function Dashboard() {
 
             {/* ASYMMETRIC GRID */}
             <View className="flex-row justify-between">
-              {/* Large Disbursements Tile */}
+              {/* Large Disbursements Tile — financial figures only for roles that see money on web (Admin/Client/Consultant) */}
               <View className="w-[58%]">
                 <Card>
                   <View className="min-h-[110px] justify-between flex-col">
                     <View className="flex-row justify-between items-center">
-                      <View className="w-8 h-8 rounded-xl bg-emerald-50 items-center justify-center border border-emerald-100">
-                        <Ionicons name="cash-outline" size={18} color="#1B8755" />
+                      <View className={`w-8 h-8 rounded-xl items-center justify-center border ${showFinancial ? "bg-emerald-50 border-emerald-100" : "bg-sky-50 border-sky-100"}`}>
+                        <Ionicons name={showFinancial ? "cash-outline" : "layers-outline"} size={18} color={showFinancial ? "#1B8755" : "#0284C7"} />
                       </View>
-                      <Text className="text-successGreen text-[11px] font-bold uppercase">
-                        Cleared
+                      <Text className={`text-[11px] font-bold uppercase ${showFinancial ? "text-successGreen" : "text-sky-700"}`}>
+                        {showFinancial ? "Cleared" : "In Pipeline"}
                       </Text>
                     </View>
-                    <View className="mt-4">
-                      <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">
-                        Disbursed
-                      </Text>
-                      <Text className="text-2xl font-extrabold text-successGreen leading-none">
-                        ₹{(data.payments.paid / 100000).toFixed(1)}L
-                      </Text>
-                    </View>
+                    {showFinancial ? (
+                      <View className="mt-4">
+                        <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">
+                          Disbursed
+                        </Text>
+                        <Text className="text-2xl font-extrabold text-successGreen leading-none">
+                          ₹{(data.payments.paid / 100000).toFixed(1)}L
+                        </Text>
+                      </View>
+                    ) : (
+                      <View className="mt-4">
+                        <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">
+                          Your Active Stages
+                        </Text>
+                        <Text className="text-2xl font-extrabold text-sky-700 leading-none">
+                          {pendingStages.length}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 </Card>
               </View>
@@ -214,55 +241,59 @@ export default function Dashboard() {
                 </Card>
               </Pressable>
 
-              <Pressable
-                onPress={() => router.push("/site-updates")}
-                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
-                className="mt-1"
-              >
-                <Card>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center flex-1">
-                      <View className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 items-center justify-center mr-3">
-                        <Ionicons name="camera-outline" size={20} color="#0284C7" />
+              {(isAdmin || isContractor) && (
+                <Pressable
+                  onPress={() => router.push("/site-updates")}
+                  style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
+                  className="mt-1"
+                >
+                  <Card>
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-row items-center flex-1">
+                        <View className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 items-center justify-center mr-3">
+                          <Ionicons name="camera-outline" size={20} color="#0284C7" />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-brandCharcoal font-extrabold text-sm">
+                            Submit Daily Site Log
+                          </Text>
+                          <Text className="text-slate-400 text-sm font-semibold mt-0.5">
+                            Record geotagged photos and audio logs
+                          </Text>
+                        </View>
                       </View>
-                      <View className="flex-1">
-                        <Text className="text-brandCharcoal font-extrabold text-sm">
-                          Submit Daily Site Log
-                        </Text>
-                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
-                          Record geotagged photos and audio logs
-                        </Text>
-                      </View>
+                      <Ionicons name="chevron-forward" size={18} color="#64748B" />
                     </View>
-                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
-                  </View>
-                </Card>
-              </Pressable>
+                  </Card>
+                </Pressable>
+              )}
 
-              <Pressable
-                onPress={() => router.push("/payments")}
-                style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
-                className="mt-1"
-              >
-                <Card>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center flex-1">
-                      <View className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 items-center justify-center mr-3">
-                        <Ionicons name="cash-outline" size={20} color="#1B8755" />
+              {showFinancial && (
+                <Pressable
+                  onPress={() => router.push("/payments")}
+                  style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }], opacity: 0.9 } : {}}
+                  className="mt-1"
+                >
+                  <Card>
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-row items-center flex-1">
+                        <View className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 items-center justify-center mr-3">
+                          <Ionicons name="cash-outline" size={20} color="#1B8755" />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-brandCharcoal font-extrabold text-sm">
+                            View Payments &amp; GST Breakdown
+                          </Text>
+                          <Text className="text-slate-400 text-sm font-semibold mt-0.5">
+                            Contract value, retention, and dues per activity
+                          </Text>
+                        </View>
                       </View>
-                      <View className="flex-1">
-                        <Text className="text-brandCharcoal font-extrabold text-sm">
-                          View Payments &amp; GST Breakdown
-                        </Text>
-                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
-                          Contract value, retention, and dues per activity
-                        </Text>
-                      </View>
+                      <Ionicons name="chevron-forward" size={18} color="#64748B" />
                     </View>
-                    <Ionicons name="chevron-forward" size={18} color="#64748B" />
-                  </View>
-                </Card>
-              </Pressable>
+                  </Card>
+                </Pressable>
+              )}
 
               <Pressable
                 onPress={() => router.push("/delays")}
@@ -379,7 +410,7 @@ export default function Dashboard() {
                         <Text className="text-brandCharcoal font-extrabold text-sm">
                           Quotations &amp; Award
                         </Text>
-                        <Text className="text-slate-400 text-xs font-semibold mt-0.5">
+                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
                           Compare vendor quotes and award the contract
                         </Text>
                       </View>

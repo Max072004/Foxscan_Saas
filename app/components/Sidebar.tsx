@@ -72,6 +72,9 @@ interface SidebarProps {
   onClose: () => void;
   collapsed: boolean;
   onToggleCollapse: () => void;
+  projects?: { id: string; name: string }[];
+  selectedProjectId?: string;
+  onSelectProject?: (id: string) => void;
 }
 
 export default function Sidebar({
@@ -86,6 +89,9 @@ export default function Sidebar({
   onClose,
   collapsed,
   onToggleCollapse,
+  projects,
+  selectedProjectId,
+  onSelectProject,
 }: SidebarProps) {
   const handleNav = (tab: Tab) => {
     onTabChange(tab);
@@ -115,13 +121,36 @@ export default function Sidebar({
         </div>
 
         {/* Project Switcher */}
-        <div className="sidebar-project-switcher">
+        <div className="sidebar-project-switcher" style={{ position: "relative" }}>
           <span
             className="project-dot"
             style={{ background: projectStatus === "ACTIVE" ? "var(--success)" : "var(--warning)" }}
           />
-          <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{projectName}</span>
-          <ChevronDown size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
+          {projects && projects.length > 1 && onSelectProject ? (
+            <select
+              value={selectedProjectId}
+              onChange={(e) => onSelectProject(e.target.value)}
+              style={{
+                flex: 1,
+                background: "transparent",
+                border: "none",
+                color: "inherit",
+                font: "inherit",
+                cursor: "pointer",
+                appearance: "none",
+                WebkitAppearance: "none",
+                padding: 0,
+              }}
+              title="Switch project"
+            >
+              {projects.map((p) => (
+                <option key={p.id} value={p.id} style={{ color: "#000" }}>{p.name}</option>
+              ))}
+            </select>
+          ) : (
+            <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{projectName}</span>
+          )}
+          <ChevronDown size={12} style={{ opacity: 0.5, flexShrink: 0, pointerEvents: "none" }} />
         </div>
 
         {/* Navigation */}

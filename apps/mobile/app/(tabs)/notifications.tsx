@@ -73,7 +73,7 @@ export default function Notifications() {
                       </Text>
                       {unread ? <View className="w-2 h-2 rounded-full bg-brandAmber mt-1.5" /> : null}
                     </View>
-                    <Text className="text-slate-400 text-sm font-medium leading-relaxed mb-2">
+                    <Text className="text-slate-600 text-sm font-medium leading-relaxed mb-2">
                       {n.body}
                     </Text>
                     <Text className="text-slate-300 text-[11px] font-bold uppercase tracking-wide">

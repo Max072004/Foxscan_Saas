@@ -72,7 +72,7 @@ export default function Documents() {
                           {doc.name}
                         </Text>
                         <View className="bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                          <Text className="text-[10px] font-extrabold text-slate-600">v{doc.version}</Text>
+                          <Text className="text-[11px] font-extrabold text-slate-600">v{doc.version}</Text>
                         </View>
                       </View>
                       <Text className="text-slate-400 text-[12px] font-bold uppercase tracking-wide mb-2">

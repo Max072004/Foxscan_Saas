@@ -48,6 +48,55 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
     cleanup: false,
     evidence: false
   });
+  const [paymentProofStage, setPaymentProofStage] = useState<any>(null);
+  const [paymentRef, setPaymentRef] = useState("");
+  const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
+  const [proofError, setProofError] = useState("");
+  const [submittingProof, setSubmittingProof] = useState(false);
+
+  const submitPaymentProof = async () => {
+    setProofError("");
+    if (!paymentRef.trim() && !paymentProofFile) {
+      setProofError("Enter a reference number or attach a photo of the payment/cheque.");
+      return;
+    }
+    setSubmittingProof(true);
+    try {
+      let photoUrl: string | undefined;
+      if (paymentProofFile) {
+        const activity = activities.find((x: any) => x.id === paymentProofStage.activityId);
+        const formData = new FormData();
+        formData.append("file", paymentProofFile);
+        formData.append("projectId", activity?.projectId || "");
+        formData.append("activityId", "payments");
+        formData.append("filename", paymentProofFile.name);
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+        if (!uploadRes.ok) throw new Error("Photo upload failed");
+        photoUrl = (await uploadRes.json()).url;
+      }
+      const evidencePayload = [paymentRef.trim(), photoUrl].filter(Boolean) as string[];
+      await fetch("/api/stages", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          stageId: paymentProofStage.id,
+          actorId,
+          role,
+          action: "APPROVE",
+          evidence: evidencePayload,
+          note: `Payment proof submitted: ${paymentRef.trim() || "photo attached"}`,
+        }),
+      });
+      setPaymentProofStage(null);
+      setPaymentRef("");
+      setPaymentProofFile(null);
+      await reload();
+    } catch (err) {
+      setProofError(err instanceof Error ? err.message : "Failed to submit payment proof");
+    } finally {
+      setSubmittingProof(false);
+    }
+  };
 
   const raise = async (a: any, checklistObj: any) => {
     await fetch("/api/stages", {
@@ -64,13 +113,6 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
   };
 
   const act = async (s: any, action: string, customNote?: string) => {
-    let evidencePayload: string[] | undefined = undefined;
-    if (role === "CLIENT" && action === "APPROVE") {
-      const ref = prompt("Enter Cheque Number or Transaction Reference (Proof of Payment):");
-      if (!ref) return;
-      evidencePayload = [ref];
-    }
-
     await fetch("/api/stages", {
       method: "PATCH",
       headers: { "content-type": "application/json" },
@@ -79,8 +121,7 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
         actorId,
         role,
         action,
-        evidence: evidencePayload,
-        note: customNote || (action === "RETURN" ? "Returned for rework" : `Approved with proof reference: ${evidencePayload?.[0]}`),
+        note: customNote || (action === "RETURN" ? "Returned for rework" : undefined),
       }),
     });
     reload();
@@ -361,7 +402,20 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
                           </div>
                         ) : (
                           <div className="row" style={{ gap: "var(--sp-2)", justifyContent: "flex-start" }}>
-                            <button className="btn-primary" onClick={() => act(s, "APPROVE")} style={{ fontSize: "var(--text-xs)" }}>
+                            <button
+                              className="btn-primary"
+                              onClick={() => {
+                                if (role === "CLIENT") {
+                                  setPaymentProofStage(s);
+                                  setPaymentRef("");
+                                  setPaymentProofFile(null);
+                                  setProofError("");
+                                } else {
+                                  act(s, "APPROVE");
+                                }
+                              }}
+                              style={{ fontSize: "var(--text-xs)" }}
+                            >
                               <CheckCircle2 size={14} />
                               {role === "CLIENT" ? "Release Payment" : "Approve"}
                             </button>
@@ -564,6 +618,53 @@ export default function Workflow({ data, activities, stages, role, actorId, relo
                 }}
               >
                 Raise Stage
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Proof Submission Modal */}
+      {paymentProofStage && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "var(--sp-4)"
+        }}>
+          <div className="card animate-fade" style={{
+            maxWidth: "460px", width: "100%", backgroundColor: "var(--card-bg, #FFFFFF)",
+            padding: "var(--sp-6)", borderRadius: "var(--radius-lg)",
+            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+            display: "flex", flexDirection: "column", gap: "var(--sp-4)"
+          }}>
+            <h3 style={{ margin: 0, fontSize: "var(--text-lg)" }}>Submit Payment Proof</h3>
+            <p className="muted" style={{ fontSize: "var(--text-sm)", margin: 0 }}>
+              Confirm you have paid ₹{paymentProofStage.amountDue?.toLocaleString("en-IN")} outside the app (bank transfer, cheque, or cash), then provide a reference number and/or a photo as proof. The contractor will confirm receipt before this stage closes.
+            </p>
+            <div>
+              <label className="muted" style={{ display: "block", marginBottom: "var(--sp-1)", fontSize: "var(--text-xs)" }}>Cheque Number / UTR / Transaction Reference</label>
+              <input
+                value={paymentRef}
+                onChange={(e) => setPaymentRef(e.target.value)}
+                placeholder="e.g. Cheque #482931 or IMPS reference"
+                style={{ width: "100%", border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "var(--sp-2) var(--sp-3)", fontSize: "var(--text-sm)" }}
+              />
+            </div>
+            <div>
+              <label className="muted" style={{ display: "block", marginBottom: "var(--sp-1)", fontSize: "var(--text-xs)" }}>Payment Screenshot / Cheque Photo</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setPaymentProofFile(e.target.files?.[0] || null)}
+                style={{ fontSize: "var(--text-xs)" }}
+              />
+            </div>
+            {proofError && <div style={{ color: "var(--error)", fontSize: "var(--text-xs)" }}>{proofError}</div>}
+            <div style={{ display: "flex", gap: "var(--sp-3)", justifyContent: "flex-end", borderTop: "1px solid var(--border)", paddingTop: "var(--sp-4)" }}>
+              <button className="btn-secondary" onClick={() => setPaymentProofStage(null)} disabled={submittingProof}>Cancel</button>
+              <button className="btn-primary" onClick={submitPaymentProof} disabled={submittingProof}>
+                {submittingProof ? "Submitting…" : "Submit Proof"}
               </button>
             </div>
           </div>

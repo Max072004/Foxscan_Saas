@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { AppData } from "@/lib/domain";
-import { FileSpreadsheet, Plus, Trophy, X } from "lucide-react";
+import { FileSpreadsheet, Paperclip, Plus, Trophy, X } from "lucide-react";
 
 interface QuotationsProps {
   data: AppData;
@@ -25,6 +25,7 @@ export default function Quotations({ data, token, projectId, reload }: Quotation
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [attachingId, setAttachingId] = useState<string | null>(null);
 
   const quotations = data.quotations
     .filter((q) => q.projectId === projectId)
@@ -78,6 +79,43 @@ export default function Quotations({ data, token, projectId, reload }: Quotation
       await reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to reject");
+    }
+  };
+
+  const attachContract = async (q: (typeof quotations)[number], file: File) => {
+    setError("");
+    setAttachingId(q.id);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("projectId", projectId);
+      formData.append("activityId", "quotations");
+      formData.append("filename", file.name);
+      const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!uploadRes.ok) throw new Error("Contract upload failed");
+      const { url } = await uploadRes.json();
+
+      const docRes = await fetch("/api/documents", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          projectId,
+          name: `${q.vendorName} - Signed Contract`,
+          type: "CONTRACT",
+          tags: ["quotation", "contract"],
+          visibility: ["ADMIN", "CLIENT", "CONSULTANT", "MANUFACTURER", "CONTRACTOR"],
+          url,
+        }),
+      });
+      if (!docRes.ok) throw new Error("Failed to register contract document");
+      const document = await docRes.json();
+
+      await authed("PATCH", { id: q.id, documentId: document.id });
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to attach contract");
+    } finally {
+      setAttachingId(null);
     }
   };
 
@@ -140,6 +178,7 @@ export default function Quotations({ data, token, projectId, reload }: Quotation
                     <th>Amount</th>
                     <th>Notes</th>
                     <th>Status</th>
+                    <th>Contract</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -147,6 +186,7 @@ export default function Quotations({ data, token, projectId, reload }: Quotation
                   {quotations.map((q) => {
                     const style = STATUS_STYLE[q.status];
                     const isLowest = q.amount === lowest && q.status !== "REJECTED";
+                    const contract = q.documentId ? data.documents.find((d) => d.id === q.documentId) : undefined;
                     return (
                       <tr key={q.id}>
                         <td style={{ fontWeight: 700 }}>{q.vendorName}</td>
@@ -157,6 +197,33 @@ export default function Quotations({ data, token, projectId, reload }: Quotation
                         <td className="muted" style={{ fontSize: "var(--text-xs)", maxWidth: "220px" }}>{q.notes || "—"}</td>
                         <td>
                           <span className="badge" style={{ background: style.bg, color: style.color, fontWeight: 700 }}>{q.status}</span>
+                        </td>
+                        <td>
+                          {q.status === "AWARDED" ? (
+                            contract ? (
+                              <a href={contract.url} target="_blank" rel="noreferrer" style={{ fontSize: "11px", fontWeight: 600, color: "var(--success)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                <Paperclip size={11} /> View
+                              </a>
+                            ) : (
+                              <label className="btn-sm" style={{ fontSize: "11px", padding: "4px 10px", border: "1px solid var(--line)", borderRadius: "4px", cursor: token ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "4px", opacity: token ? 1 : 0.5 }}>
+                                <Paperclip size={11} />
+                                {attachingId === q.id ? "Uploading…" : "Attach PDF"}
+                                <input
+                                  type="file"
+                                  accept="application/pdf"
+                                  disabled={!token || attachingId === q.id}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) attachContract(q, file);
+                                    e.target.value = "";
+                                  }}
+                                  style={{ display: "none" }}
+                                />
+                              </label>
+                            )
+                          ) : (
+                            <span className="muted" style={{ fontSize: "var(--text-xs)" }}>—</span>
+                          )}
                         </td>
                         <td>
                           {q.status !== "AWARDED" && q.status !== "REJECTED" && (

@@ -17,6 +17,7 @@ import { CameraCapture } from "@/components/camera-capture";
 import { VoiceNote } from "@/components/voice-note";
 import { File as ExpoFile } from "expo-file-system";
 import { api, baseUrl } from "@/lib/api";
+import { useProjectStore } from "@/stores/project";
 import { enqueue, syncQueue } from "@/lib/offline";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
@@ -43,7 +44,8 @@ export default function SiteUpdates() {
     }
   }, [activityId]);
 
-  const project = data?.projects?.[0];
+  const { selectedProjectId } = useProjectStore();
+  const project = data?.projects?.find((p: any) => p.id === selectedProjectId) ?? data?.projects?.[0];
   const projectActivities = data?.activities?.filter((a: any) => a.projectId === project?.id)
     ?.sort((a: any, b: any) => a.sequence - b.sequence) || [];
 
@@ -286,7 +288,7 @@ export default function SiteUpdates() {
                             </Pressable>
                             {cap.latitude && cap.longitude && (
                               <View className="absolute bottom-1 left-1 bg-black/50 px-1 py-0.5 rounded">
-                                <Text className="text-[9px] text-white font-bold">
+                                <Text className="text-[10px] text-white font-bold">
                                   {cap.latitude.toFixed(2)}, {cap.longitude.toFixed(2)}
                                 </Text>
                               </View>

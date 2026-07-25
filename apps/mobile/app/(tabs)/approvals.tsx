@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Text, View, ScrollView, Pressable, TextInput, Image, Modal } from "react-native";
 import { Screen, Title, Card, Button } from "@/components/ui";
-import { api } from "@/lib/api";
+import { CameraCapture } from "@/components/camera-capture";
+import { api, baseUrl } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
@@ -21,7 +22,7 @@ function TatBadge({ stage }: { stage: any }) {
   if (!style) return null;
   return (
     <View className={`px-2 py-0.5 rounded-full self-start mt-1 ${style.bg}`}>
-      <Text className={`text-[10px] font-extrabold ${style.text}`}>
+      <Text className={`text-[11px] font-extrabold ${style.text}`}>
         {tat.tier === "ESCALATED" ? "ESCALATED" : tat.tier === "OVERDUE" ? "OVERDUE" : "TAT 50%+"} · {tat.pct}%
       </Text>
     </View>
@@ -38,6 +39,13 @@ const CHECKLIST_LABELS: Record<string, string> = {
 function checklistLabel(key: string) {
   return CHECKLIST_LABELS[key] || key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
+
+const DEFAULT_CHECKLIST_TEMPLATE: { key: string; label: string; description: string }[] = [
+  { key: "prep", label: "Substrate Prep", description: "Surface is clean, dry, and free of dust/loose paint." },
+  { key: "coating", label: "Coating Uniformity", description: "Material is applied evenly without runs or patches." },
+  { key: "cleanup", label: "Housekeeping", description: "Workspace is cleared of scaffolding debris and hazards." },
+  { key: "evidence", label: "Evidence Logged", description: "Photo and/or voice logs have been attached." },
+];
 
 export function VoiceNotePlayer({ url, color = "#EAAC1F" }: { url: string; color?: string }) {
   const player = useAudioPlayer(url);
@@ -71,36 +79,55 @@ export default function Approvals() {
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
   const [selectedPaymentStage, setSelectedPaymentStage] = useState<any>(null);
   const [paymentRefText, setPaymentRefText] = useState("");
+  const [paymentProofPhoto, setPaymentProofPhoto] = useState<{ uri: string } | null>(null);
+  const [showPaymentCamera, setShowPaymentCamera] = useState(false);
+  const [paymentProofError, setPaymentProofError] = useState("");
+  const [submittingPaymentProof, setSubmittingPaymentProof] = useState(false);
   const [returningStageId, setReturningStageId] = useState<string | null>(null);
   const [returnComment, setReturnComment] = useState("");
   const [activeImageUrl, setActiveImageUrl] = useState<string | null>(null);
-  const [checklist, setChecklist] = useState({
-    prep: false,
-    coating: false,
-    cleanup: false,
-    evidence: false
-  });
+  const [checklist, setChecklist] = useState<Record<string, boolean>>({});
 
   const { data, refetch } = useQuery({
     queryKey: ["data"],
     queryFn: () => api<any>("/api/data"),
   });
 
+  const checklistTemplateFor = (activityId: string) => {
+    const activity = (data?.activities ?? []).find((a: any) => a.id === activityId);
+    const project = (data?.projects ?? []).find((p: any) => p.id === activity?.projectId);
+    return project?.checklistTemplate?.length ? project.checklistTemplate : DEFAULT_CHECKLIST_TEMPLATE;
+  };
+
+  const resetChecklist = (activityId: string) => {
+    const template = checklistTemplateFor(activityId);
+    setChecklist(Object.fromEntries(template.map((item: any) => [item.key, false])));
+  };
+
+  const [actionError, setActionError] = useState("");
+
   const act = async (stageId: string, action: "APPROVE" | "RETURN", comment?: string) => {
-    await api("/api/stages", {
-      method: "PATCH",
-      body: JSON.stringify({
-        stageId,
-        action,
-        role,
-        actorId: userId || "mobile",
-        note: comment,
-      }),
-    });
-    refetch();
+    setActionError("");
+    try {
+      await api("/api/stages", {
+        method: "PATCH",
+        body: JSON.stringify({
+          stageId,
+          action,
+          role,
+          actorId: userId || "mobile",
+          note: comment,
+        }),
+      });
+      refetch();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to update stage");
+    }
   };
 
   const raiseStage = async (activityId: string, checklistObj: any) => {
+    setActionError("");
+    try {
     await api("/api/stages", {
       method: "POST",
       body: JSON.stringify({
@@ -110,7 +137,10 @@ export default function Approvals() {
         checklist: checklistObj,
       }),
     });
-    refetch();
+      refetch();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to raise stage");
+    }
   };
 
   // Filter stages based on the user's role
@@ -163,7 +193,7 @@ export default function Approvals() {
 
         {originalUpdates.length > 0 && (
           <View className={reworkUpdates.length > 0 ? "mb-3" : ""}>
-            <Text className="text-[10px] font-extrabold text-slate-500 uppercase mb-1">
+            <Text className="text-[11px] font-extrabold text-slate-500 uppercase mb-1">
               Original Submission:
             </Text>
             {originalUpdates.map((su: any) => (
@@ -196,7 +226,7 @@ export default function Approvals() {
 
         {reworkUpdates.length > 0 && (
           <View>
-            <Text className="text-[10px] font-extrabold text-alertRed uppercase mb-1">
+            <Text className="text-[11px] font-extrabold text-alertRed uppercase mb-1">
               Rework Remedial Evidence:
             </Text>
             {reworkUpdates.map((su: any) => (
@@ -324,10 +354,10 @@ export default function Approvals() {
               <View className="flex-1">
                 <View className="flex-row items-center flex-wrap" style={{ gap: 4 }}>
                   <Text className="text-sm font-bold text-slate-700">{d.role}</Text>
-                  <Text className="text-[10px] font-semibold text-slate-400 uppercase">
+                  <Text className="text-[11px] font-semibold text-slate-400 uppercase">
                     {d.decision.replace("_", " ")}
                   </Text>
-                  <Text className="text-[10px] text-slate-400">
+                  <Text className="text-[11px] text-slate-400">
                     · {new Date(d.createdAt).toLocaleDateString()} {new Date(d.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </Text>
                 </View>
@@ -369,6 +399,11 @@ export default function Approvals() {
         <ScrollView className="flex-grow" contentContainerStyle={{ flexGrow: 1 }}>
           <Screen>
             <Title icon="checkmark-done-outline" eyebrow="Stage Workflow">Approvals</Title>
+            {actionError ? (
+              <View className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <Text className="text-alertRed font-bold text-sm">{actionError}</Text>
+              </View>
+            ) : null}
 
             {raisableActivities.length > 0 && (
               <View className="mb-6">
@@ -391,7 +426,7 @@ export default function Approvals() {
                       label="Raise Stage"
                       onPress={() => {
                         setSelectedActivity(activity);
-                        setChecklist({ prep: false, coating: false, cleanup: false, evidence: false });
+                        resetChecklist(activity.id);
                       }}
                     />
                   </Card>
@@ -451,7 +486,7 @@ export default function Approvals() {
                         label="Re-submit Stage"
                         onPress={() => {
                           setSelectedActivity(activityObj || { id: stage.activityId, name: getActivityName(stage.activityId) });
-                          setChecklist({ prep: false, coating: false, cleanup: false, evidence: false });
+                          resetChecklist(stage.activityId);
                         }}
                       />
                     </Card>
@@ -555,57 +590,23 @@ export default function Approvals() {
               </Text>
 
               <View className="space-y-4 gap-3 mb-6">
-                <Pressable
-                  onPress={() => setChecklist({ ...checklist, prep: !checklist.prep })}
-                  className="flex-row items-start"
-                >
-                  <View className={`w-5 h-5 rounded border border-2 items-center justify-center mr-3 ${checklist.prep ? "bg-brandAmber border-brandAmber" : "border-slate-300"}`}>
-                    {checklist.prep && <Ionicons name="checkmark" size={12} color="#1A1D24" />}
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-brandCharcoal font-extrabold text-sm">Substrate Prep</Text>
-                    <Text className="text-slate-400 text-[11px] font-semibold mt-0.5">Surface is clean, dry, and free of dust/loose paint.</Text>
-                  </View>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => setChecklist({ ...checklist, coating: !checklist.coating })}
-                  className="flex-row items-start"
-                >
-                  <View className={`w-5 h-5 rounded border border-2 items-center justify-center mr-3 ${checklist.coating ? "bg-brandAmber border-brandAmber" : "border-slate-300"}`}>
-                    {checklist.coating && <Ionicons name="checkmark" size={12} color="#1A1D24" />}
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-brandCharcoal font-extrabold text-sm">Coating Uniformity</Text>
-                    <Text className="text-slate-400 text-[11px] font-semibold mt-0.5">Material is applied evenly without runs or patches.</Text>
-                  </View>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => setChecklist({ ...checklist, cleanup: !checklist.cleanup })}
-                  className="flex-row items-start"
-                >
-                  <View className={`w-5 h-5 rounded border border-2 items-center justify-center mr-3 ${checklist.cleanup ? "bg-brandAmber border-brandAmber" : "border-slate-300"}`}>
-                    {checklist.cleanup && <Ionicons name="checkmark" size={12} color="#1A1D24" />}
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-brandCharcoal font-extrabold text-sm">Housekeeping</Text>
-                    <Text className="text-slate-400 text-[11px] font-semibold mt-0.5">Workspace is cleared of scaffolding debris and hazards.</Text>
-                  </View>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => setChecklist({ ...checklist, evidence: !checklist.evidence })}
-                  className="flex-row items-start"
-                >
-                  <View className={`w-5 h-5 rounded border border-2 items-center justify-center mr-3 ${checklist.evidence ? "bg-brandAmber border-brandAmber" : "border-slate-300"}`}>
-                    {checklist.evidence && <Ionicons name="checkmark" size={12} color="#1A1D24" />}
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-brandCharcoal font-extrabold text-sm">Evidence Logged</Text>
-                    <Text className="text-slate-400 text-[11px] font-semibold mt-0.5">Photo and/or voice logs have been attached.</Text>
-                  </View>
-                </Pressable>
+                {checklistTemplateFor(selectedActivity.id).map((item: any) => (
+                  <Pressable
+                    key={item.key}
+                    onPress={() => setChecklist({ ...checklist, [item.key]: !checklist[item.key] })}
+                    className="flex-row items-start"
+                  >
+                    <View className={`w-5 h-5 rounded border border-2 items-center justify-center mr-3 ${checklist[item.key] ? "bg-brandAmber border-brandAmber" : "border-slate-300"}`}>
+                      {checklist[item.key] && <Ionicons name="checkmark" size={12} color="#1A1D24" />}
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-brandCharcoal font-extrabold text-sm">{item.label}</Text>
+                      {item.description ? (
+                        <Text className="text-slate-400 text-[11px] font-semibold mt-0.5">{item.description}</Text>
+                      ) : null}
+                    </View>
+                  </Pressable>
+                ))}
               </View>
 
               <Button
@@ -613,9 +614,9 @@ export default function Approvals() {
                 onPress={async () => {
                   await raiseStage(selectedActivity.id, checklist);
                   setSelectedActivity(null);
-                  setChecklist({ prep: false, coating: false, cleanup: false, evidence: false });
+                  setChecklist({});
                 }}
-                disabled={!(checklist.prep && checklist.coating && checklist.cleanup && checklist.evidence)}
+                disabled={!checklistTemplateFor(selectedActivity.id).every((item: any) => checklist[item.key])}
               />
             </View>
           </View>
@@ -635,6 +636,11 @@ export default function Approvals() {
         <ScrollView className="flex-grow" contentContainerStyle={{ flexGrow: 1 }}>
           <Screen>
             <Title icon="checkmark-done-outline" eyebrow="Stage Workflow">Approvals</Title>
+            {actionError ? (
+              <View className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <Text className="text-alertRed font-bold text-sm">{actionError}</Text>
+              </View>
+            ) : null}
             <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
               Awaiting Payment Release
             </Text>
@@ -694,18 +700,23 @@ export default function Approvals() {
                   Upload Payment Proof
                 </Text>
                 <Pressable
-                  onPress={() => setSelectedPaymentStage(null)}
+                  onPress={() => {
+                    setSelectedPaymentStage(null);
+                    setPaymentProofPhoto(null);
+                    setShowPaymentCamera(false);
+                    setPaymentProofError("");
+                  }}
                   className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center"
                 >
                   <Ionicons name="close" size={16} color="#64748B" />
                 </Pressable>
               </View>
-              
+
               <Text className="text-slate-400 text-sm font-semibold mb-4 leading-relaxed">
-                Confirm you have paid ₹{selectedPaymentStage.amountDue?.toLocaleString("en-IN")} externally and enter details (e.g. cheque number, transaction ID).
+                Confirm you have paid ₹{selectedPaymentStage.amountDue?.toLocaleString("en-IN")} externally (bank transfer, cheque, or cash) and provide a reference number and/or a photo as proof.
               </Text>
 
-              <View className="mb-6">
+              <View className="mb-4">
                 <Text className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1.5">
                   Cheque Number / Transfer Reference
                 </Text>
@@ -718,24 +729,73 @@ export default function Approvals() {
                 />
               </View>
 
+              <View className="mb-6">
+                <Text className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1.5">
+                  Payment Screenshot / Cheque Photo
+                </Text>
+                {paymentProofPhoto ? (
+                  <View className="flex-row items-center" style={{ gap: 10 }}>
+                    <Image source={{ uri: paymentProofPhoto.uri }} className="w-16 h-16 rounded-lg bg-slate-100" resizeMode="cover" />
+                    <Pressable onPress={() => setPaymentProofPhoto(null)}>
+                      <Text className="text-alertRed text-sm font-bold">Remove</Text>
+                    </Pressable>
+                  </View>
+                ) : showPaymentCamera ? (
+                  <CameraCapture onCapture={(c) => { setPaymentProofPhoto({ uri: c.uri }); setShowPaymentCamera(false); }} />
+                ) : (
+                  <Button label="Capture photo" variant="secondary" onPress={() => setShowPaymentCamera(true)} />
+                )}
+              </View>
+
+              {paymentProofError ? (
+                <Text className="text-alertRed text-xs font-semibold mb-3">{paymentProofError}</Text>
+              ) : null}
+
               <Button
-                label="Submit Payment Proof"
+                label={submittingPaymentProof ? "Submitting…" : "Submit Payment Proof"}
                 onPress={async () => {
-                  await api("/api/stages", {
-                    method: "PATCH",
-                    body: JSON.stringify({
-                      stageId: selectedPaymentStage.id,
-                      action: "APPROVE",
-                      role: "CLIENT",
-                      actorId: userId || "mobile",
-                      evidence: [paymentRefText],
-                      note: `Approved with proof reference: ${paymentRefText}`,
-                    }),
-                  });
-                  refetch();
-                  setSelectedPaymentStage(null);
+                  setPaymentProofError("");
+                  if (!paymentRefText.trim() && !paymentProofPhoto) {
+                    setPaymentProofError("Enter a reference number or attach a photo.");
+                    return;
+                  }
+                  setSubmittingPaymentProof(true);
+                  try {
+                    let photoUrl: string | undefined;
+                    if (paymentProofPhoto) {
+                      const fileResponse = await fetch(paymentProofPhoto.uri);
+                      const blob = await fileResponse.blob();
+                      const formData = new FormData();
+                      formData.append("file", blob, "payment_proof.jpg");
+                      formData.append("projectId", data?.projects?.find((p: any) => p.id === activities.find((a: any) => a.id === selectedPaymentStage.activityId)?.projectId)?.id || "");
+                      formData.append("activityId", "payments");
+                      formData.append("filename", "payment_proof.jpg");
+                      const uploadRes = await fetch(`${baseUrl}/api/upload`, { method: "POST", body: formData });
+                      if (!uploadRes.ok) throw new Error("Photo upload failed");
+                      photoUrl = (await uploadRes.json()).url;
+                    }
+                    const evidence = [paymentRefText.trim(), photoUrl].filter(Boolean) as string[];
+                    await api("/api/stages", {
+                      method: "PATCH",
+                      body: JSON.stringify({
+                        stageId: selectedPaymentStage.id,
+                        action: "APPROVE",
+                        role: "CLIENT",
+                        actorId: userId || "mobile",
+                        evidence,
+                        note: `Payment proof submitted: ${paymentRefText.trim() || "photo attached"}`,
+                      }),
+                    });
+                    refetch();
+                    setSelectedPaymentStage(null);
+                    setPaymentProofPhoto(null);
+                  } catch (err) {
+                    setPaymentProofError(err instanceof Error ? err.message : "Failed to submit payment proof");
+                  } finally {
+                    setSubmittingPaymentProof(false);
+                  }
                 }}
-                disabled={!paymentRefText.trim()}
+                disabled={submittingPaymentProof || (!paymentRefText.trim() && !paymentProofPhoto)}
               />
             </View>
           </View>
@@ -744,18 +804,26 @@ export default function Approvals() {
     );
   }
 
-  // Manufacturer / Consultant / Admin: see stages awaiting their review
-  const awaitingRole =
-    role === "ADMIN"
-      ? stages.filter((s: any) => s.state !== "PAID" && s.state !== "REWORK")
-      : stages.filter((s: any) => s.state === role);
+  // Manufacturer / Consultant: see stages awaiting their review and can act.
+  // Admin: sees every open stage for oversight, but the backend never lets ADMIN
+  // approve/return a stage directly (only the assigned reviewer role can), so this
+  // is read-only here to match what the API will actually allow.
+  const isAdminView = role === "ADMIN";
+  const awaitingRole = isAdminView
+    ? stages.filter((s: any) => s.state !== "PAID" && s.state !== "REWORK")
+    : stages.filter((s: any) => s.state === role);
 
   return (
     <ScrollView className="flex-1 bg-offWhite" contentContainerStyle={{ flexGrow: 1 }}>
       <Screen>
         <Title icon="checkmark-done-outline" eyebrow="Stage Workflow">Approvals</Title>
+        {actionError ? (
+          <View className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+            <Text className="text-alertRed font-bold text-sm">{actionError}</Text>
+          </View>
+        ) : null}
         <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
-          Awaiting Your Review
+          {isAdminView ? "Portfolio Oversight (Read-Only)" : "Awaiting Your Review"}
         </Text>
         {awaitingRole.length === 0 ? (
           <Card>
@@ -790,22 +858,30 @@ export default function Approvals() {
                 {renderStageDetailsBlock(stage)}
                 {renderDecisionTimeline(stage)}
                 {renderEvidenceBlock(stage)}
-                <View className="flex-row space-x-3 gap-3">
-                  <View className="flex-1">
-                    <Button
-                      label="Approve"
-                      variant="primary"
-                      onPress={() => act(stage.id, "APPROVE")}
-                    />
+                {isAdminView ? (
+                  <View className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+                    <Text className="text-slate-500 text-xs font-semibold">
+                      Awaiting the {stage.state} role — admins can view but not act on this stage.
+                    </Text>
                   </View>
-                  <View className="flex-1">
-                    <Button
-                      label="Return"
-                      variant="danger"
-                      onPress={() => setReturningStageId(stage.id)}
-                    />
+                ) : (
+                  <View className="flex-row space-x-3 gap-3">
+                    <View className="flex-1">
+                      <Button
+                        label="Approve"
+                        variant="primary"
+                        onPress={() => act(stage.id, "APPROVE")}
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Button
+                        label="Return"
+                        variant="danger"
+                        onPress={() => setReturningStageId(stage.id)}
+                      />
+                    </View>
                   </View>
-                </View>
+                )}
               </Card>
             );
           })

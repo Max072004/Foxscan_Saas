@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Screen, Title, Card, SectionLabel, EmptyState, Button } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
+import { useProjectStore } from "@/stores/project";
 import { Ionicons } from "@expo/vector-icons";
 
 function timeAgo(iso: string) {
@@ -23,7 +24,8 @@ export default function Discussion() {
     queryFn: () => api<any>("/api/data"),
   });
 
-  const project = data?.projects?.[0];
+  const { selectedProjectId } = useProjectStore();
+  const project = data?.projects?.find((p: any) => p.id === selectedProjectId) ?? data?.projects?.[0];
   const activities = (data?.activities ?? []).filter((a: any) => a.projectId === project?.id);
   const [selectedActivityId, setSelectedActivityId] = useState<string>("");
   const [text, setText] = useState("");
@@ -92,37 +94,28 @@ export default function Discussion() {
               })}
             </ScrollView>
 
-            <Card>
-              {comments.length === 0 ? (
-                <View className="items-center py-8">
-                  <Ionicons name="chatbubble-ellipses-outline" size={28} color="#CBD5E1" />
-                  <Text className="text-slate-400 font-semibold text-sm text-center mt-3">
-                    No comments yet on this activity.
-                  </Text>
-                </View>
-              ) : (
-                <View style={{ gap: 12 }}>
-                  {comments.map((c: any) => (
-                    <View key={c.id} className="bg-slate-50 border border-slate-100 rounded-xl p-3">
-                      <View className="flex-row justify-between items-center mb-1">
-                        <Text className="font-extrabold text-brandCharcoal text-sm">{getUserName(c.authorId)}</Text>
-                        <Text className="text-slate-400 text-[11px] font-semibold">{timeAgo(c.createdAt)}</Text>
-                      </View>
-                      <Text className="text-slate-700 text-sm leading-relaxed">{c.text}</Text>
-                      {c.mentions?.length > 0 && (
-                        <View className="flex-row flex-wrap mt-2" style={{ gap: 4 }}>
-                          {c.mentions.map((uid: string) => (
-                            <View key={uid} className="bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-full">
-                              <Text className="text-[11px] font-bold text-violet-600">@{getUserName(uid)}</Text>
-                            </View>
-                          ))}
+            {comments.length === 0 ? (
+              <EmptyState icon="chatbubble-ellipses-outline" title="No comments yet" subtitle="Be the first to comment on this activity." />
+            ) : (
+              comments.map((c: any) => (
+                <Card key={c.id}>
+                  <View className="flex-row justify-between items-center mb-1">
+                    <Text className="font-extrabold text-brandCharcoal text-sm">{getUserName(c.authorId)}</Text>
+                    <Text className="text-slate-400 text-[11px] font-semibold">{timeAgo(c.createdAt)}</Text>
+                  </View>
+                  <Text className="text-slate-700 text-sm leading-relaxed">{c.text}</Text>
+                  {c.mentions?.length > 0 && (
+                    <View className="flex-row flex-wrap mt-2" style={{ gap: 4 }}>
+                      {c.mentions.map((uid: string) => (
+                        <View key={uid} className="bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-full">
+                          <Text className="text-[11px] font-bold text-violet-600">@{getUserName(uid)}</Text>
                         </View>
-                      )}
+                      ))}
                     </View>
-                  ))}
-                </View>
-              )}
-            </Card>
+                  )}
+                </Card>
+              ))
+            )}
 
             <View className="flex-row items-end mb-6" style={{ gap: 8 }}>
               <TextInput

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Screen, Title, Card, SectionLabel, EmptyState, Button } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
+import { useProjectStore } from "@/stores/project";
 import { Ionicons } from "@expo/vector-icons";
 
 const DLP_COLOR: Record<string, { bg: string; text: string }> = {
@@ -36,7 +37,8 @@ export default function Assurance() {
   const [section, setSection] = useState<SectionKey>("dlp");
   const [error, setError] = useState("");
 
-  const project = data?.projects?.[0];
+  const { selectedProjectId } = useProjectStore();
+  const project = data?.projects?.find((p: any) => p.id === selectedProjectId) ?? data?.projects?.[0];
   const dlpCases = (data?.dlpCases ?? []).filter((c: any) => c.projectId === project?.id);
   const warranties = (data?.warranties ?? []).filter((w: any) => w.projectId === project?.id);
   const disputes = (data?.disputes ?? []).filter((d: any) => d.projectId === project?.id);
@@ -100,6 +102,7 @@ export default function Assurance() {
 
   const submitWarranty = async () => {
     setError("");
+    if (!project?.id) { setError("No project selected."); return; }
     if (!wProvider || !wReference || !wStartsOn || !wEndsOn || !wCoverage) { setError("All warranty fields are required."); return; }
     setWSubmitting(true);
     try {
@@ -126,6 +129,7 @@ export default function Assurance() {
 
   const submitDispute = async () => {
     setError("");
+    if (!project?.id) { setError("No project selected."); return; }
     if (!dTitle || !dDescription) { setError("Title and description are required."); return; }
     setDSubmitting(true);
     try {

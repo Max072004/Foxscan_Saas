@@ -16,6 +16,7 @@ export function createStage(activity: Activity, project: Project, actorId: strin
 }
 export function decide(stage: Stage, project: Project, actorId: string, role: Role, action: "APPROVE" | "RETURN", note?: string, tatHours = 48): Stage {
   if (expectedRole[stage.state] !== role) throw new Error(`Only the ${expectedRole[stage.state]} role can act at this step.`);
+  if (stage.state === "REWORK") throw new Error("A stage in rework must be resubmitted with new evidence, not approved or returned directly.");
   const now = new Date().toISOString();
   if (action === "RETURN") { stage.state = "REWORK"; stage.comments.push({ id: id(), actorId, text: note || "Returned for rework", createdAt: now, kind: "RETURN_REASON" }); stage.decisions.push({ id: id(), actorId, role, decision: "RETURNED", createdAt: now, note, comment: note }); return stage; }
   

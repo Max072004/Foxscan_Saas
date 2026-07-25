@@ -5,21 +5,17 @@ import { Screen, Title, Card, Button } from "@/components/ui";
 import { api } from "@/lib/api";
 
 export default function Login() {
-  const [identifier, setIdentifier] = useState("admin@foxscan.local");
+  const [identifier, setIdentifier] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();
 
   const request = async () => {
     try {
-      const result = await api<{ developmentCode?: string }>("/api/auth/otp", {
+      const result = await api<{ deliveredTo?: string }>("/api/auth/otp", {
         method: "POST",
         body: JSON.stringify({ action: "request", identifier }),
       });
-      setMessage(
-        result.developmentCode
-          ? `Local OTP: ${result.developmentCode}`
-          : "Code sent."
-      );
+      setMessage(result.deliveredTo ? `Code sent to ${result.deliveredTo}` : "Code sent.");
       router.push({
         pathname: "/(auth)/verify",
         params: { identifier },

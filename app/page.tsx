@@ -29,6 +29,7 @@ export default function Home() {
   const [token, setToken] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   const reload = async () => setData(await (await fetch("/api/data")).json());
 
@@ -68,7 +69,7 @@ export default function Home() {
     );
   }
 
-  const project = data.projects[0];
+  const project = data.projects.find((p) => p.id === selectedProjectId) || data.projects[0];
   const activities = data.activities.filter((a) => a.projectId === project.id);
   const stages = data.stages;
   const me = data.users.find((u) => u.role === role)!;
@@ -88,6 +89,9 @@ export default function Home() {
         onClose={() => setSidebarOpen(false)}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        projects={data.projects}
+        selectedProjectId={project.id}
+        onSelectProject={setSelectedProjectId}
       />
 
       <div className={`app-main${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>

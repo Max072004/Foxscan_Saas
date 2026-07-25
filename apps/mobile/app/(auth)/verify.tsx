@@ -7,7 +7,7 @@ import { useAuthStore } from "@/stores/auth";
 
 export default function Verify() {
   const { identifier } = useLocalSearchParams<{ identifier: string }>();
-  const [code, setCode] = useState("123456");
+  const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
   const signIn = useAuthStore((s) => s.signIn);
   const router = useRouter();

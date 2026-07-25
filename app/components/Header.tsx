@@ -31,8 +31,8 @@ export default function Header({
   userName,
 }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [identifier, setIdentifier] = useState("admin@foxscan.local");
-  const [code, setCode] = useState("123456");
+  const [identifier, setIdentifier] = useState("");
+  const [code, setCode] = useState("");
   const [message, setMessage] = useState(token ? "Signed in" : "");
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -54,7 +54,7 @@ export default function Header({
       body: JSON.stringify({ action: "request", identifier }),
     });
     const d = await r.json();
-    setMessage(d.developmentCode ? `Local OTP: ${d.developmentCode}` : d.delivery);
+    setMessage(r.ok ? `Code sent to ${d.deliveredTo}` : d.error || "Failed to send code");
   };
 
   const verify = async () => {

@@ -3,6 +3,7 @@ import { Text, View, ScrollView, TextInput, Pressable } from "react-native";
 import { Screen, Title, Card, Button } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
+import { useProjectStore } from "@/stores/project";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 
@@ -29,7 +30,8 @@ export default function Delays() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const project = data?.projects?.[0];
+  const { selectedProjectId } = useProjectStore();
+  const project = data?.projects?.find((p: any) => p.id === selectedProjectId) ?? data?.projects?.[0];
   const activities = (data?.activities ?? []).filter((a: any) => a.projectId === project?.id);
   const delays = (data?.delays ?? []).filter((d: any) => activities.some((a: any) => a.id === d.activityId));
   const openDelays = delays.filter((d: any) => !d.resolvedAt);
@@ -167,7 +169,7 @@ export default function Delays() {
                 <View className="flex-row justify-between items-center mb-1.5">
                   <Text className="font-bold text-brandCharcoal text-sm flex-1 pr-2">{getActivityName(d.activityId)}</Text>
                   <View className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
-                    <Text className="text-[10px] font-bold text-slate-600 uppercase">{getReasonLabel(d.reason)}</Text>
+                    <Text className="text-[11px] font-bold text-slate-600 uppercase">{getReasonLabel(d.reason)}</Text>
                   </View>
                 </View>
                 <Text className="text-sm text-slate-500 font-semibold mb-2">
