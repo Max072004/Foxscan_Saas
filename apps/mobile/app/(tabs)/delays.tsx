@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Text, View, ScrollView, TextInput, Pressable } from "react-native";
-import { Screen, Title, Card, Button } from "@/components/ui";
+import { Screen, Title, Card, Button, ProjectSwitcher } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import { useProjectStore } from "@/stores/project";
@@ -76,6 +76,7 @@ export default function Delays() {
         <Title icon="alert-circle-outline" eyebrow="Schedule Risk" subtitle="Causes, impact days, and mitigation plans">
           Delays
         </Title>
+        <ProjectSwitcher />
 
         <View className="flex-row justify-between mb-5" style={{ gap: 8 }}>
           <View className="flex-1">

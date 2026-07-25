@@ -13,6 +13,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { useProjectStore } from "@/stores/project";
 
 /* ─── helpers ─── */
 export function useTheme() {
@@ -387,5 +390,55 @@ export function Button({
         )}
       </Animated.View>
     </Pressable>
+  );
+}
+
+/* ─── ProjectSwitcher ─── */
+export function ProjectSwitcher() {
+  const t = useTheme();
+  const [open, setOpen] = useState(false);
+  const { selectedProjectId, setSelectedProjectId } = useProjectStore();
+  const { data: projects = [] } = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => api<any[]>("/api/projects"),
+  });
+
+  if (projects.length === 0) return null;
+  const active = projects.find((p: any) => p.id === selectedProjectId) ?? projects[0];
+
+  if (projects.length === 1) {
+    return (
+      <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 16, gap: 8 }}>
+        <Ionicons name="business-outline" size={16} color="#F5B81F" />
+        <Text style={{ color: t.text, fontSize: 14, fontWeight: "800", flex: 1 }} numberOfLines={1}>{active.name}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ marginBottom: 16 }}>
+      <Pressable
+        onPress={() => setOpen(!open)}
+        style={{ flexDirection: "row", alignItems: "center", backgroundColor: t.card, borderWidth: 2, borderColor: open ? "#F5B81F" : t.cardBorder, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, gap: 8 }}
+      >
+        <Ionicons name="business-outline" size={16} color="#F5B81F" />
+        <Text style={{ color: t.text, fontSize: 14, fontWeight: "800", flex: 1 }} numberOfLines={1}>{active?.name || "Select project"}</Text>
+        <Ionicons name={open ? "chevron-up" : "chevron-down"} size={16} color={t.textMuted} />
+      </Pressable>
+      {open && (
+        <View style={{ marginTop: 8, gap: 6 }}>
+          {projects.map((p: any) => (
+            <Pressable
+              key={p.id}
+              onPress={() => { setSelectedProjectId(p.id); setOpen(false); }}
+              style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: p.id === active?.id ? "rgba(245,184,31,0.12)" : t.inputBg, borderWidth: 1, borderColor: p.id === active?.id ? "#F5B81F" : t.cardBorder, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10 }}
+            >
+              <Text style={{ color: t.text, fontSize: 14, fontWeight: "700" }}>{p.name}</Text>
+              {p.id === active?.id ? <Ionicons name="checkmark-circle" size={16} color="#F5B81F" /> : null}
+            </Pressable>
+          ))}
+        </View>
+      )}
+    </View>
   );
 }

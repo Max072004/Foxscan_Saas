@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Text, View, ScrollView, TextInput, Pressable } from "react-native";
 import { useQuery } from "@tanstack/react-query";
-import { Screen, Title, Card, SectionLabel, EmptyState, Button } from "@/components/ui";
+import { Screen, Title, Card, SectionLabel, EmptyState, Button, ProjectSwitcher } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import { useProjectStore } from "@/stores/project";
@@ -173,6 +173,7 @@ export default function Assurance() {
         <Title icon="shield-checkmark-outline" eyebrow="Risk & Assurance" subtitle="Defect liability, warranties, and formal disputes">
           Assurance
         </Title>
+        <ProjectSwitcher />
 
         <View className="flex-row bg-white border border-slate-200 rounded-2xl p-1 mb-5">
           {TABS.map((t) => {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Text, View, ScrollView, TextInput, Linking } from "react-native";
 import { useQuery } from "@tanstack/react-query";
-import { Screen, Title, Card, SectionLabel, EmptyState, Button } from "@/components/ui";
+import { Screen, Title, Card, SectionLabel, EmptyState, Button, ProjectSwitcher } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import { useProjectStore } from "@/stores/project";
@@ -78,6 +78,7 @@ export default function Quotations() {
         <Title icon="document-text-outline" eyebrow="Vendor Selection" subtitle="Invite quotes, compare side-by-side, and award the contract">
           Quotations
         </Title>
+        <ProjectSwitcher />
 
         {awarded && (
           <Card>

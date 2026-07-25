@@ -6,7 +6,7 @@ export type ProjectStatus = "DRAFT" | "ACTIVE" | "ON_HOLD" | "COMPLETED" | "CANC
 export type WorkflowState = "CONTRACTOR" | "MANUFACTURER" | "CONSULTANT" | "CLIENT" | "AWAITING_RECEIPT" | "PAID" | "REWORK";
 
 export interface Tenant { id: string; name: string; type: "SOCIETY" | "CONSULTANT" | "MANUFACTURER" | "CONTRACTOR"; gstin?: string }
-export interface User { id: string; tenantId: string; name: string; email: string; phone?: string; role: Role; active: boolean }
+export interface User { id: string; tenantId: string; name: string; email: string; phone?: string; companyName?: string; role: Role; active: boolean }
 export interface Session { token: string; userId: string; expiresAt: string }
 export interface Invitation { id: string; tenantId: string; email?: string; phone?: string; role: Role; projectId?: string; token: string; expiresAt: string; acceptedAt?: string; createdBy: string; createdAt: string }
 export interface Building { id: string; projectId: string; name: string; wings: number; floors: number; areaSqft: number }

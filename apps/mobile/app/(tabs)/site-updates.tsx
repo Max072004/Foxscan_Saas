@@ -13,7 +13,7 @@ import {
   Modal,
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
-import { Screen, Title, Card, Button, useTheme } from "@/components/ui";
+import { Screen, Title, Card, Button, useTheme, ProjectSwitcher } from "@/components/ui";
 import { CameraCapture } from "@/components/camera-capture";
 import { api, baseUrl } from "@/lib/api";
 import { useProjectStore } from "@/stores/project";
@@ -158,6 +158,7 @@ export default function SiteUpdates() {
               <Title icon="camera-outline" eyebrow="Daily Record" subtitle="Log work done, attach evidence photos, and link to an activity">
                 Site Log
               </Title>
+              <ProjectSwitcher />
 
               <Card>
                 {/* Contractor nested Project Dropdown Selector */}

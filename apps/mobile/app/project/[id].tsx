@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Text, View, ScrollView, Pressable, TextInput } from "react-native";
-import { Screen, Title, Card, Button } from "@/components/ui";
+import { Screen, Card, Skeleton, useTheme } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Project } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,7 +10,25 @@ import { useAuthStore } from "@/stores/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { calculateProjectSlippage } from "@/lib/scheduling";
 
+const STATUS_META: Record<string, { bg: string; text: string; label: string }> = {
+  NOT_STARTED: { bg: "#F1F5F9", text: "#64748B", label: "Not Started" },
+  IN_PROGRESS: { bg: "#E0F2FE", text: "#0369A1", label: "In Progress" },
+  SUBMITTED: { bg: "#FEF3C7", text: "#B45309", label: "Submitted" },
+  APPROVED: { bg: "#CCFBF1", text: "#0F766E", label: "Approved" },
+  PAID: { bg: "#DCFCE7", text: "#15803D", label: "Paid" },
+  ON_HOLD: { bg: "#FEE2E2", text: "#B91C1C", label: "On Hold" },
+};
+
+const DOC_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
+  CONTRACT: "document-text-outline",
+  BOQ: "calculator-outline",
+  INVOICE: "cash-outline",
+  PHOTO: "image-outline",
+  VIDEO: "image-outline",
+};
+
 export default function ProjectDetails() {
+  const t = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { role } = useAuthStore();
@@ -29,382 +47,260 @@ export default function ProjectDetails() {
   });
   const activities = globalData?.activities?.filter((a: any) => a.projectId === id) || [];
   const projectStages = globalData?.stages?.filter((s: any) => activities.some((a: any) => a.id === s.activityId)) || [];
-  const slippageInfo = calculateProjectSlippage(project, activities, projectStages);
+  const slippageInfo = project ? calculateProjectSlippage(project, activities, projectStages) : null;
 
-  const { data: documents = [], refetch: refetchDocs } = useQuery({
+  const { data: documents = [], isLoading: docsLoading, refetch: refetchDocs } = useQuery({
     queryKey: ["project-documents", id, searchQuery],
     queryFn: () => api<any[]>(`/api/documents?projectId=${id}&q=${encodeURIComponent(searchQuery)}`),
+    enabled: activeSubTab === "docs",
   });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "NOT_STARTED":
-        return { bg: "bg-slate-100 border border-slate-200", text: "text-slate-600", label: "Not Started" };
-      case "IN_PROGRESS":
-        return { bg: "bg-sky-50 border border-sky-100", text: "text-sky-700", label: "In Progress" };
-      case "SUBMITTED":
-        return { bg: "bg-amber-50 border border-amber-100", text: "text-amber-700", label: "Submitted" };
-      case "APPROVED":
-        return { bg: "bg-teal-50 border border-teal-100", text: "text-teal-700", label: "Approved" };
-      case "PAID":
-        return { bg: "bg-green-50 border border-green-100", text: "text-successGreen", label: "Paid" };
-      case "ON_HOLD":
-        return { bg: "bg-red-50 border border-red-100", text: "text-alertRed", label: "On Hold" };
-      default:
-        return { bg: "bg-slate-50 border border-slate-200", text: "text-slate-600", label: status };
-    }
-  };
+  const today = new Date();
+  const escalated = projectStages.filter((s: any) => s.state !== "PAID" && s.state !== "REWORK" && new Date(s.dueAt) < today);
 
-  const getDocIcon = (type: string) => {
-    switch (type) {
-      case "CONTRACT":
-        return "document-text-outline";
-      case "BOQ":
-        return "calculator-outline";
-      case "INVOICE":
-        return "cash-outline";
-      case "PHOTO":
-      case "VIDEO":
-        return "image-outline";
-      default:
-        return "document-outline";
-    }
+  const inputStyle = {
+    borderWidth: 2,
+    borderColor: t.inputBorder,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 48,
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: t.text,
+    backgroundColor: t.inputBg,
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-offWhite" edges={["top"]}>
-      <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
-        <Screen>
-        {/* Project Header Info Card */}
-        <View className="mb-4">
-          <View className="flex-row items-center justify-between mb-1.5 px-0.5">
-            <Text className="text-slate-400 text-sm font-bold uppercase tracking-wider">
+    <SafeAreaView style={{ flex: 1, backgroundColor: t.bg }} edges={["top"]}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+        <Screen scroll>
+          {/* Header row */}
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <Text style={{ color: t.textSecondary, fontSize: 12, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1.5 }}>
               Project Overview
             </Text>
             {role && role !== "MANUFACTURER" && (
               <Pressable
                 onPress={() => router.push({ pathname: "/project/setup", params: { id } })}
-                className="flex-row items-center active:opacity-75"
-                style={({ pressed }) => pressed ? { transform: [{ scale: 0.96 }] } : {}}
+                style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", opacity: pressed ? 0.7 : 1 })}
               >
-                <Ionicons name="settings-outline" size={14} color="#EAAC1F" />
-                <Text className="text-brandAmber text-sm font-bold ml-1">Setup</Text>
+                <Ionicons name="settings-outline" size={14} color="#F5B81F" />
+                <Text style={{ color: "#F5B81F", fontSize: 14, fontWeight: "700", marginLeft: 4 }}>Setup</Text>
               </Pressable>
             )}
           </View>
+
           <Card>
-            <View className="border-l-4 border-brandAmber pl-3">
-              <Text className="text-xl font-extrabold text-brandCharcoal leading-tight mb-1">
+            <View style={{ borderLeftWidth: 4, borderLeftColor: "#F5B81F", paddingLeft: 12 }}>
+              <Text style={{ fontSize: 20, fontWeight: "900", color: t.text, lineHeight: 26, marginBottom: 4 }}>
                 {project?.name || "Project Details"}
               </Text>
-              <Text className="text-slate-500 text-sm font-semibold mb-3">
+              <Text style={{ color: t.textSecondary, fontSize: 14, fontWeight: "600", marginBottom: 12 }}>
                 {project?.address}
               </Text>
             </View>
-
-            <View className="flex-row justify-between items-center border-t border-slate-100 pt-3 mt-1">
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderTopWidth: 1, borderTopColor: t.cardBorder, paddingTop: 12, marginTop: 4 }}>
               <View>
-                <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
+                <Text style={{ color: t.textMuted, fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>
                   Contract Value
                 </Text>
-                <Text className="text-sm font-extrabold text-brandCharcoal">
+                <Text style={{ fontSize: 14, fontWeight: "900", color: t.text }}>
                   ₹{project?.contractValue?.toLocaleString("en-IN") || "0"}
                 </Text>
               </View>
               <View>
-                <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
+                <Text style={{ color: t.textMuted, fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>
                   Planned Schedule
                 </Text>
-                <Text className="text-sm font-extrabold text-slate-500">
+                <Text style={{ fontSize: 14, fontWeight: "900", color: t.textSecondary }}>
                   {project?.startDate} — {project?.endDate}
                 </Text>
               </View>
             </View>
           </Card>
-        </View>
 
-        {/* Schedule & Slippage Card */}
-        {project && (
-          <View className="mb-4">
+          {project && slippageInfo && (
             <Card>
-              <View className="flex-row items-center justify-between mb-2">
-                <View className="flex-row items-center">
-                  <Ionicons 
-                    name={
-                      slippageInfo.status === "BEHIND" 
-                        ? "alert-circle" 
-                        : slippageInfo.status === "AHEAD" 
-                        ? "sparkles" 
-                        : "checkmark-circle"
-                    } 
-                    size={20} 
-                    color={
-                      slippageInfo.status === "BEHIND" 
-                        ? "#D9383A" 
-                        : slippageInfo.status === "AHEAD" 
-                        ? "#1B8755" 
-                        : "#64748B"
-                    } 
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Ionicons
+                    name={slippageInfo.status === "BEHIND" ? "alert-circle" : slippageInfo.status === "AHEAD" ? "sparkles" : "checkmark-circle"}
+                    size={20}
+                    color={slippageInfo.status === "BEHIND" ? "#EF4444" : slippageInfo.status === "AHEAD" ? "#22C55E" : t.textSecondary}
                   />
-                  <Text className="text-sm font-extrabold text-brandCharcoal ml-2">
-                    Schedule Status
-                  </Text>
+                  <Text style={{ fontSize: 14, fontWeight: "900", color: t.text, marginLeft: 8 }}>Schedule Status</Text>
                 </View>
-                <View className={`px-2.5 py-0.5 rounded-full ${
-                  slippageInfo.status === "BEHIND" 
-                    ? "bg-red-50" 
-                    : slippageInfo.status === "AHEAD" 
-                    ? "bg-green-50" 
-                    : "bg-slate-100"
-                }`}>
-                  <Text className={`text-[11px] font-bold uppercase ${
-                    slippageInfo.status === "BEHIND" 
-                      ? "text-alertRed" 
-                      : slippageInfo.status === "AHEAD" 
-                      ? "text-successGreen" 
-                      : "text-slate-500"
-                  }`}>
+                <View style={{ backgroundColor: slippageInfo.status === "BEHIND" ? "#FEE2E2" : slippageInfo.status === "AHEAD" ? "#DCFCE7" : t.inputBg, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 }}>
+                  <Text style={{ fontSize: 11, fontWeight: "800", textTransform: "uppercase", color: slippageInfo.status === "BEHIND" ? "#B91C1C" : slippageInfo.status === "AHEAD" ? "#15803D" : t.textSecondary }}>
                     {slippageInfo.status.replace("_", " ")}
                   </Text>
                 </View>
               </View>
 
-              <View className="flex-row justify-between items-center mt-1">
+              <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
                 <View>
-                  <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
-                    Slippage Metric
-                  </Text>
-                  <Text className={`text-sm font-extrabold ${
-                    slippageInfo.status === "BEHIND" 
-                      ? "text-alertRed" 
-                      : slippageInfo.status === "AHEAD" 
-                      ? "text-successGreen" 
-                      : "text-slate-600"
-                  }`}>
-                    {slippageInfo.status === "BEHIND" 
-                      ? `${slippageInfo.slippageDays} days behind` 
-                      : slippageInfo.status === "AHEAD" 
-                      ? `${Math.abs(slippageInfo.slippageDays)} days ahead` 
-                      : "On track"}
+                  <Text style={{ color: t.textMuted, fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>Slippage Metric</Text>
+                  <Text style={{ fontSize: 14, fontWeight: "900", color: slippageInfo.status === "BEHIND" ? "#EF4444" : slippageInfo.status === "AHEAD" ? "#22C55E" : t.textSecondary }}>
+                    {slippageInfo.status === "BEHIND" ? `${slippageInfo.slippageDays} days behind` : slippageInfo.status === "AHEAD" ? `${Math.abs(slippageInfo.slippageDays)} days ahead` : "On track"}
                   </Text>
                 </View>
                 <View>
-                  <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
-                    Projected Completion
-                  </Text>
-                  <Text className="text-sm font-extrabold text-brandCharcoal">
-                    {slippageInfo.projectedEndDate || project.endDate}
-                  </Text>
+                  <Text style={{ color: t.textMuted, fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>Projected Completion</Text>
+                  <Text style={{ fontSize: 14, fontWeight: "900", color: t.text }}>{slippageInfo.projectedEndDate || project.endDate}</Text>
                 </View>
               </View>
 
-              {/* Escalated delays (stuck TAT stages) */}
-              {(() => {
-                const today = new Date();
-                const escalated = projectStages.filter((s: any) => {
-                  return s.state !== "PAID" && s.state !== "REWORK" && new Date(s.dueAt) < today;
-                });
-                
-                if (escalated.length === 0) return null;
-                
-                return (
-                  <View className="mt-4 pt-3 border-t border-slate-100">
-                    <View className="flex-row items-center mb-2">
-                      <Ionicons name="warning-outline" size={14} color="#D9383A" />
-                      <Text className="text-alertRed text-sm font-bold uppercase tracking-wider ml-1">
-                        Escalated Delays (Overdue)
-                      </Text>
-                    </View>
-                    {escalated.map((s: any) => {
-                      const act = activities.find((a: any) => a.id === s.activityId);
-                      const overdueHours = Math.max(0, Math.floor((today.getTime() - new Date(s.dueAt).getTime()) / 3600000));
-                      const overdueDays = Math.floor(overdueHours / 24);
-                      const displayOverdue = overdueDays > 0 
-                        ? `${overdueDays}d ${overdueHours % 24}h` 
-                        : `${overdueHours}h`;
-                      
-                      return (
-                        <View key={s.id} className="bg-red-50/50 rounded-xl p-2.5 mb-1.5 border border-red-100/50">
-                          <Text className="text-sm font-bold text-slate-800">
-                            {act?.name || "Unknown Activity"}
-                          </Text>
-                          <View className="flex-row justify-between items-center mt-1">
-                            <Text className="text-[11px] font-semibold text-slate-500">
-                              Stuck with: <Text className="font-extrabold text-brandCharcoal">{s.state}</Text>
-                            </Text>
-                            <Text className="text-[11px] font-bold text-alertRed bg-red-100 px-1.5 py-0.5 rounded">
-                              Overdue by {displayOverdue}
-                            </Text>
-                          </View>
-                        </View>
-                      );
-                    })}
+              {escalated.length > 0 && (
+                <View style={{ marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.cardBorder }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                    <Ionicons name="warning-outline" size={14} color="#EF4444" />
+                    <Text style={{ color: "#EF4444", fontSize: 12, fontWeight: "900", textTransform: "uppercase", letterSpacing: 0.5, marginLeft: 4 }}>
+                      Escalated Delays (Overdue)
+                    </Text>
                   </View>
-                );
-              })()}
+                  {escalated.map((s: any) => {
+                    const act = activities.find((a: any) => a.id === s.activityId);
+                    const overdueHours = Math.max(0, Math.floor((today.getTime() - new Date(s.dueAt).getTime()) / 3600000));
+                    const overdueDays = Math.floor(overdueHours / 24);
+                    const displayOverdue = overdueDays > 0 ? `${overdueDays}d ${overdueHours % 24}h` : `${overdueHours}h`;
+                    return (
+                      <View key={s.id} style={{ backgroundColor: "rgba(239,68,68,0.06)", borderWidth: 1, borderColor: "rgba(239,68,68,0.15)", borderRadius: 14, padding: 10, marginBottom: 6 }}>
+                        <Text style={{ fontSize: 14, fontWeight: "800", color: t.text }}>{act?.name || "Unknown Activity"}</Text>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
+                          <Text style={{ fontSize: 11, fontWeight: "700", color: t.textSecondary }}>
+                            Stuck with: <Text style={{ fontWeight: "900", color: t.text }}>{s.state}</Text>
+                          </Text>
+                          <Text style={{ fontSize: 11, fontWeight: "800", color: "#EF4444", backgroundColor: "rgba(239,68,68,0.12)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                            Overdue by {displayOverdue}
+                          </Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
             </Card>
+          )}
+
+          {/* Sub-tab switcher */}
+          <View style={{ flexDirection: "row", backgroundColor: t.inputBg, padding: 6, borderRadius: 18, marginBottom: 16, gap: 8 }}>
+            <Pressable
+              onPress={() => setActiveSubTab("timeline")}
+              style={{ flex: 1, paddingVertical: 12, borderRadius: 14, alignItems: "center", backgroundColor: activeSubTab === "timeline" ? t.card : "transparent" }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Ionicons name="trail-sign-outline" size={16} color={activeSubTab === "timeline" ? "#F5B81F" : t.textSecondary} />
+                <Text style={{ fontSize: 14, fontWeight: "800", color: activeSubTab === "timeline" ? t.text : t.textSecondary }}>Timeline</Text>
+              </View>
+            </Pressable>
+            <Pressable
+              onPress={() => setActiveSubTab("docs")}
+              style={{ flex: 1, paddingVertical: 12, borderRadius: 14, alignItems: "center", backgroundColor: activeSubTab === "docs" ? t.card : "transparent" }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Ionicons name="document-attach-outline" size={16} color={activeSubTab === "docs" ? "#F5B81F" : t.textSecondary} />
+                <Text style={{ fontSize: 14, fontWeight: "800", color: activeSubTab === "docs" ? t.text : t.textSecondary }}>Documents</Text>
+              </View>
+            </Pressable>
           </View>
-        )}
 
-        {/* Project Sub-Tab Switcher */}
-        <View className="flex-row bg-slate-200/50 p-1.5 rounded-2xl mb-4 gap-2">
-          <Pressable
-            onPress={() => setActiveSubTab("timeline")}
-            className={`flex-1 py-3 rounded-xl ${activeSubTab === "timeline" ? "bg-white shadow-[0_2px_4px_rgba(26,29,36,0.06)]" : ""}`}
-            style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }] } : {}}
-          >
-            <View className="flex-row items-center justify-center space-x-1.5">
-              <Ionicons name="trail-sign-outline" size={16} color={activeSubTab === "timeline" ? "#EAAC1F" : "#64748B"} />
-              <Text className={`text-sm font-bold ml-1.5 ${activeSubTab === "timeline" ? "text-brandCharcoal font-extrabold" : "text-slate-500"}`}>
-                Timeline
-              </Text>
-            </View>
-          </Pressable>
-
-          <Pressable
-            onPress={() => setActiveSubTab("docs")}
-            className={`flex-1 py-3 rounded-xl ${activeSubTab === "docs" ? "bg-white shadow-[0_2px_4px_rgba(26,29,36,0.06)]" : ""}`}
-            style={({ pressed }) => pressed ? { transform: [{ scale: 0.98 }] } : {}}
-          >
-            <View className="flex-row items-center justify-center space-x-1.5">
-              <Ionicons name="document-attach-outline" size={16} color={activeSubTab === "docs" ? "#EAAC1F" : "#64748B"} />
-              <Text className={`text-sm font-bold ml-1.5 ${activeSubTab === "docs" ? "text-brandCharcoal font-extrabold" : "text-slate-500"}`}>
-                Documents
-              </Text>
-            </View>
-          </Pressable>
-        </View>
-
-        {/* Tab Content Rendering */}
-        {activeSubTab === "timeline" ? (
-          <View className="space-y-3 gap-2">
-            {activities.length > 0 ? (
+          {activeSubTab === "timeline" ? (
+            activities.length > 0 ? (
               activities.map((a: any) => {
-                const badge = getStatusBadge(a.status);
+                const meta = STATUS_META[a.status] || STATUS_META.NOT_STARTED;
+                const duration = a.durationDays || Math.max(1, Math.round((new Date(a.plannedEnd).getTime() - new Date(a.plannedStart).getTime()) / 86400000) + 1);
                 return (
                   <Card key={a.id}>
-                    <View className="flex-row justify-between items-start mb-2">
-                      <Text className="font-extrabold text-brandCharcoal text-sm flex-1 pr-2">
-                        {a.name}
-                      </Text>
-                      <View className={`${badge.bg} px-2 py-0.5 rounded-full`}>
-                        <Text className={`text-[10px] font-bold uppercase ${badge.text}`}>
-                          {badge.label}
-                        </Text>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                      <Text style={{ fontWeight: "900", color: t.text, fontSize: 14, flex: 1, paddingRight: 8 }}>{a.name}</Text>
+                      <View style={{ backgroundColor: meta.bg, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 }}>
+                        <Text style={{ fontSize: 10, fontWeight: "800", textTransform: "uppercase", color: meta.text }}>{meta.label}</Text>
                       </View>
                     </View>
-
-                    <View className="flex-row items-center space-x-1.5 mb-2">
-                      <Ionicons name="calendar-outline" size={12} color="#64748B" />
-                      <Text className="text-slate-400 text-[11px] font-semibold ml-1">
-                        {a.plannedStart} — {a.plannedEnd}
-                      </Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8, gap: 4 }}>
+                      <Ionicons name="calendar-outline" size={12} color={t.textMuted} />
+                      <Text style={{ color: t.textMuted, fontSize: 11, fontWeight: "700" }}>{a.plannedStart} — {a.plannedEnd}</Text>
                     </View>
-
-                    <View className="flex-row items-center justify-between mb-3 bg-slate-50 p-2 rounded-lg border border-slate-100">
-                      <View className="flex-row items-center">
-                        <Ionicons name="time-outline" size={12} color="#64748B" />
-                        <Text className="text-slate-500 text-[11px] font-bold ml-1">
-                          Duration: {a.durationDays || Math.max(1, Math.round((new Date(a.plannedEnd).getTime() - new Date(a.plannedStart).getTime()) / (1000 * 60 * 60 * 24)) + 1)} days
-                        </Text>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: t.inputBg, padding: 8, borderRadius: 10, marginBottom: 10 }}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <Ionicons name="time-outline" size={12} color={t.textMuted} />
+                        <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "800" }}>Duration: {duration} days</Text>
                       </View>
                       {project && project.contractValue > 0 && (
-                        <View className="flex-row items-center">
-                          <Ionicons name="pie-chart-outline" size={12} color="#EAAC1F" />
-                          <Text className="text-slate-500 text-[11px] font-bold ml-1">
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                          <Ionicons name="pie-chart-outline" size={12} color="#F5B81F" />
+                          <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "800" }}>
                             Allocation: {(((a.paymentValue || 0) / project.contractValue) * 100).toFixed(1)}%
                           </Text>
                         </View>
                       )}
                     </View>
-
-                    {/* Completion progress bar */}
-                    <View className="space-y-1">
-                      <View className="flex-row justify-between items-center mb-0.5">
-                        <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                          Progress
-                        </Text>
-                        <Text className="text-brandCharcoal font-extrabold text-[11px]">
-                          {a.progress}%
-                        </Text>
-                      </View>
-                      <View className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <View
-                          className="h-full bg-brandAmber rounded-full"
-                          style={{ width: `${a.progress}%` }}
-                        />
-                      </View>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }}>
+                      <Text style={{ color: t.textMuted, fontSize: 10, fontWeight: "800", textTransform: "uppercase" }}>Progress</Text>
+                      <Text style={{ color: t.text, fontSize: 11, fontWeight: "900" }}>{a.progress}%</Text>
+                    </View>
+                    <View style={{ height: 6, width: "100%", backgroundColor: t.inputBg, borderRadius: 3, overflow: "hidden" }}>
+                      <View style={{ height: "100%", width: `${a.progress}%`, backgroundColor: "#F5B81F", borderRadius: 3 }} />
                     </View>
                   </Card>
                 );
               })
             ) : (
               <Card>
-                <View className="items-center py-6">
-                  <Ionicons name="calendar-clear-outline" size={32} color="#64748B" />
-                  <Text className="text-slate-500 font-bold mt-2">
-                    No timeline activities found.
-                  </Text>
+                <View style={{ alignItems: "center", paddingVertical: 24 }}>
+                  <Ionicons name="calendar-clear-outline" size={32} color={t.textMuted} />
+                  <Text style={{ color: t.textSecondary, fontWeight: "700", marginTop: 8 }}>No timeline activities found.</Text>
                 </View>
               </Card>
-            )}
-          </View>
-        ) : (
-          <View>
-            {/* Search inputs */}
-            <View className="flex-row space-x-2 gap-2 mb-3 items-center">
-              <View className="flex-1 relative">
+            )
+          ) : (
+            <View>
+              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 14, gap: 8 }}>
                 <TextInput
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   placeholder="Search files (e.g. Contract, BOQ)..."
-                  placeholderTextColor="#94A3B8"
-                  className="h-12 border border-slate-200 bg-white rounded-xl px-4 text-brandCharcoal text-sm font-semibold focus:border-brandAmber"
+                  placeholderTextColor={t.textMuted}
+                  style={[inputStyle, { flex: 1 }]}
                 />
+                <Pressable
+                  onPress={() => refetchDocs()}
+                  style={{ height: 48, width: 48, borderRadius: 14, backgroundColor: t.isDark ? "#222733" : "#0F172A", alignItems: "center", justifyContent: "center" }}
+                >
+                  <Ionicons name="search" size={18} color="#FFFFFF" />
+                </Pressable>
               </View>
-              <Pressable
-                onPress={() => refetchDocs()}
-                className="h-12 w-12 rounded-xl bg-brandCharcoal items-center justify-center active:scale-95"
-                style={({ pressed }) => pressed ? { transform: [{ scale: 0.95 }], opacity: 0.85 } : {}}
-              >
-                <Ionicons name="search" size={18} color="#FFFFFF" />
-              </Pressable>
-            </View>
 
-            {/* Documents List */}
-            <View className="space-y-3 gap-2">
-              {documents.length > 0 ? (
+              {docsLoading ? (
+                <View style={{ gap: 10 }}>
+                  <Skeleton height={70} />
+                  <Skeleton height={70} />
+                </View>
+              ) : documents.length > 0 ? (
                 documents.map((doc: any) => (
                   <Card key={doc.id}>
-                    <View className="flex-row items-center py-1">
-                      <View className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 items-center justify-center mr-3">
-                        <Ionicons name={getDocIcon(doc.type)} size={18} color="#EAAC1F" />
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                      <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: t.inputBg, borderWidth: 1, borderColor: t.cardBorder, alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+                        <Ionicons name={DOC_ICON[doc.type] || "document-outline"} size={18} color="#F5B81F" />
                       </View>
-                      <View className="flex-1">
-                        <Text className="text-brandCharcoal font-bold text-sm">
-                          {doc.name}
-                        </Text>
-                        <Text className="text-slate-400 text-sm font-semibold mt-0.5">
-                          {doc.type} · Version {doc.version}
-                        </Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: t.text, fontWeight: "800", fontSize: 14 }}>{doc.name}</Text>
+                        <Text style={{ color: t.textMuted, fontSize: 12, fontWeight: "600", marginTop: 2 }}>{doc.type} · Version {doc.version}</Text>
                       </View>
-                      <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
+                      <Ionicons name="chevron-forward" size={16} color={t.textMuted} />
                     </View>
                   </Card>
                 ))
               ) : (
                 <Card>
-                  <View className="items-center py-6">
-                    <Ionicons name="document-text-outline" size={32} color="#64748B" />
-                    <Text className="text-slate-500 font-bold mt-2">
-                      No documents found.
-                    </Text>
+                  <View style={{ alignItems: "center", paddingVertical: 24 }}>
+                    <Ionicons name="document-text-outline" size={32} color={t.textMuted} />
+                    <Text style={{ color: t.textSecondary, fontWeight: "700", marginTop: 8 }}>No documents found.</Text>
                   </View>
                 </Card>
               )}
             </View>
-          </View>
-        )}
+          )}
         </Screen>
       </ScrollView>
     </SafeAreaView>

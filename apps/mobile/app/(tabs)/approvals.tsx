@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Text, View, ScrollView, Pressable, TextInput, Image, Modal } from "react-native";
-import { Screen, Title, Card, Button, useTheme } from "@/components/ui";
+import { Screen, Title, Card, Button, useTheme, ProjectSwitcher } from "@/components/ui";
 import { CameraCapture } from "@/components/camera-capture";
 import { api, baseUrl } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
+import { useProjectStore } from "@/stores/project";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { useAudioPlayer } from "expo-audio";
@@ -181,9 +182,13 @@ export default function Approvals() {
     }
   };
 
-  // Filter stages based on the user's role
-  const stages = data?.stages ?? [];
-  const activities = data?.activities ?? [];
+  // Scope everything to the currently selected project first, then filter by role
+  const { selectedProjectId } = useProjectStore();
+  const projects = data?.projects ?? [];
+  const activeProject = projects.find((p: any) => p.id === selectedProjectId) ?? projects[0];
+  const activities = (data?.activities ?? []).filter((a: any) => !activeProject || a.projectId === activeProject.id);
+  const activityIds = new Set(activities.map((a: any) => a.id));
+  const stages = (data?.stages ?? []).filter((s: any) => activityIds.has(s.activityId));
 
   const getStateBadge = (state: string) => {
     switch (state) {
@@ -437,6 +442,7 @@ export default function Approvals() {
         <ScrollView className="flex-grow" contentContainerStyle={{ flexGrow: 1 }}>
           <Screen scroll>
             <Title icon="checkmark-done-outline" eyebrow="Stage Workflow">Approvals</Title>
+            <ProjectSwitcher />
             {actionError ? (
               <View className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
                 <Text className="text-[#EF4444] font-bold text-sm">{actionError}</Text>
@@ -672,6 +678,7 @@ export default function Approvals() {
         <ScrollView className="flex-grow" contentContainerStyle={{ flexGrow: 1 }}>
           <Screen scroll>
             <Title icon="checkmark-done-outline" eyebrow="Stage Workflow">Approvals</Title>
+            <ProjectSwitcher />
             {actionError ? (
               <View className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
                 <Text className="text-[#EF4444] font-bold text-sm">{actionError}</Text>

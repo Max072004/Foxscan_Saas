@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Text, View, ScrollView, TextInput, Pressable } from "react-native";
 import { useQuery } from "@tanstack/react-query";
-import { Screen, Title, Card, SectionLabel, EmptyState, Button } from "@/components/ui";
+import { Screen, Title, Card, SectionLabel, EmptyState, Button, ProjectSwitcher } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import { useProjectStore } from "@/stores/project";
@@ -65,6 +65,7 @@ export default function Discussion() {
         <Title icon="chatbubbles-outline" eyebrow="Keep it on record" subtitle="Per-activity discussion instead of WhatsApp. Use @Name to mention someone.">
           Discussion
         </Title>
+        <ProjectSwitcher />
 
         {activities.length === 0 ? (
           <EmptyState icon="chatbubbles-outline" title="No activities yet" subtitle="Add activities to this project to start a discussion thread." />

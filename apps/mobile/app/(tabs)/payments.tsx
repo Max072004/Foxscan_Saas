@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Text, View, ScrollView } from "react-native";
-import { Screen, Title, Card, useTheme } from "@/components/ui";
+import { Screen, Title, Card, useTheme, ProjectSwitcher } from "@/components/ui";
 import { api } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useProjectStore } from "@/stores/project";
@@ -31,6 +31,7 @@ export default function Payments() {
         <Title icon="cash-outline" eyebrow="Financial Overview" subtitle="GST, retention, and payment tracking per activity">
           Payments
         </Title>
+        <ProjectSwitcher />
 
         <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8, gap: 8 }}>
           <View style={{ flex: 1 }}>

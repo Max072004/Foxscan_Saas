@@ -1,13 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View, ScrollView, TextInput, Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { Screen, Title, Card, Button, useTheme } from "@/components/ui";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Screen, Title, Card, Button, useTheme, ProjectSwitcher } from "@/components/ui";
 import { useAuthStore } from "@/stores/auth";
+import { useProjectStore } from "@/stores/project";
 import { authenticateWithBiometrics } from "@/lib/biometrics";
 import { api } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
 import type { Role } from "@/lib/types";
+
+const ROLE_ICON: Record<Role, keyof typeof Ionicons.glyphMap> = {
+  ADMIN: "shield-checkmark-outline",
+  CONTRACTOR: "hammer-outline",
+  MANUFACTURER: "cube-outline",
+  CONSULTANT: "briefcase-outline",
+  CLIENT: "home-outline",
+};
 
 const INVITE_PERMISSIONS: Record<string, Role[]> = {
   ADMIN: ["ADMIN", "CONTRACTOR", "MANUFACTURER", "CONSULTANT", "CLIENT"],
@@ -25,8 +34,11 @@ const ROLE_LABELS: Record<Role, string> = {
 
 export default function Profile() {
   const t = useTheme();
-  const { name, role, signOut } = useAuthStore();
+  const { name, role, userId, updateName } = useAuthStore();
+  const signOut = useAuthStore((s) => s.signOut);
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { selectedProjectId } = useProjectStore();
 
   const invitableRoles = role ? INVITE_PERMISSIONS[role] ?? [] : [];
   const canInvite = invitableRoles.length > 0;
@@ -34,8 +46,63 @@ export default function Profile() {
   const { data: myProjects = [] } = useQuery({
     queryKey: ["projects"],
     queryFn: () => api<any[]>("/api/projects"),
-    enabled: canInvite,
   });
+
+  const { data: globalData } = useQuery({
+    queryKey: ["data"],
+    queryFn: () => api<any>("/api/data"),
+  });
+  const me = globalData?.users?.find((u: any) => u.id === userId);
+  const activeProject = myProjects.find((p: any) => p.id === selectedProjectId) ?? myProjects[0];
+  const teamRoleFields: { field: string; role: Role }[] = [
+    { field: "contractorId", role: "CONTRACTOR" },
+    { field: "manufacturerId", role: "MANUFACTURER" },
+    { field: "consultantId", role: "CONSULTANT" },
+    { field: "clientId", role: "CLIENT" },
+  ];
+  const teamMembers = activeProject
+    ? teamRoleFields
+        .map(({ field, role: r }) => ({ role: r, user: globalData?.users?.find((u: any) => u.id === activeProject[field]) }))
+        .filter((tm) => tm.user)
+    : [];
+
+  const [editName, setEditName] = useState("");
+  const [editCompany, setEditCompany] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [profileError, setProfileError] = useState("");
+
+  useEffect(() => {
+    if (me) {
+      setEditName(me.name || "");
+      setEditCompany(me.companyName || "");
+      setEditPhone(me.phone || "");
+    }
+  }, [me?.id]);
+
+  const saveProfile = async () => {
+    setProfileError("");
+    setProfileSaved(false);
+    if (!editName.trim()) {
+      setProfileError("Name cannot be empty.");
+      return;
+    }
+    setSavingProfile(true);
+    try {
+      await api("/api/profile", {
+        method: "PATCH",
+        body: JSON.stringify({ name: editName.trim(), companyName: editCompany.trim(), phone: editPhone.trim() }),
+      });
+      await updateName(editName.trim());
+      await queryClient.invalidateQueries({ queryKey: ["data"] });
+      setProfileSaved(true);
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : "Failed to save profile");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
@@ -127,6 +194,63 @@ export default function Profile() {
             </View>
           </View>
         </Card>
+
+        {/* Edit Profile */}
+        <View style={{ marginBottom: 24 }}>
+          <Text style={{ fontSize: 13, fontWeight: "700", color: t.textSecondary, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>
+            Edit Profile
+          </Text>
+          <Card>
+            <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Name</Text>
+            <TextInput value={editName} onChangeText={setEditName} placeholder="Your full name" placeholderTextColor={t.textMuted} style={inputStyle} />
+            <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Company Name</Text>
+            <TextInput value={editCompany} onChangeText={setEditCompany} placeholder="e.g. Apex Coatings" placeholderTextColor={t.textMuted} style={inputStyle} />
+            <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Phone Number</Text>
+            <TextInput value={editPhone} onChangeText={setEditPhone} placeholder="Phone number" placeholderTextColor={t.textMuted} keyboardType="phone-pad" style={inputStyle} />
+            <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Email</Text>
+            <View style={[inputStyle, { justifyContent: "center", opacity: 0.6 }]}>
+              <Text style={{ color: t.textSecondary, fontSize: 14, fontWeight: "600" }}>{me?.email || "—"}</Text>
+            </View>
+            <Text style={{ color: t.textMuted, fontSize: 11, fontWeight: "600", marginTop: -6, marginBottom: 12 }}>Email is your sign-in ID and can't be changed here.</Text>
+            {profileError ? <Text style={{ color: "#EF4444", fontSize: 12, fontWeight: "600", marginBottom: 8 }}>{profileError}</Text> : null}
+            {profileSaved ? <Text style={{ color: "#22C55E", fontSize: 12, fontWeight: "600", marginBottom: 8 }}>Profile updated.</Text> : null}
+            <Button label={savingProfile ? "Saving…" : "Save Profile"} onPress={saveProfile} disabled={savingProfile} />
+          </Card>
+        </View>
+
+        {/* Project Team */}
+        {activeProject && (
+          <View style={{ marginBottom: 24 }}>
+            <Text style={{ fontSize: 13, fontWeight: "700", color: t.textSecondary, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>
+              Project Team
+            </Text>
+            <ProjectSwitcher />
+            {teamMembers.length === 0 ? (
+              <Card>
+                <Text style={{ color: t.textSecondary, fontSize: 14, fontWeight: "600" }}>No one else is assigned to this project yet.</Text>
+              </Card>
+            ) : (
+              teamMembers.map((tm) => (
+                <Card key={tm.user.id}>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: t.inputBg, borderWidth: 1, borderColor: t.cardBorder, alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+                      <Ionicons name={ROLE_ICON[tm.role]} size={20} color="#F5B81F" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: t.text, fontWeight: "800", fontSize: 15 }}>{tm.user.name}</Text>
+                      <Text style={{ color: t.textSecondary, fontSize: 12, fontWeight: "700", marginTop: 2 }}>
+                        {tm.role}{tm.user.companyName ? ` · ${tm.user.companyName}` : ""}
+                      </Text>
+                      {tm.user.phone ? (
+                        <Text style={{ color: t.textMuted, fontSize: 12, fontWeight: "600", marginTop: 2 }}>{tm.user.phone}</Text>
+                      ) : null}
+                    </View>
+                  </View>
+                </Card>
+              ))
+            )}
+          </View>
+        )}
 
         {/* Invite Users */}
         {canInvite && (

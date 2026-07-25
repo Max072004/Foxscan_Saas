@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Text, View, ScrollView, Pressable, useColorScheme } from "react-native";
-import { Screen, Title, Card, Skeleton, useTheme } from "@/components/ui";
+import { Screen, Title, Card, Skeleton, useTheme, ProjectSwitcher } from "@/components/ui";
 import { api } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -59,6 +59,7 @@ export default function Dashboard() {
         <Title icon="speedometer-outline" eyebrow="Workspace Overview" subtitle="Live project health, disbursements, and stage compliance">
           Dashboard
         </Title>
+        <ProjectSwitcher />
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, gap: 8 }}>
           <View style={{ backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 }}>
             <Text style={{ color: "#F5B81F", fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1 }}>

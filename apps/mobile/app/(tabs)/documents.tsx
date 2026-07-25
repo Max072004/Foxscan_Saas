@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Text, TextInput, View, ScrollView, Pressable, Linking } from "react-native";
-import { useQuery } from "@tanstack/react-query";
-import { Screen, Title, Card, SectionLabel, EmptyState, Skeleton, useTheme } from "@/components/ui";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Screen, Title, Card, SectionLabel, EmptyState, Skeleton, Button, ProjectSwitcher, useTheme } from "@/components/ui";
 import { api } from "@/lib/api";
+import { useProjectStore } from "@/stores/project";
 import { Ionicons } from "@expo/vector-icons";
 
 const TYPE_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; color: string }> = {
@@ -16,13 +17,68 @@ const TYPE_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; color: s
   OTHER: { icon: "attach-outline", color: "#64748B" },
 };
 
+const DOC_TYPES = Object.keys(TYPE_META);
+
 export default function Documents() {
   const t = useTheme();
+  const queryClient = useQueryClient();
+  const { selectedProjectId } = useProjectStore();
   const [q, setQ] = useState("");
-  const { data = [], refetch, isLoading, isFetching } = useQuery({
-    queryKey: ["documents", q],
-    queryFn: () => api<any[]>(`/api/documents?q=${encodeURIComponent(q)}`),
+
+  const { data: projects = [] } = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => api<any[]>("/api/projects"),
   });
+  const activeProject = projects.find((p: any) => p.id === selectedProjectId) ?? projects[0];
+
+  const { data = [], refetch, isLoading, isFetching } = useQuery({
+    queryKey: ["documents", activeProject?.id, q],
+    queryFn: () => api<any[]>(`/api/documents?projectId=${activeProject.id}&q=${encodeURIComponent(q)}`),
+    enabled: !!activeProject,
+  });
+
+  const [showAdd, setShowAdd] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newType, setNewType] = useState("OTHER");
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState("");
+
+  const inputStyle = {
+    borderWidth: 2,
+    borderColor: t.inputBorder,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 48,
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: t.text,
+    backgroundColor: t.inputBg,
+    marginBottom: 12,
+  };
+
+  const addDocument = async () => {
+    setAddError("");
+    if (!newName.trim() || !activeProject) {
+      setAddError("Enter a document name.");
+      return;
+    }
+    setAdding(true);
+    try {
+      await api("/api/documents", {
+        method: "POST",
+        body: JSON.stringify({ projectId: activeProject.id, name: newName.trim(), type: newType }),
+      });
+      setNewName("");
+      setNewType("OTHER");
+      setShowAdd(false);
+      await queryClient.invalidateQueries({ queryKey: ["documents"] });
+      refetch();
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : "Failed to add document");
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: t.bg }} contentContainerStyle={{ flexGrow: 1 }}>
@@ -30,6 +86,45 @@ export default function Documents() {
         <Title icon="folder-outline" eyebrow="Project Vault" subtitle="Contracts, drawings, invoices, and site media in one place">
           Documents
         </Title>
+        <ProjectSwitcher />
+
+        {!showAdd ? (
+          <View style={{ marginBottom: 20 }}>
+            <Button label="+ Add Document" onPress={() => setShowAdd(true)} disabled={!activeProject} />
+          </View>
+        ) : (
+          <Card>
+            <Text style={{ fontWeight: "900", color: t.text, fontSize: 16, marginBottom: 12 }}>Add a Document</Text>
+            <TextInput
+              value={newName}
+              onChangeText={setNewName}
+              placeholder="Document name (e.g. Signed Contract v2)"
+              placeholderTextColor={t.textMuted}
+              style={inputStyle}
+            />
+            <Text style={{ color: t.textSecondary, fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Type</Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+              {DOC_TYPES.map((type) => (
+                <Pressable
+                  key={type}
+                  onPress={() => setNewType(type)}
+                  style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 1, backgroundColor: newType === type ? "#F5B81F" : t.card, borderColor: newType === type ? "#F5B81F" : t.cardBorder }}
+                >
+                  <Text style={{ fontSize: 13, fontWeight: "700", color: newType === type ? "#0F172A" : t.textSecondary }}>{type}</Text>
+                </Pressable>
+              ))}
+            </View>
+            {addError ? <Text style={{ color: "#EF4444", fontSize: 12, fontWeight: "600", marginBottom: 10 }}>{addError}</Text> : null}
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <View style={{ flex: 1 }}>
+                <Button label="Cancel" variant="secondary" onPress={() => { setShowAdd(false); setAddError(""); }} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Button label={adding ? "Adding…" : "Add"} onPress={addDocument} disabled={adding} />
+              </View>
+            </View>
+          </Card>
+        )}
 
         <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: t.card, borderWidth: 2, borderColor: t.inputBorder, borderRadius: 16, paddingHorizontal: 16, height: 56, marginBottom: 24, gap: 10 }}>
           <Ionicons name="search-outline" size={20} color={t.textMuted} />
